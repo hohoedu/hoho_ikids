@@ -49,13 +49,14 @@ class JoinUserInfoScreen extends StatelessWidget {
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        '아래의 정보를 확인해 주세요',
+                        '기관과 반 이름을 확인 후\n이름을 입력해 주세요',
                         style: TextStyle(
                           color: fontMain,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           height: 1.2,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
@@ -87,7 +88,50 @@ class JoinUserInfoScreen extends StatelessWidget {
                           usernameController.text,
                           classNameController.text,
                         );
-                        Get.to(() => const JoinPhoneScreen());
+                        showNameCheckDialog(
+                          isBarrier: false,
+                          title: '회원가입',
+                          content: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '${usernameController.text}',
+                                  style: const TextStyle(
+                                      color: fontMain,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.0),
+                                ),
+                                const TextSpan(
+                                  text: ' 학생이 맞나요?\n',
+                                  style: TextStyle(
+                                    color: fontMain,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '',
+                                  style: TextStyle(fontSize: 2.0),
+                                ),
+                                TextSpan(
+                                  text: '이름은 변경이 불가합니다',
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 12.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          confirmOnTap: () {
+                            Get.back();
+                            Get.to(() => const JoinPhoneScreen());
+                          },
+                          cancelOnTap: () {},
+                          confirmButtonText: '맞아요',
+                          cancelButtonText: '아니요',
+                        );
+                        //
                       }
                     },
                     text: '위의 정보가 맞아요',
@@ -118,7 +162,7 @@ class UserInfoField extends StatelessWidget {
         height: 50,
         width: MediaQuery.of(context).size.width * 0.5,
         decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(30)),
+            color: Colors.grey[300], borderRadius: BorderRadius.circular(30)),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             vertical: 12.0,

@@ -15,6 +15,7 @@ class CustomTextField extends StatefulWidget {
   final String? suffix;
   final bool? isNumberField;
   final bool? isKoreanOnly;
+  final bool? isUserId;
 
   const CustomTextField({
     super.key,
@@ -27,6 +28,7 @@ class CustomTextField extends StatefulWidget {
     this.completeText,
     this.messageColor,
     this.suffix,
+    this.isUserId = false,
     this.isNumberField = false,
     this.isKoreanOnly = false,
   });
@@ -77,7 +79,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 cursorColor: fontMain,
                 maxLength: widget.isNumberField == true
                     ? 11
-                    : (widget.hintText == '아이디' ? 10 : 20),
+                    : (widget.hintText == '아이디' ? 50 : 50),
                 keyboardType: widget.isNumberField == true
                     ? TextInputType.number
                     : TextInputType.text,
@@ -85,10 +87,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     ? [FilteringTextInputFormatter.digitsOnly]
                     : widget.isKoreanOnly == true
                         ? [
-                            FilteringTextInputFormatter.allow(
-                                RegExp(r'[ㄱ-ㅎㅏ-ㅣ가-힣]'))
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'[ㄱ-ㅎㅏ-ㅣ가-힣\u3130-\u318F\uAC00-\uD7A3\u119E\u119E\u11A2\u11A2]'))
                           ]
-                        : [],
+                        : widget.isUserId == true
+                            ? [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-Z0-9]'))
+                              ]
+                            : [],
                 decoration: InputDecoration(
                   hintText: widget.hintText,
                   hintStyle: const TextStyle(color: fontGrey),

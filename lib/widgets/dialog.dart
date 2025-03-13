@@ -5,17 +5,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/screens/auth/join_widgets/join_once_verification_screen.dart';
+import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
 import 'package:hani_booki/services/auth/withdraw_service.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void oneButtonDialog({
+  bool isBarrier = false,
   required String title,
   required String content,
   required VoidCallback onTap,
   required String buttonText,
 }) {
   Get.defaultDialog(
+    barrierDismissible: isBarrier,
     backgroundColor: Colors.white,
     title: title,
     middleText: content,
@@ -26,6 +30,7 @@ void oneButtonDialog({
 }
 
 void twoButtonDialog({
+  required bool isBarrier,
   required String title,
   required String content,
   required VoidCallback confirmOnTap,
@@ -34,7 +39,7 @@ void twoButtonDialog({
   required String cancelButtonText,
 }) {
   Get.defaultDialog(
-    barrierDismissible: true,
+    barrierDismissible: isBarrier,
     backgroundColor: Colors.white,
     title: title,
     middleText: content,
@@ -233,7 +238,7 @@ void lottieDialog(
 void versionDialog(String platform) {
   Get.defaultDialog(
     title: '버전 불일치',
-    middleText: '최신 버전으로 업데이트 하시겠습니까?',
+    middleText: '최신 버전이 아니면 원활한 진행이 어렵습니다.',
     textConfirm: '확인',
     buttonColor: Colors.green,
     textCancel: '취소',
@@ -438,4 +443,26 @@ void showTermsDialog(BuildContext context,
     // 다이얼로그 종료 후에도 한번 실행할 경우 사용
     onConfirmed();
   });
+}
+
+void showNameCheckDialog({
+  required bool isBarrier,
+  required String title,
+  required Widget content,
+  required VoidCallback confirmOnTap,
+  required VoidCallback cancelOnTap,
+  required String confirmButtonText,
+  required String cancelButtonText,
+}) {
+  Get.defaultDialog(
+    barrierDismissible: isBarrier,
+    backgroundColor: Colors.white,
+    title: title,
+    content: content,
+    buttonColor: Colors.green,
+    textConfirm: confirmButtonText,
+    onConfirm: confirmOnTap,
+    textCancel: cancelButtonText,
+    onCancel: cancelOnTap,
+  );
 }

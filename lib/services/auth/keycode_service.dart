@@ -9,12 +9,13 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 회원 탈퇴
-Future<void> keyCodeService(id, pin) async {
+Future<void> keyCodeService(id, pin, yy) async {
   String url = dotenv.get('KEYCODE_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,
-    'pin': pin
+    'pin': pin,
+    'yy': yy,
   };
 
   // HTTP POST 요청

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -49,6 +50,9 @@ class _MypageScreenState extends State<MypageScreen> {
   bool isEditingName = false;
   bool isEditingCode1 = false;
   bool isEditingCode2 = false;
+  bool isPwdChanged = false;
+
+  bool isValid = false;
 
   @override
   void initState() {
@@ -74,36 +78,86 @@ class _MypageScreenState extends State<MypageScreen> {
     });
   }
 
-  void showCode1Dialog() {
-    Get.defaultDialog(
-      title: "가입코드 변경",
-      content: Text("가입코드를 변경하시겠습니까?"),
-      textConfirm: "확인",
-      textCancel: "취소",
-      onConfirm: () {
-        Get.back();
-        setState(() {
-          isEditingCode1 = true;
-        });
-      },
-      onCancel: () {},
-    );
-  }
+  Future<bool> codeValidation() async {
+    String code1 = code1Controller.text;
+    String code2 = code2Controller.text;
+    String pin1 = '';
+    String pin2 = '';
 
-  void showCode2Dialog() {
-    Get.defaultDialog(
-      title: "가입코드 변경",
-      content: Text("가입코드를 변경하시겠습니까?"),
-      textConfirm: "확인",
-      textCancel: "취소",
-      onConfirm: () {
-        Get.back();
-        setState(() {
-          isEditingCode2 = true;
-        });
-      },
-      onCancel: () {},
-    );
+    if (userCodeData.userCodeDataList[0].pin.isNotEmpty) {
+      pin1 = userCodeData.userCodeDataList[0].pin;
+    }
+    if (userCodeData.userCodeDataList.length == 2) {
+      if (userCodeData.userCodeDataList[1].pin.isNotEmpty) {
+        pin2 = userCodeData.userCodeDataList[1].pin;
+      }
+    }
+
+    Logger().d('code1 = $code1');
+    Logger().d('code2 = $code2');
+    Logger().d('pin1 = $pin1');
+    Logger().d('pin2 = $pin2');
+
+    // 아무것도 변경 없음
+    if (code1.isEmpty && code2.isEmpty) {
+      return true;
+    }
+
+    // code1 변경, code2 없음
+    if (code1.isNotEmpty && (code2.isEmpty && pin2.isEmpty)) {
+      await keyCodeService(
+        userData.userData!.id,
+        code1,
+        userData.userData!.year,
+      );
+      return true;
+    }
+
+    // code1 변경, code2 추가
+    else if (code1.isNotEmpty && code2.isNotEmpty) {
+      if (code1.substring(5, 6) == code2.substring(5, 6)) {
+        return false;
+      } else {
+        await keyCodeService(
+          userData.userData!.id,
+          code1,
+          userData.userData!.year,
+        );
+        await keyCodeService(
+          userData.userData!.id,
+          code2,
+          userData.userData!.year,
+        );
+        return true;
+      }
+    }
+    // pin1 픽스, code2 추가
+    else if (code2.isNotEmpty && (code1.isEmpty || pin1.isNotEmpty)) {
+      if (pin1.substring(5, 6) == code2.substring(5, 6)) {
+        return false;
+      } else {
+        await keyCodeService(
+          userData.userData!.id,
+          code2,
+          userData.userData!.year,
+        );
+        return true;
+      }
+    }
+    // code1 변경, pin2 픽스
+    else if (code1.isNotEmpty && (code2.isEmpty || pin2.isNotEmpty)) {
+      if (pin2.substring(5, 6) == code1.substring(5, 6)) {
+        return false;
+      } else {
+        await keyCodeService(
+          userData.userData!.id,
+          code1,
+          userData.userData!.year,
+        );
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -116,6 +170,24 @@ class _MypageScreenState extends State<MypageScreen> {
       appBar: MainAppBar(
         title: ' ',
         isContent: false,
+        isInfo: true,
+        onTapBackIcon: () {
+          if (!isPwdChanged &&
+              isEditingCode1 &&
+              (isEditingCode2 && code2Controller.text.isEmpty ||
+                  !isEditingCode2 && !isCode2)) {
+            oneButtonDialog(
+                isBarrier: false,
+                title: '안내',
+                content: '가입 코드는 반드시 1개 이상 입력해야 합니다.',
+                onTap: () {
+                  Get.back();
+                },
+                buttonText: '확인');
+          } else {
+            Get.back();
+          }
+        },
       ),
       body: GestureDetector(
         onTap: () {
@@ -274,9 +346,9 @@ class _MypageScreenState extends State<MypageScreen> {
                                   child: GestureDetector(
                                       onTap: () {
                                         showCodeDeleteDialog(
-                                          onDeleteConfirmed: () async{
-                                            await delUserCode(
-                                                userCodeData.userCodeDataList[0].pin);
+                                          onDeleteConfirmed: () async {
+                                            await delUserCode(userCodeData
+                                                .userCodeDataList[0].pin);
                                             setState(() {
                                               isEditingCode1 = true;
                                             });
@@ -336,9 +408,9 @@ class _MypageScreenState extends State<MypageScreen> {
                                         });
                                       } else {
                                         showCodeDeleteDialog(
-                                          onDeleteConfirmed: () async{
-                                            await delUserCode(
-                                                userCodeData.userCodeDataList[1].pin);
+                                          onDeleteConfirmed: () async {
+                                            await delUserCode(userCodeData
+                                                .userCodeDataList[1].pin);
                                             setState(() {
                                               isEditingCode2 = true;
                                             });
@@ -386,44 +458,50 @@ class _MypageScreenState extends State<MypageScreen> {
                             ),
                             GestureDetector(
                               onTap: () async {
+                                // 비밀번호를 변경할 때
                                 if (passwordController.text.isNotEmpty) {
                                   await updatePasswordService(
                                       userData.userData!.id,
                                       md5_convertHash(passwordController.text));
+                                  setState(() {
+                                    isPwdChanged = true;
+                                  });
                                 }
-                                if (code1Controller.text.isNotEmpty) {
-                                  await keyCodeService(userData.userData!.id,
-                                      code1Controller.text);
+                                isValid = await codeValidation();
+                                if (isValid == false) {
+                                  oneButtonDialog(
+                                    title: '회원가입',
+                                    content: '수업 코드는 중복될 수 없습니다.',
+                                    onTap: () => Get.back(),
+                                    buttonText: '확인',
+                                  );
                                 }
-                                if (code2Controller.text.isNotEmpty) {
-                                  await keyCodeService(userData.userData!.id,
-                                      code2Controller.text);
+                                if (!isPwdChanged &&
+                                    isEditingCode1 &&
+                                    code1Controller.text.isEmpty &&
+                                    (isEditingCode2 &&
+                                            code2Controller.text.isEmpty ||
+                                        !isEditingCode2 && !isCode2)) {
+                                  isValid = false;
+                                  oneButtonDialog(
+                                      isBarrier: false,
+                                      title: '안내',
+                                      content: '가입 코드는 반드시 1개 이상 입력해야 합니다.',
+                                      onTap: () {
+                                        Get.back();
+                                      },
+                                      buttonText: '확인');
                                 }
-
-                                if (code1Controller.text.isNotEmpty &&
-                                    code2Controller.text.isNotEmpty) {
-                                  if (code1Controller.text.substring(5, 6) ==
-                                      code2Controller.text.substring(5, 6)) {
-                                    oneButtonDialog(
-                                        title: '안내',
-                                        content: ('수업은 중복될 수 없습니다'),
-                                        onTap: () {
-                                          code2Controller.text = '';
-                                          Get.back();
-                                        },
-                                        buttonText: '확인');
-                                  }
-                                } else {
-                                  Logger().d('뒤로가기');
-                                  Get.back();
+                                if (isValid || isPwdChanged) {
+                                  oneButtonDialog(
+                                      isBarrier: false,
+                                      title: '안내',
+                                      content: '정보가 변경되었습니다.\n다시 로그인해주세요.',
+                                      onTap: () {
+                                        Get.offAll(() => LoginScreen());
+                                      },
+                                      buttonText: '확인');
                                 }
-                                oneButtonDialog(
-                                    title: '안내',
-                                    content: '정보가 변경되었습니다.\n다시 로그인해주세요.',
-                                    onTap: () {
-                                      Get.offAll(() => LoginScreen());
-                                    },
-                                    buttonText: '확인');
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -472,6 +550,40 @@ class _MypageScreenState extends State<MypageScreen> {
                                         height: 1.5,
                                         color: fontGrey,
                                       ),
+                                      Visibility(
+                                        visible:
+                                            userData.userData!.id == 'haha',
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              GestureDetector(
+                                                  onTap: () async {
+                                                    await FirebaseMessaging
+                                                        .instance
+                                                        .subscribeToTopic(
+                                                            'test');
+                                                    Logger()
+                                                        .d("✅ 'test' 토픽 구독 완료");
+                                                  },
+                                                  child: Text('알림 구독')),
+                                              SizedBox(width: 10),
+                                              GestureDetector(
+                                                  onTap: () async {
+                                                    await FirebaseMessaging
+                                                        .instance
+                                                        .unsubscribeFromTopic(
+                                                            'test');
+                                                    Logger()
+                                                        .d("✅ 'test' 토픽 구독 취소");
+                                                  },
+                                                  child: Text('구독 취소')),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -491,6 +603,7 @@ class _MypageScreenState extends State<MypageScreen> {
       ),
     );
   }
+
   @override
   void dispose() {
     Get.find<BgmController>().resumeBgm();

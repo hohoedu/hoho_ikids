@@ -17,7 +17,7 @@ class SiblingData {
       : id = json['id'],
         username = json['cname'],
         schoolId = json['school_id'],
-        schoolName = json['schoolname'] ?? '';
+        schoolName = json['school_name'] ?? '';
 }
 
 class SiblingDataController extends GetxController {

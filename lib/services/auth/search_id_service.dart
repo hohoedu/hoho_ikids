@@ -29,6 +29,7 @@ Future<void> searchIdService(username, phoneNumber) async {
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
         twoButtonDialog(
+          isBarrier: true,
           title: '아이디 찾기',
           content: '${resultList['id']}',
           confirmOnTap: () {

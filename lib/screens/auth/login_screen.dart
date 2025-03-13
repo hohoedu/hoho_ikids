@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+
 import 'package:hani_booki/screens/auth/auth_widgets/auth_button.dart';
 import 'package:hani_booki/screens/auth/join_screen.dart';
 import 'package:hani_booki/screens/auth/search/search_id_screen.dart';
@@ -31,32 +33,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _requestNotificationPermission();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       idFocusNode.unfocus();
       pwdFocusNode.unfocus();
     });
-  }
-
-  void _requestNotificationPermission() async {
-    var requestStatus = await Permission.notification.request();
-    var status = await Permission.notification.status;
-
-    if (requestStatus.isGranted) {
-      print("✅ 알림 권한 허용됨");
-    } else if (requestStatus.isPermanentlyDenied || status.isPermanentlyDenied) {
-      print("❌ 알림 권한이 영구적으로 거부됨, 설정에서 변경 필요");
-      openAppSettings();
-    } else if (status.isRestricted) {
-      print("⚠️ iOS에서 알림 권한이 제한됨, 설정에서 변경 필요");
-      openAppSettings();
-    } else if (status.isDenied) {
-      print("🚫 알림 권한 거부됨");
-    }
-
-
-    print("Request Status: ${requestStatus.name}");
-    print("Current Status: ${status.name}");
   }
 
   @override
@@ -165,10 +146,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                            onTap: () {
-                              Get.to(() => SearchIdScreen());
-                            },
-                            child: const Text('아이디 찾기')),
+                          onTap: () {
+                            Get.to(() => SearchIdScreen());
+                          },
+                          child: Center(child: const Text('아이디 찾기')),
+                        ),
                         const SizedBox(
                           height: 16,
                           child: VerticalDivider(
@@ -181,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onTap: () {
                             Get.to(() => const SearchPasswordScreen());
                           },
-                          child: const Text('비밀번호 찾기'),
+                          child: Center(child: const Text('비밀번호 찾기')),
                         ),
                         const SizedBox(
                           height: 16,
@@ -196,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             FocusManager.instance.primaryFocus?.unfocus();
                             Get.to(() => const JoinScreen());
                           },
-                          child: const Text('회원가입'),
+                          child: Center(child: const Text('회원가입')),
                         ),
                       ],
                     ),

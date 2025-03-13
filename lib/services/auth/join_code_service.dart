@@ -68,7 +68,6 @@ Future<bool> joinCodeService(TextEditingController classCode) async {
   }
 }
 
-
 // 수업코드 확인
 Future<bool> codeVerifyService(String classCode) async {
   String url = dotenv.get('JOIN_CODE_URL');
@@ -115,38 +114,40 @@ class CodeVerifyController extends GetxController {
   Rx<Color> messageColor2 = Colors.red.obs;
 
   // codeIndex: 1이면 가입코드 1, 2이면 가입코드 2를 의미
-  Future<void> checkClassCode({required String code, required int codeIndex}) async {
+  Future<void> checkClassCode(
+      {required String code, required int codeIndex}) async {
     final validation = await codeVerifyService(code);
     if (codeIndex == 1) {
-      if(code.isEmpty){
+      if (code.isEmpty || code.length != 7) {
         code1Message.value = '가입코드를 입력해주세요';
         messageColor1.value = Colors.red;
         isComplete1.value = false;
-      }
-      if (validation) {
-        code1Message.value = '인증되었습니다.';
-        messageColor1.value = Colors.green;
-        isComplete1.value = true;
       } else {
-        code1Message.value = '기관에서 발송한 가입코드와 일치하지 않습니다.';
-        messageColor1.value = Colors.red;
-        isComplete1.value = false;
-      }
-    } else if (codeIndex == 2) {
-      if(code.isEmpty)
-        {
-          code1Message.value = '';
-          messageColor1.value = Colors.transparent;
+        if (validation) {
+          code1Message.value = '인증되었습니다.';
+          messageColor1.value = Colors.green;
+          isComplete1.value = true;
+        } else {
+          code1Message.value = '기관에서 발송한 가입코드와 일치하지 않습니다.';
+          messageColor1.value = Colors.red;
           isComplete1.value = false;
         }
-      if (validation) {
-        code2Message.value = '인증되었습니다.';
-        messageColor2.value = Colors.green;
-        isComplete2.value = true;
-      } else {
-        code2Message.value = '기관에서 발송한 가입코드와 일치하지 않습니다.';
+      }
+    } else if (codeIndex == 2) {
+      if (code.isEmpty || code.length != 7) {
+        code2Message.value = '가입코드를 입력해주세요';
         messageColor2.value = Colors.red;
         isComplete2.value = false;
+      } else {
+        if (validation) {
+          code2Message.value = '인증되었습니다.';
+          messageColor2.value = Colors.green;
+          isComplete2.value = true;
+        } else {
+          code2Message.value = '기관에서 발송한 가입코드와 일치하지 않습니다.';
+          messageColor2.value = Colors.red;
+          isComplete2.value = false;
+        }
       }
     }
   }
@@ -161,4 +162,3 @@ class CodeVerifyController extends GetxController {
     }
   }
 }
-

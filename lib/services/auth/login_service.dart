@@ -7,7 +7,7 @@ import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_core/notification/token_management.dart';
 import 'package:hani_booki/_data/auth/join_dto.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
-import 'package:hani_booki/screens/auth/join_widgets/join_verification_screen.dart';
+import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
 import 'package:hani_booki/screens/auth/legacy_user_screen.dart';
 import 'package:hani_booki/screens/auth/referral_code_screen.dart';
 import 'package:hani_booki/screens/home/home_screen.dart';
@@ -49,9 +49,11 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
         if (int.parse(userData.siblingCount) >= 2) {
           await siblingService(userData.parentTel);
         } else {
+          await siblingService(userData.parentTel);
           await ebookStatusService(id, userData.schoolId, userData.year);
         }
       } else if (resultValue == '6666') {
+        await getToken(id);
         oneButtonDialog(
           title: '로그인',
           content: resultList['message'],
@@ -65,6 +67,7 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
           buttonText: '확인',
         );
       } else if (resultValue == '7777') {
+        await getToken(id);
         Get.to(() => LegacyUserScreen(
               id: id,
               isAutoLoginChecked: isAutoLoginChecked,

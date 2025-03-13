@@ -3,12 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
-import 'package:hani_booki/screens/kidok/kidok_result_screen/kidok_result_bar.dart';
-import 'package:hani_booki/screens/kidok/kidok_result_screen/kidok_result_button.dart';
-import 'package:hani_booki/screens/kidok/kidok_result_screen/kidok_result_top.dart';
+import 'package:hani_booki/screens/kidok/kidok_result/kidok_result_bar.dart';
+import 'package:hani_booki/screens/kidok/kidok_result/kidok_result_button.dart';
+import 'package:hani_booki/screens/kidok/kidok_result/kidok_result_top.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
-import 'package:hani_booki/widgets/drawer/main_drawer.dart';
-import 'package:logger/logger.dart';
 
 class KidokResultScreen extends StatelessWidget {
   final List<bool> matchedAnswers;

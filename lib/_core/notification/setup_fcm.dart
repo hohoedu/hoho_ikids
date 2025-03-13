@@ -3,8 +3,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 import 'package:hani_booki/_core/notification/background_handler.dart';
+import 'package:hani_booki/_core/notification/notification.dart';
 import 'package:hani_booki/firebase_options.dart';
+import 'package:hani_booki/utils/notification_controller.dart';
 import 'package:logger/logger.dart';
 
 Future<void> setupFcm() async {
@@ -13,6 +16,7 @@ Future<void> setupFcm() async {
     name: 'hanibooki',
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Get.put(NotificationController());
 
   // iOS: 포그라운드 메시지 프레젠테이션 옵션 업데이트
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
@@ -45,5 +49,10 @@ Future<void> setupFcm() async {
       )));
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {});
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (message.notification != null) {
+      showNotification(message);
+    }
+  });
 }

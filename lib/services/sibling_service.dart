@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/sibling_data.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/star_data.dart';
 import 'package:hani_booki/screens/home/home_screen.dart';
 import 'package:hani_booki/screens/home/sibling_screen.dart';
@@ -13,6 +14,7 @@ import 'package:logger/logger.dart';
 // 형제 리스트 조회
 Future<void> siblingService(tel) async {
   final siblingData = Get.put(SiblingDataController());
+  final userData = Get.put(UserDataController());
   String url = dotenv.get('SIBLING_URL');
 
   final Map<String, dynamic> requestData = {'ptel': tel};
@@ -32,7 +34,17 @@ Future<void> siblingService(tel) async {
             .toList();
         siblingData.setSiblingDataList(siblingDataList);
 
-        Get.offAll(() => SiblingScreen());
+        if (siblingDataList.length >= 2) {
+          Get.offAll(() => SiblingScreen());
+        } else if(siblingDataList.length == 1){
+          userData.updateUserData(
+            id: siblingData.siblingDataList[0].id,
+            username: siblingData.siblingDataList[0].username,
+            schoolId: siblingData.siblingDataList[0].schoolId,
+            schoolName: siblingData.siblingDataList[0].schoolName,
+            year: userData.userData!.year,
+          );
+        }
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

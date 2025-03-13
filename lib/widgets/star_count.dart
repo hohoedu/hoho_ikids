@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/star_data.dart';
+import 'package:hani_booki/screens/record/record_home_shool/record_home_school_screen.dart';
 import 'package:hani_booki/screens/record/record_screen.dart';
 import 'package:hani_booki/services/content_star_service.dart';
 import 'package:hani_booki/utils/get_record_list.dart';
@@ -29,7 +30,8 @@ class StarCount extends StatelessWidget {
               onTap: () async {
                 await contentStarService(keyCode);
                 await getRecordList(keyCode, type);
-                Get.to(() => RecordScreen(type: type));
+                // Get.to(() => RecordScreen(keyCode: keyCode, type: type));
+                Get.to(() => RecordHomeSchoolScreen(type: type));
               },
               child: Container(
                 width: double.infinity,

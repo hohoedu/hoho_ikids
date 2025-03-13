@@ -10,7 +10,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 키독 책장 도서목록
-Future<void> kidokSublistService(hosu, keycode) async {
+Future<void> kidokSublistService(hosu, keyCode) async {
   String url = dotenv.get('KIDOK_SUBLIST_URL');
   final kidokSublistController = Get.put(KidokSublistDataController());
   final userdata = Get.find<UserDataController>();
@@ -18,7 +18,7 @@ Future<void> kidokSublistService(hosu, keycode) async {
     'id': userdata.userData!.id,
     'yy': userdata.userData!.year,
     'hosu': hosu,
-    'keycode': keycode,
+    'keycode': keyCode,
   };
 
   // HTTP POST 요청

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_data.dart';
 import 'package:hani_booki/services/star_update_service.dart';
-import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -30,10 +30,13 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
   bool? isCorrect;
   late AudioPlayer _audioPlayer;
 
+  Timer? _resetTimer;
+
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final haniGoldenbell =
           haniGoldenbellDataController.haniGoldenbellDataList[0];
@@ -95,21 +98,23 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
   }
 
   void checkAnswer(int answerIndex) {
-    if (isCorrect == true) return;
-    int correctAnswer = int.parse(
-        haniGoldenbellDataController.haniGoldenbellDataList[0].correctAnswer[currentIndex]
-    );
+    _resetTimer?.cancel();
+
+    int correctAnswer = int.parse(haniGoldenbellDataController
+        .haniGoldenbellDataList[0].correctAnswer[currentIndex]);
+
+    bool tappedAnswerIsCorrect = (answerIndex + 1) == correctAnswer;
 
     setState(() {
       selectedAnswerIndex = answerIndex;
-      isCorrect = (answerIndex + 1) == correctAnswer;
+      isCorrect = tappedAnswerIsCorrect;
     });
 
-    if (isCorrect == true) {
+    if (tappedAnswerIsCorrect == true) {
       SoundManager.playCorrect();
     } else {
       SoundManager.playNo();
-      Future.delayed(Duration(milliseconds: 500), () {
+      _resetTimer = Timer(Duration(milliseconds: 500), () {
         setState(() {
           selectedAnswerIndex = null;
           isCorrect = null;
@@ -117,6 +122,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
       });
     }
   }
+
   void resetQuestionState() {
     selectedAnswerIndex = null;
     isCorrect = null;
@@ -144,7 +150,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
         onTapBackIcon: () => showBackDialog(false),
       ),
       body: Center(
-        child: Container(
+        child: SizedBox(
           width: Platform.isIOS
               ? MediaQuery.of(context).size.width * 0.85
               : double.infinity,
@@ -192,13 +198,18 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
                               alignment: Alignment.center,
                               children: [
                                 GestureDetector(
-                                  onTap: selectedAnswerIndex == null ? () => checkAnswer(index) : null,
+                                  onTap: () => checkAnswer(index),
                                   child: Image.network(answer),
                                 ),
-                                if (selectedAnswerIndex != null && selectedAnswerIndex == index)
+                                if (selectedAnswerIndex != null &&
+                                    selectedAnswerIndex == index)
                                   Icon(
-                                    isCorrect == true ? Icons.circle_outlined : Icons.close,
-                                    color: isCorrect == true ? Colors.green : Colors.red,
+                                    isCorrect == true
+                                        ? Icons.circle_outlined
+                                        : Icons.close,
+                                    color: isCorrect == true
+                                        ? Colors.green
+                                        : Colors.red,
                                     size: 40.sp,
                                   ),
                               ],
@@ -240,6 +251,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _resetTimer?.cancel();
     super.dispose();
   }
 }

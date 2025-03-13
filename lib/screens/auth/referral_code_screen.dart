@@ -141,7 +141,22 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen> {
                             height: 50,
                             child: VerifyButton(
                               onTap: () async {
-                                await _verifyCode(code1Controller, true);
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                if (code2Controller.text.isNotEmpty &&
+                                    code1Controller.text.substring(5, 6) ==
+                                        code2Controller.text.substring(5, 6)) {
+                                  oneButtonDialog(
+                                    title: '회원가입',
+                                    content: '수업 코드는 중복될 수 없습니다.',
+                                    onTap: () => Get.back(),
+                                    buttonText: '확인',
+                                  );
+                                  code1Controller.text = ''; // code1 초기화
+                                } else {
+                                  // 그렇지 않으면 code1을 검증한다.
+                                  await _verifyCode(code1Controller, true);
+                                }
+
                               },
                               text: '인증',
                               controller: code1Controller,
@@ -174,7 +189,24 @@ class _ReferralCodeScreenState extends State<ReferralCodeScreen> {
                             height: 50,
                             child: VerifyButton(
                               onTap: () async {
-                                await _verifyCode(code2Controller, false);
+                                if (code1Controller.text.isNotEmpty &&
+                                    code2Controller.text.isNotEmpty) {
+                                  if (code1Controller.text.substring(5, 6) ==
+                                      code2Controller.text.substring(5, 6)) {
+                                    oneButtonDialog(
+                                      title: '회원가입',
+                                      content: '수업 코드는 중복될 수 없습니다.',
+                                      onTap: () => Get.back(),
+                                      buttonText: '확인',
+                                    );
+                                    code2Controller.text = '';
+                                  } else {
+                                    await _verifyCode(code2Controller, false);
+                                  }
+                                } else {
+                                  await _verifyCode(code2Controller, false);
+                                }
+
                               },
                               text: '인증',
                               controller: code2Controller,

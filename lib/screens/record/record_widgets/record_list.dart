@@ -17,13 +17,23 @@ class RecordList extends StatefulWidget {
 
 class _RecordListState extends State<RecordList> {
   final userRecordList = Get.find<UserRecordListDataController>();
-  final haniData = Get.find<UserHaniDataController>();
-  final bookiData = Get.find<UserBookiDataController>();
+  late UserHaniDataController haniData = UserHaniDataController();
+  late UserBookiDataController bookiData = UserBookiDataController();
 
   final ScrollController _scrollController = ScrollController();
   int _currentIndex = 0;
   double itemWidth = 0;
   double _availableWidth = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.type == 'hani') {
+      haniData = Get.find<UserHaniDataController>();
+    } else {
+      bookiData = Get.find<UserBookiDataController>();
+    }
+  }
 
   void _goPrevious() {
     if (_currentIndex > 0) {

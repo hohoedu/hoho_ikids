@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/kidok/kidok_question_data.dart';
 import 'package:hani_booki/screens/kidok/kidok_question/kidok_question_widgets/kidok_question_option.dart';
-import 'package:hani_booki/screens/kidok/kidok_result_screen/kidok_result_screen.dart';
+import 'package:hani_booki/screens/kidok/kidok_result/kidok_result_screen.dart';
 import 'package:hani_booki/services/kidok/kidok_question_service.dart';
 import 'package:hani_booki/services/kidok/kidok_result_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -85,27 +85,18 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
   Widget build(BuildContext context) {
     final kidokQuestion = kidokQuestionController.kidokQuestionData;
     List<Map<String, dynamic>> options = [
-      {
-        'number': '1',
-        'text': kidokQuestion!.option1
-      },
-      {
-        'number': '2',
-        'text': kidokQuestion.option2
-      },
-      {
-        'number': '3',
-        'text': kidokQuestion.option3
-      },
+      {'number': '1', 'text': kidokQuestion!.option1},
+      {'number': '2', 'text': kidokQuestion.option2},
+      {'number': '3', 'text': kidokQuestion.option3},
     ];
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: kidokColor,
-      appBar:  MainAppBar(
+      appBar: MainAppBar(
         isContent: true,
         title: '',
-        onTapBackIcon: ()=> showBackDialog(false),
+        onTapBackIcon: () => showBackDialog(false),
       ),
       body: Center(
         child: SizedBox(
@@ -218,24 +209,25 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                     ),
                   ),
                 ),
-                Expanded(
-                  flex: 2,
-                  child: kidokQuestion.isExample
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 64.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.yellow,
-                                border: Border.all(color: Colors.orange)),
-                            child: Center(
-                              child: RichText(
-                                text: exampleText(kidokQuestion.example),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                Visibility(
+                  visible: kidokQuestion.isExample,
+                  child: Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 64.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.yellow,
+                            border: Border.all(color: Colors.orange)),
+                        child: Center(
+                          child: RichText(
+                            text: exampleText(kidokQuestion.example),
+                            textAlign: TextAlign.center,
                           ),
-                        )
-                      : Container(),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 9,

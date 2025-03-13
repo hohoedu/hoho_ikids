@@ -6,13 +6,8 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/screens/setting/setting_widgets/seeting_title.dart';
-import 'package:hani_booki/screens/setting/setting_widgets/setting_account.dart';
-import 'package:hani_booki/screens/setting/setting_widgets/setting_logout.dart';
 import 'package:hani_booki/screens/setting/setting_widgets/setting_notification.dart';
-import 'package:hani_booki/screens/setting/setting_widgets/setting_password_update.dart';
-import 'package:hani_booki/screens/setting/setting_widgets/setting_terms.dart';
 import 'package:hani_booki/screens/setting/setting_widgets/setting_volume.dart';
-import 'package:hani_booki/screens/setting/setting_widgets/setting_withdraw.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 

@@ -20,8 +20,8 @@ Future<void> sendToken(token, id) async {
     'id': id,
     'token': token,
   };
-  Logger().d('requestData = $requestData');
 
+  Logger().d('token = $token');
   try {
     await dio.post(url, data: requestData);
   } catch (e) {

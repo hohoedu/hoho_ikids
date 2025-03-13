@@ -3,11 +3,13 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/join_dto.dart';
 import 'package:hani_booki/screens/auth/auth_widgets/auth_button.dart';
-import 'package:hani_booki/screens/auth/join_widgets/join_verification_screen.dart';
+import 'package:hani_booki/screens/auth/join_widgets/join_select_verification_screen.dart';
+import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
 import 'package:hani_booki/services/auth/dupe_check_service.dart';
 import 'package:hani_booki/utils/encryption.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/custom_text_field.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 
 class JoinScreen extends StatefulWidget {
   const JoinScreen({super.key});
@@ -83,7 +85,10 @@ class _JoinScreenState extends State<JoinScreen> {
       child: Scaffold(
         backgroundColor: mBackAuth,
         extendBodyBehindAppBar: true,
-        appBar: const MainAppBar(title: '', isContent: false,),
+        appBar: const MainAppBar(
+          title: '',
+          isContent: false,
+        ),
         body: Center(
           child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.5,
@@ -113,6 +118,7 @@ class _JoinScreenState extends State<JoinScreen> {
                       },
                       completeText: joinInputController.message.value,
                       messageColor: joinInputController.messageColor.value,
+                      isUserId: true,
                     ),
                   ),
                   CustomTextField(
@@ -155,7 +161,8 @@ class _JoinScreenState extends State<JoinScreen> {
                         joinController.updateIdAndPassword(idController.text,
                             md5_convertHash(pwdController.text));
 
-                        Get.to(() => const JoinVerificationScreen());
+                        // showCodeQuantityDialog();
+                        Get.to(() => const JoinSelectVerificationScreen());
                       }
                     },
                     text: '다음',

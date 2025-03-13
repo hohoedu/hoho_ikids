@@ -1,11 +1,9 @@
 flutter_native_splash:
+  ios: true
+  android: false
   image: "assets/images/splash.png"
   color: "#FFFFFF"
   fullscreen: true
   image_dark: "assets/images/splash.png"
-  color_dark: "#000000"
-  android_12:
-    image: "assets/images/splash.png"
-    image_dark: "assets/images/splash.png"
-    color: "#FFFFFF"
-    color_dark: "#000000"
+  color_dark: "#FFFFFF"
+  ios_content_mode: scaleAspectFit

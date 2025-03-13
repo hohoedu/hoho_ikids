@@ -13,6 +13,7 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isPortraitMode;
   final bool? isVisibleLeading;
   final bool isContent;
+  final bool isInfo;
   final VoidCallback? onTap;
   final VoidCallback? onTapBackIcon;
 
@@ -21,6 +22,7 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.title,
     this.isPortraitMode = false,
     required this.isContent,
+    this.isInfo = false,
     this.onTap,
     this.isVisibleLeading = true,
     this.onTapBackIcon,
@@ -54,7 +56,9 @@ class _MainAppBarState extends State<MainAppBar> {
           onTap: () async {
             if (widget.isContent) {
               widget.onTapBackIcon!();
-            } else {
+            } else if(widget.isInfo){
+              widget.onTapBackIcon!();
+            }else{
               Get.back();
             }
           },

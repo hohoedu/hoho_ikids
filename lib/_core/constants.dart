@@ -122,8 +122,8 @@ final Map<String, String> bookiCategory = {
   'song': '동화',
   'story': '동요',
   'bell': '골든벨',
-  'img': '다른 그림 찾기',
-  'find': '그림 맞추기',
+  'img': '그림 맞추기',
+  'find': '다른 그림 찾기',
 };
 
 final List<Color> strokeColors = [

@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,11 +7,9 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/booki/booki_goldenbell_data.dart';
 import 'package:hani_booki/services/star_update_service.dart';
-import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
-import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 
@@ -33,6 +31,8 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
   bool? isCorrect;
   late AudioPlayer _audioPlayer;
 
+  Timer? _resetTimer;
+
   @override
   void initState() {
     super.initState();
@@ -51,9 +51,7 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
     try {
       await _audioPlayer.setUrl(url[currentIndex]);
       _audioPlayer.play();
-    } catch (e) {
-      Logger().e("Error playing sound: $e");
-    }
+    } catch (e) {}
   }
 
   void prevQuestion() {
@@ -61,6 +59,8 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
       setState(() {
         currentIndex--;
         resetQuestionState();
+        _playSound(
+            bookiGoldenbellDataController.bookiGoldenbellDataList[0].voicePath);
       });
     }
   }
@@ -73,6 +73,8 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
       setState(() {
         currentIndex++;
         resetQuestionState();
+        _playSound(
+            bookiGoldenbellDataController.bookiGoldenbellDataList[0].voicePath);
       });
     }
   }
@@ -95,22 +97,23 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
   }
 
   void checkAnswer(int answerIndex) {
-    if (isCorrect == true) return;
-    int correctAnswer = int.parse(
-        bookiGoldenbellDataController.bookiGoldenbellDataList[0]
-            .correctAnswer[currentIndex]);
+    _resetTimer?.cancel();
+
+    int correctAnswer = int.parse(bookiGoldenbellDataController
+        .bookiGoldenbellDataList[0].correctAnswer[currentIndex]);
+
+    bool tappedAnswerIsCorrect = (answerIndex + 1) == correctAnswer;
 
     setState(() {
       selectedAnswerIndex = answerIndex;
-      isCorrect = (answerIndex + 1) == correctAnswer;
+      isCorrect = tappedAnswerIsCorrect;
     });
 
-    if (isCorrect == true) {
+    if (tappedAnswerIsCorrect == true) {
       SoundManager.playCorrect();
-
     } else {
       SoundManager.playNo();
-      Future.delayed(Duration(milliseconds: 500), () {
+      _resetTimer = Timer(Duration(milliseconds: 500), () {
         setState(() {
           selectedAnswerIndex = null;
           isCorrect = null;
@@ -118,6 +121,7 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
       });
     }
   }
+
   void resetQuestionState() {
     selectedAnswerIndex = null;
     isCorrect = null;
@@ -193,16 +197,18 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
                               alignment: Alignment.center,
                               children: [
                                 GestureDetector(
-                                  onTap: selectedAnswerIndex == null
-                                      ? () => checkAnswer(index)
-                                      : null,
+                                  onTap: () => checkAnswer(index),
                                   child: Image.network(answer),
                                 ),
                                 if (selectedAnswerIndex != null &&
                                     selectedAnswerIndex == index)
                                   Icon(
-                                    isCorrect == true ? Icons.circle_outlined : Icons.close,
-                                    color: isCorrect == true ? Colors.green : Colors.red,
+                                    isCorrect == true
+                                        ? Icons.circle_outlined
+                                        : Icons.close,
+                                    color: isCorrect == true
+                                        ? Colors.green
+                                        : Colors.red,
                                     size: 40.sp,
                                   ),
                               ],
@@ -210,7 +216,6 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
                           ),
                         );
                       }).toList(),
-                      // next 버튼: 정답을 맞췄을 때만 보이도록 처리 (마지막 문제인 경우 endQuestion 호출)
                       if (isCorrect == true)
                         Expanded(
                           flex: 1,
@@ -244,6 +249,7 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
 
   @override
   void dispose() {
+    _resetTimer?.cancel();
     super.dispose();
   }
 }

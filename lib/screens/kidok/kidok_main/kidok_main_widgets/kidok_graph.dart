@@ -56,7 +56,7 @@ class KidokGraph extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: BarChart(
                           BarChartData(
-                            maxY: 10,
+                            maxY: 2,
                             barGroups: _generateBarGroups(scores, constraints),
                             titlesData: FlTitlesData(
                               bottomTitles: AxisTitles(

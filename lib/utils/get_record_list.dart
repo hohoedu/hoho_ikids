@@ -17,18 +17,17 @@ import 'package:logger/logger.dart';
 Future<void> getRecordList(String keyCode, String type) async {
   String url = dotenv.get('RECORD_LIST_URL');
   final userData = Get.find<UserDataController>();
-  final haniData = Get.find<UserHaniDataController>();
-  final bookiData = Get.find<UserBookiDataController>();
   final userRecordList = Get.put(UserRecordListDataController());
   String section1 = keyCode.substring(0, 1);
   String section2 = '';
 
   if (type == 'hani') {
+    final haniData = Get.find<UserHaniDataController>();
     section2 = haniData.userHaniDataList[0].section;
   } else {
+    final bookiData = Get.find<UserBookiDataController>();
     section2 = bookiData.userBookiDataList[0].section;
   }
-  Logger().d('section2 = $section2');
 
   final Map<String, dynamic> requestData = {
     'schoolid': userData.userData!.schoolId,
