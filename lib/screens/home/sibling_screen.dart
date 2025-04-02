@@ -9,6 +9,7 @@ import 'package:hani_booki/screens/home/home_screen.dart';
 import 'package:hani_booki/services/auth/ebook_status_service.dart';
 import 'package:hani_booki/services/sibling_service.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:logger/logger.dart';
 
 class SiblingScreen extends StatelessWidget {
   final siblingData = Get.find<SiblingDataController>();
@@ -93,6 +94,7 @@ class SiblingScreen extends StatelessWidget {
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),

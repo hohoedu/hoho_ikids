@@ -109,7 +109,7 @@ class _SettingVolumeState extends State<SettingVolume> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildSlider(
-                      '배경음', // 시스템 볼륨 연동
+                      '배경음',
                       _systemVolume * 10,
                           (value) {
                         _setSystemVolume(value / 10);

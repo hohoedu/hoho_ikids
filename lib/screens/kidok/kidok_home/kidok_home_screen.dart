@@ -177,7 +177,7 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
                                               .kidokThemeData!.textColor),
                                           outlineColor: fontWhite,
                                           outlineWidth: 2.sp,
-                                          fontSize: 13.sp,
+                                          fontSize: 11.sp,
                                         ),
                                         OutlinedText(
                                           text: '키독활동',
@@ -185,7 +185,7 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
                                               .kidokThemeData!.textColor),
                                           outlineColor: fontWhite,
                                           outlineWidth: 2.sp,
-                                          fontSize: 13.sp,
+                                          fontSize: 11.sp,
                                         ),
                                         OutlinedText(
                                           text: kidokThemeController

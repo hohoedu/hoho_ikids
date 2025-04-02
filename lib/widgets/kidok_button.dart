@@ -18,8 +18,7 @@ class KidokButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSibling =
-        userData.userData!.siblingCount == '1' ? false : true;
+    final bool isSibling = userData.userData!.siblingCount == '1' ? false : true;
     return Expanded(
       child: Stack(
         children: [
@@ -58,8 +57,7 @@ class KidokButton extends StatelessWidget {
                             Container(
                               height: MediaQuery.of(context).size.height * 0.5,
                               decoration: BoxDecoration(
-                                color: Color(kidokThemeController
-                                    .kidokThemeData!.boxColor),
+                                color: Color(kidokThemeController.kidokThemeData!.boxColor),
                                 borderRadius: BorderRadius.only(
                                   bottomLeft: Radius.circular(15),
                                 ),
@@ -73,11 +71,9 @@ class KidokButton extends StatelessWidget {
                                       child: Container(
                                         width: double.infinity,
                                         decoration: BoxDecoration(
-                                          borderRadius: type == 'hani'
-                                              ? BorderRadius.circular(100)
-                                              : BorderRadius.circular(15),
-                                          color: Color(kidokThemeController
-                                              .kidokThemeData!.subjectColor),
+                                          borderRadius:
+                                              type == 'hani' ? BorderRadius.circular(100) : BorderRadius.circular(15),
+                                          color: Color(kidokThemeController.kidokThemeData!.subjectColor),
                                         ),
                                         child: AspectRatio(
                                           aspectRatio: 1.0,
@@ -85,9 +81,9 @@ class KidokButton extends StatelessWidget {
                                             child: FittedBox(
                                               child: Text(
                                                 insertNewlineAtFirstSpace(
-                                                    kidokThemeController
+                                                    type == 'hani' ? kidokThemeController
                                                         .kidokThemeData!
-                                                        .subject),
+                                                        .subject: '지식\n확장'),
                                                 style: TextStyle(
                                                   color: fontWhite,
                                                   fontFamily: 'Cookie',
@@ -105,8 +101,7 @@ class KidokButton extends StatelessWidget {
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Image.asset(
-                                        'assets/images/kido_logo_vertical.png'),
+                                    child: Image.asset('assets/images/kido_logo_vertical.png'),
                                   )
                                 ],
                               ),

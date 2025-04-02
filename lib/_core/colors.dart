@@ -36,3 +36,54 @@ const Color mBackBottomBar = Color(0xFFECF2F5);
 const Color mBackStar = Color(0xFFFFF3A3);
 const Color mBackAuth = Color(0xFFFFCD55);
 const Color mTextField = Color(0xFFF3F4F5);
+
+const Map<String, Color> noticeTitleColor = {
+  '0': Color(0xFFF286AC),
+  '1': Color(0xFF1AD0C1),
+  '2': Color(0xFFA974C5),
+  '8': Color(0xFFFFC12C),
+};
+const Map<String, Color> noticeTitleActiveColor = {
+  '0': Color(0xFFE73F7A),
+  '1': Color(0xFF00AA9C),
+  '2': Color(0xFF7D38A1),
+  '8': Color(0xFFFF9600),
+};
+
+const Map<String, Color> HighFiveColor = {
+  '1': Color(0xFFA4DAFF),
+  '2': Color(0xFFF8C085),
+  '3': Color(0xFFF5B5D1),
+  '4': Color(0xFFD7B6FA),
+  '5': Color(0xFF8AF0B1),
+};
+const Map<String, Color> HighFiveTextColor = {
+  '1': Color(0xFF1994FC),
+  '2': Color(0xFFFF8400),
+  '3': Color(0xFFFF4192),
+  '4': Color(0xFFA96CEB),
+  '5': Color(0xFF35E060),
+};
+
+const Map<String, Color> bookiReportColor = {
+  "1": Color(0xFF7AC2FF),
+  "2": Color(0xFFFFB26A),
+  "3": Color(0xFFFF9AC5),
+  "4": Color(0xFFCD9FFF),
+  "5": Color(0xFF57F47F),
+};
+
+const Map<String, Color> haniReportColor = {
+  "1": Color(0xFFD7AFFF),
+  "2": Color(0xFFE8FF60),
+  "3": Color(0xFF8997FF),
+  "4": Color(0xFF4CFFFD),
+  "5": Color(0xFFFF754C),
+};
+const Map<String, Color> haniReportTextColor = {
+  "1": Color(0xFFD7AFFF),
+  "2": Color(0xFF8EB100),
+  "3": Color(0xFF8997FF),
+  "4": Color(0xFF00AFB1),
+  "5": Color(0xFFFF754C),
+};

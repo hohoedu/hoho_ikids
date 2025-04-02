@@ -18,12 +18,12 @@ class UserRecordListData {
 }
 
 class UserRecordListDataController extends GetxController {
-  List<UserRecordListData> _userrRecordListDataList = <UserRecordListData>[].obs;
+  List<UserRecordListData> _userRecordListDataList = <UserRecordListData>[].obs;
 
-  void setUserRecordListDataList(List<dynamic> userrRecordListDataList) {
-    _userrRecordListDataList = List.from(userrRecordListDataList);
+  void setUserRecordListDataList(List<dynamic> userRecordListDataList) {
+    _userRecordListDataList = List.from(userRecordListDataList);
     update();
   }
 
-  List<UserRecordListData> get userrRecordListDataList => _userrRecordListDataList;
+  List<UserRecordListData> get userRecordListDataList => _userRecordListDataList;
 }

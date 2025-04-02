@@ -62,53 +62,18 @@ const Map<String, String> kidoMonth = {
 };
 
 final items = [
-  {
-    'title': '루이브라유',
-    'category': '배려',
-    'color': gridColors[0],
-    'circleColor': gridInsideColors[0]
-  },
-  {
-    'title': '방정환',
-    'category': '존중',
-    'color': gridColors[1],
-    'circleColor': gridInsideColors[1]
-  },
-  {
-    'title': '김구',
-    'category': '효',
-    'color': gridColors[2],
-    'circleColor': gridInsideColors[2]
-  },
-  {
-    'title': '간디',
-    'category': '협력',
-    'color': gridColors[3],
-    'circleColor': gridInsideColors[3]
-  },
-  {
-    'title': '최무선',
-    'category': '끈기',
-    'color': gridColors[4],
-    'circleColor': gridInsideColors[4]
-  },
-  {
-    'title': '유관순',
-    'category': '애국심',
-    'color': gridColors[5],
-    'circleColor': gridInsideColors[5]
-  },
-  {
-    'title': '정조•정약용',
-    'category': '협력',
-    'color': gridColors[6],
-    'circleColor': gridInsideColors[6]
-  },
+  {'title': '루이브라유', 'category': '배려', 'color': gridColors[0], 'circleColor': gridInsideColors[0]},
+  {'title': '방정환', 'category': '존중', 'color': gridColors[1], 'circleColor': gridInsideColors[1]},
+  {'title': '김구', 'category': '효', 'color': gridColors[2], 'circleColor': gridInsideColors[2]},
+  {'title': '간디', 'category': '협력', 'color': gridColors[3], 'circleColor': gridInsideColors[3]},
+  {'title': '최무선', 'category': '끈기', 'color': gridColors[4], 'circleColor': gridInsideColors[4]},
+  {'title': '유관순', 'category': '애국심', 'color': gridColors[5], 'circleColor': gridInsideColors[5]},
+  {'title': '정조•정약용', 'category': '협력', 'color': gridColors[6], 'circleColor': gridInsideColors[6]},
 ];
 
 final Map<String, String> haniCategory = {
-  'song': '동화',
-  'story': '동요',
+  'song': '동요',
+  'story': '동화',
   'insung': '한자성어',
   'write': '획순',
   'card': '카드놀이',
@@ -119,8 +84,8 @@ final Map<String, String> haniCategory = {
 };
 
 final Map<String, String> bookiCategory = {
-  'song': '동화',
-  'story': '동요',
+  'song': '동요',
+  'story': '동화',
   'bell': '골든벨',
   'img': '그림 맞추기',
   'find': '다른 그림 찾기',
@@ -140,3 +105,33 @@ final List<Color> strokeColors = [
   Color(0xFFDA9DAE),
   Color(0xFF6FC1B3),
 ];
+
+final Map<String, String> noticeIcon = {
+  '1': 'assets/images/icons/board_type3.png', // 교육정보
+  '2': 'assets/images/icons/board_type2.png', // 한자성어
+  '0': 'assets/images/icons/board_type4.png', // 공지사항
+  '8': 'assets/images/icons/board_type1.png', // 호호스타
+};
+
+final List<String> pentagons = [
+  'assets/images/icons/blue.png',
+  'assets/images/icons/orange.png',
+  'assets/images/icons/pink.png',
+  'assets/images/icons/purple.png',
+  'assets/images/icons/green.png',
+];
+
+final List<String> haniTitles = [
+  '호호하니 학습 내용',
+  'High-five 수업',
+  '우리반 언어활동',
+  '인성활동',
+];
+
+final List<String> bookiTitles = [
+  '호호부키 학습 내용',
+  'High-five 수업',
+  '우리반 언어활동',
+  '지식확장 독서활동',
+];
+

@@ -24,7 +24,7 @@ class UserHaniDataController extends GetxController {
   List<UserHaniData> _userHaniDataList = <UserHaniData>[].obs;
 
   void setUserHaniDataList(List<UserHaniData> userHaniDataList) {
-    _userHaniDataList = List.from(userHaniDataList);
+    _userHaniDataList = List.from(userHaniDataList.reversed.toList());
     update();
   }
 

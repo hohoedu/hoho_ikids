@@ -17,12 +17,10 @@ class JoinTwiceVerificationScreen extends StatefulWidget {
   const JoinTwiceVerificationScreen({super.key});
 
   @override
-  State<JoinTwiceVerificationScreen> createState() =>
-      _JoinTwiceVerificationScreenState();
+  State<JoinTwiceVerificationScreen> createState() => _JoinTwiceVerificationScreenState();
 }
 
-class _JoinTwiceVerificationScreenState
-    extends State<JoinTwiceVerificationScreen> {
+class _JoinTwiceVerificationScreenState extends State<JoinTwiceVerificationScreen> {
   final TextEditingController code1Controller = TextEditingController();
   final TextEditingController code2Controller = TextEditingController();
   final FocusNode code1FocusNode = FocusNode();
@@ -33,8 +31,7 @@ class _JoinTwiceVerificationScreenState
   bool isCode1Verified = false;
   bool isCode2Verified = false;
 
-  Future<void> _verifyCode(
-      TextEditingController controller, bool isCode1) async {
+  Future<void> _verifyCode(TextEditingController controller, bool isCode1) async {
     FocusScope.of(context).unfocus();
     if (controller.text.isNotEmpty) {
       bool isVerified = await joinCodeService(controller);
@@ -113,12 +110,8 @@ class _JoinTwiceVerificationScreenState
                     child: Padding(
                       padding: EdgeInsets.all(4.0),
                       child: Text(
-                        '* 안내받으신 코드가 2개일 경우 모두 입력해주세요.',
-                        style: TextStyle(
-                            color: fontSub,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2),
+                        '* 안내받으신 코드를 모두 입력해 주세요.',
+                        style: TextStyle(color: fontSub, fontSize: 12, fontWeight: FontWeight.bold, height: 1.2),
                       ),
                     ),
                   ),
@@ -155,12 +148,11 @@ class _JoinTwiceVerificationScreenState
                                 onTap: () async {
                                   FocusManager.instance.primaryFocus?.unfocus();
                                   if (code2Controller.text.isNotEmpty &&
-                                      code1Controller.text.substring(5, 6) ==
-                                          code2Controller.text
-                                              .substring(5, 6)) {
+                                      code1Controller.text.substring(5, 6).toUpperCase() ==
+                                          code2Controller.text.substring(5, 6).toUpperCase()) {
                                     oneButtonDialog(
                                       title: '회원가입',
-                                      content: '수업 코드는 중복될 수 없습니다.',
+                                      content: '가입 코드는 중복될 수 없습니다.',
                                       onTap: () => Get.back(),
                                       buttonText: '확인',
                                     );
@@ -188,7 +180,7 @@ class _JoinTwiceVerificationScreenState
                           child: CustomTextField(
                             controller: code2Controller,
                             focusNode: code2FocusNode,
-                            hintText: '가입 코드 (선택)',
+                            hintText: '가입 코드',
                             isObscure: false,
                             suffix: isCode2Verified
                                 ? code2Controller.text.isNotEmpty
@@ -206,13 +198,12 @@ class _JoinTwiceVerificationScreenState
                               child: VerifyButton(
                                 onTap: () async {
                                   FocusManager.instance.primaryFocus?.unfocus();
-                                  if (code1Controller.text.isNotEmpty &&
-                                      code2Controller.text.isNotEmpty) {
-                                    if (code1Controller.text.substring(5, 6) ==
-                                        code2Controller.text.substring(5, 6)) {
+                                  if (code1Controller.text.isNotEmpty && code2Controller.text.isNotEmpty) {
+                                    if (code1Controller.text.substring(5, 6).toUpperCase() ==
+                                        code2Controller.text.substring(5, 6).toUpperCase()) {
                                       oneButtonDialog(
                                         title: '회원가입',
-                                        content: '수업 코드는 중복될 수 없습니다.',
+                                        content: '가입 코드는 중복될 수 없습니다.',
                                         onTap: () => Get.back(),
                                         buttonText: '확인',
                                       );
@@ -240,15 +231,14 @@ class _JoinTwiceVerificationScreenState
                     width: MediaQuery.of(context).size.width * 0.5,
                     child: AuthButton(
                       onTap: () async {
-                        if (!isCode1Verified) {
+                        if (!isCode1Verified || !isCode2Verified) {
                           oneButtonDialog(
                             title: '회원가입',
                             content: '가입 코드를 입력하고 인증을 완료해주세요.',
                             onTap: () => Get.back(),
                             buttonText: '확인',
                           );
-                        } else if (code2Controller.text.isNotEmpty &&
-                            !isCode2Verified) {
+                        } else if (code2Controller.text.isNotEmpty && !isCode2Verified) {
                           oneButtonDialog(
                             title: '회원가입',
                             content: '인증을 완료해주세요.',

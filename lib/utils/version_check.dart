@@ -7,7 +7,8 @@ import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future<void> versionCheck() async {
-  String url = dotenv.get('APP_VERSION_URL', fallback: 'https://hohoschool.com/hohoeduAPI/version.html');
+  String url = dotenv.get('APP_VERSION_URL',
+      fallback: 'https://hohoschool.com/hohoeduAPI/version.html');
 
   // HTTP POST 요청
   final response = await dio.post(url);
@@ -19,15 +20,18 @@ Future<void> versionCheck() async {
 
       // 응답 결과가 있는 경우
       if (resultList[0]['result'] == "0000") {
-        final packageInfo = await PackageInfo.fromPlatform();
-        if (Platform.isAndroid) {
-          if (resultList[0]['Androidver'] != packageInfo.version) {
-            versionDialog("AOS");
+        // 검토중일 경우 Y(버전체크 X), 검토가 아닐 경우 N(버전체크 O)
+        if (resultList[0]['chkyn'] == 'N') {
+          final packageInfo = await PackageInfo.fromPlatform();
+          if (Platform.isAndroid) {
+            if (resultList[0]['Androidver'] != packageInfo.version) {
+              versionDialog("AOS");
+            }
           }
-        }
-        if (Platform.isIOS) {
-          if (resultList[0]['ISOver'] != packageInfo.version) {
-            versionDialog("IOS");
+          if (Platform.isIOS) {
+            if (resultList[0]['ISOver'] != packageInfo.version) {
+              versionDialog("IOS");
+            }
           }
         }
       }

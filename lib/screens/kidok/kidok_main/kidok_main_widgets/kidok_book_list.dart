@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/kidok/kidok_sublist_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/utils/dashed_divider.dart';
+import 'package:hani_booki/utils/text_format.dart';
 import 'package:logger/logger.dart';
 
 class KidokBookList extends StatefulWidget {
@@ -35,9 +37,7 @@ class _KidokBookListState extends State<KidokBookList> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
-                decoration: BoxDecoration(
-                    color: Color(0xFFF7F5EA),
-                    borderRadius: BorderRadius.circular(15)),
+                decoration: BoxDecoration(color: Color(0xFFF7F5EA), borderRadius: BorderRadius.circular(15)),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return Column(
@@ -47,48 +47,37 @@ class _KidokBookListState extends State<KidokBookList> {
                           return Column(
                             children: [
                               SizedBox(
-                                height: constraints.maxHeight /
-                                        kidokSublistController
-                                            .kidokSublistDataList.length -
-                                    1,
+                                height: constraints.maxHeight / kidokSublistController.kidokSublistDataList.length - 1,
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Row(
                                           children: [
-                                            kidokSublistController
-                                                    .kidokSublistDataList[index]
-                                                    .isCompleted
-                                                ? Icon(
-                                                    CupertinoIcons
-                                                        .checkmark_square_fill,
-                                                    color: Color(0xFFDED6A9),
+                                            kidokSublistController.kidokSublistDataList[index].isCompleted
+                                                ? Image.asset(
+                                                    'assets/images/icons/checkbox.png',
+                                                    scale: 2.5,
                                                   )
-                                                : Icon(
-                                                    CupertinoIcons.square_fill,
+                                                : Image.asset(
+                                                    'assets/images/icons/checkbox_blank.png',
+                                                    scale: 2.5,
                                                     color: Color(0xFFDED6A9),
                                                   ),
                                             Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                               child: Text(
-                                                kidokSublistController
-                                                    .kidokSublistDataList[index]
-                                                    .bookName,
+                                                autoWrapText(
+                                                    kidokSublistController.kidokSublistDataList[index].bookName, 10),
                                                 style: TextStyle(
-                                                    fontSize: 5.sp,
-                                                    color: kidokSublistController
-                                                            .kidokSublistDataList[
-                                                                index]
-                                                            .isCompleted
-                                                        ? fontMain
-                                                        : Colors.redAccent,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    fontSize: 7.sp,
+                                                    color:
+                                                        kidokSublistController.kidokSublistDataList[index].isCompleted
+                                                            ? fontMain
+                                                            : Colors.redAccent,
+                                                    fontWeight: FontWeight.bold),
                                               ),
                                             ),
                                           ],
@@ -97,24 +86,36 @@ class _KidokBookListState extends State<KidokBookList> {
                                       SizedBox(
                                         width: constraints.maxWidth * 0.2,
                                         child: Center(
-                                          child: Image.asset(
-                                            kidokSublistController
-                                                    .kidokSublistDataList[index]
-                                                    .isCompleted
-                                                ? 'assets/images/icons/complete.png'
-                                                : 'assets/images/icons/incomplete.png',
-                                          ),
-                                        ),
+                                            child: kidokSublistController.kidokSublistDataList[index].isCompleted
+                                                ? Container(
+                                                    width: double.infinity,
+                                                    height: 25.h,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(20),
+                                                      color: Color(0xFFC1B67B),
+                                                    ),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                                      child: Align(
+                                                        alignment: Alignment.center,
+                                                        child: Text(
+                                                          '${kidokSublistController.kidokSublistDataList[index].correctCount}'
+                                                          '/${kidokSublistController.kidokSublistDataList[index].questionCount}',
+                                                          style: TextStyle(
+                                                              fontSize: 5.sp,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: fontWhite),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                : Image.asset('assets/images/icons/incomplete.png')),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              if (index <
-                                  kidokSublistController
-                                          .kidokSublistDataList.length -
-                                      1)
-                                dashedDivider(),
+                              if (index < kidokSublistController.kidokSublistDataList.length - 1) dashedDivider(),
                             ],
                           );
                         },

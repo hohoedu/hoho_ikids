@@ -10,6 +10,7 @@ import 'package:hani_booki/screens/setting/setting_widgets/setting_notification.
 import 'package:hani_booki/screens/setting/setting_widgets/setting_volume.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 
 class SettingScreen extends StatefulWidget {
   final userData = Get.find<UserDataController>();
@@ -38,9 +39,7 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
       body: Center(
         child: Container(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.85
-              : double.infinity,
+          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
           child: Column(
             children: [
               SettingTitle(),
@@ -61,7 +60,13 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  Get.back();
+                  oneButtonDialog(
+                      title: '설정',
+                      content: '저장 되었습니다.',
+                      onTap: () {
+                        Get.back();
+                      },
+                      buttonText: '확인');
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
@@ -90,9 +95,9 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
     );
   }
+
   @override
   void dispose() {
-    Get.find<BgmController>().resumeBgm();
     super.dispose();
   }
 }

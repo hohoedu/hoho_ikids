@@ -33,76 +33,72 @@ class _SearchIdScreenState extends State<SearchPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Scaffold(
-          extendBodyBehindAppBar: true,
-          backgroundColor: mBackAuth,
-          appBar: MainAppBar(title: ' ',isContent: false,),
-          body: Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: SingleChildScrollView(
-                physics: NeverScrollableScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Center(
-                      child: Text(
-                        '비밀번호 찾기',
-                        style: TextStyle(
-                            color: fontMain,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold),
-                      ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: mBackAuth,
+        appBar: MainAppBar(title: ' ',isContent: false,),
+        body: Center(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.5,
+            child: SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Center(
+                    child: Text(
+                      '비밀번호 찾기',
+                      style: TextStyle(
+                          color: fontMain,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
                     ),
-                    CustomTextField(
-                      controller: idController,
-                      focusNode: idFocusNode,
-                      hintText: '아이디',
-                      isObscure: false,
-                    ),
-                    CustomTextField(
-                      controller: phoneNumberController,
-                      focusNode: phoneNumberFocusNode,
-                      hintText: '전화번호',
-                      isObscure: false,
-                    ),
-                    AuthButton(
-                      onTap: () async {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        if(idController.text.isEmpty){
-                          oneButtonDialog(
-                            title: '비밀번호 찾기',
-                            content: '아이디를 입력해주세요.',
-                            onTap: () => Get.back(),
-                            buttonText: '확인',
-                          );
-                        }
-                        else if (phoneNumberController.text.isEmpty) {
-                          oneButtonDialog(
-                            title: '비밀번호 찾기',
-                            content: '전화번호를 입력해주세요.',
-                            onTap: () => Get.back(),
-                            buttonText: '확인',
-                          );
-                        } else {
-                          await searchPasswordService(
-                            idController.text,
-                            phoneNumberController.text,
-                          );
-                        }
-                      },
-                      text: '임시 비밀번호 발급',
-                    ),
-                  ],
-                ),
+                  ),
+                  CustomTextField(
+                    controller: idController,
+                    focusNode: idFocusNode,
+                    hintText: '아이디',
+                    isObscure: false,
+                  ),
+                  CustomTextField(
+                    controller: phoneNumberController,
+                    focusNode: phoneNumberFocusNode,
+                    hintText: '전화번호',
+                    isObscure: false,
+                  ),
+                  AuthButton(
+                    onTap: () async {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      if(idController.text.isEmpty){
+                        oneButtonDialog(
+                          title: '비밀번호 찾기',
+                          content: '아이디를 입력해주세요.',
+                          onTap: () => Get.back(),
+                          buttonText: '확인',
+                        );
+                      }
+                      else if (phoneNumberController.text.isEmpty) {
+                        oneButtonDialog(
+                          title: '비밀번호 찾기',
+                          content: '전화번호를 입력해주세요.',
+                          onTap: () => Get.back(),
+                          buttonText: '확인',
+                        );
+                      } else {
+                        await searchPasswordService(
+                          idController.text,
+                          phoneNumberController.text,
+                        );
+                      }
+                    },
+                    text: '임시 비밀번호 발급',
+                  ),
+                ],
               ),
             ),
           ),

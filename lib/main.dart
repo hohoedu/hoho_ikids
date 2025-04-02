@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,12 +13,14 @@ import 'package:hani_booki/_core/theme.dart';
 import 'package:hani_booki/screens/auth/login_screen.dart';
 import 'package:hani_booki/utils/auto_login.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/connectivityController.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/utils/version_check.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+final screenWidth = MediaQuery.of(Get.context!).size.width;
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -39,18 +42,19 @@ Future<void> main() async {
     SystemUiMode.immersiveSticky,
     overlays: [SystemUiOverlay.bottom],
   );
-// 배경음 셋업
+
+  // Get.put(ConnectivityController);
+
+  // 배경음 셋업
   Get.put(BgmController());
   // 효과음 셋업
   await SoundManager.setupSounds();
 
   // 화면 가로모드(왼쪽만) 고정
   if (Platform.isIOS) {
-    await SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.landscapeRight]);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
   } else {
-    await SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.landscapeLeft]);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
   }
 
   Future.delayed(
@@ -59,8 +63,16 @@ Future<void> main() async {
       FlutterNativeSplash.remove();
     },
   );
-
+  configLoading();
   runApp(const MyApp());
+}
+
+void configLoading() {
+  EasyLoading.instance
+    ..loadingStyle = EasyLoadingStyle.dark
+    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
+    ..maskType = EasyLoadingMaskType.black
+    ..dismissOnTap = false;
 }
 
 class MyApp extends StatelessWidget {
@@ -85,11 +97,15 @@ class MyApp extends StatelessWidget {
                 await versionCheck();
               },
             ),
-            home: const AutoLogin(),
+            // home: const LoginScreen(),
+            home: AutoLogin(),
             builder: (context, child) {
-              return MediaQuery(
-                data: MediaQuery.of(context).copyWith(),
-                child: child!,
+              return EasyLoading.init()(
+                context,
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(),
+                  child: child!,
+                ),
               );
             },
           ),

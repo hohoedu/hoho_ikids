@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/kidok/kidok_theme_data.dart';
+import 'package:path_drawing/path_drawing.dart';
 
 class StrokePainter extends CustomPainter {
   final List<List<Offset>> lines;
@@ -53,7 +54,7 @@ class StrokePainter extends CustomPainter {
     //         ..strokeWidth = 2.0;
     //       if (completedPaths.contains(groupIndex)) {
     //         // 이미 완성한 획은 primaryColor의 실선으로 그리기
-    //         strokePaint.color = primaryColor;
+    //         strokePaint.color = Colors.green;
     //         canvas.drawPath(path, strokePaint);
     //       } else if (groupIndex == currentPathIndex) {
     //         // 현재 따라야 하는 획은 붉은 점선으로 그리기

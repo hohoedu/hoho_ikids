@@ -22,6 +22,7 @@ Future<void> kidokChartService(String hosu, String keyCode) async {
     'keycode': keyCode,
   };
 
+  Logger().d('requestData = $requestData');
 
   try {
     final response = await dio.post(url, data: jsonEncode(requestData));
@@ -33,11 +34,10 @@ Future<void> kidokChartService(String hosu, String keyCode) async {
       if (resultValue == "0000") {
         final KidokChartData kidokChartData = KidokChartData.fromJson(resultList['data']);
         kidokChartController.setKidokChartData(kidokChartData);
-        Logger().d(kidokChartData);
       } else {
         oneButtonDialog(
           title: '불러오기 실패',
-          content: '데이터가 없습니다.',
+          content: '학습 데이터가 없습니다.',
           onTap: () => Get.back(),
           buttonText: '확인',
         );

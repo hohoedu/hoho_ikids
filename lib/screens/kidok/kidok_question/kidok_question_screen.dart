@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:hani_booki/screens/kidok/kidok_result/kidok_result_screen.dart';
 import 'package:hani_booki/services/kidok/kidok_question_service.dart';
 import 'package:hani_booki/services/kidok/kidok_result_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -20,8 +22,7 @@ class KidokQuestionScreen extends StatefulWidget {
   final String bookCode;
   final String keycode;
 
-  const KidokQuestionScreen(
-      {super.key, required this.bookCode, required this.keycode});
+  const KidokQuestionScreen({super.key, required this.bookCode, required this.keycode});
 
   @override
   State<KidokQuestionScreen> createState() => _KidokQuestionScreenState();
@@ -32,8 +33,16 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
   int currentNumber = 1;
   List<int?> selectedAnswers = List.filled(10, null);
   List<bool> matchedAnswers = List.filled(10, false);
+  List<bool> correctAnswers = List.filled(10, false);
+  List<bool> hideCheckMarks = List.filled(10, false);
+  List<bool> showNextButtons = List.filled(10, false);
   int correctCount = 0;
   late AudioPlayer _audioPlayer;
+  bool isCorrect = false;
+  bool isComplete = false;
+  bool showNextButton = false;
+
+  Timer? answerTimer;
 
   @override
   void initState() {
@@ -51,6 +60,7 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
 
   Future<void> _fetchNextQuestion() async {
     setState(() {
+      showNextButton = false;
       currentNumber++;
     });
     await kidokQuestionService(widget.bookCode, currentNumber);
@@ -59,15 +69,19 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
   Future<void> _fetchPrevQuestion() async {
     setState(() {
       currentNumber--;
+      showNextButton = selectedAnswers[currentNumber - 1] != null;
     });
     await kidokQuestionService(widget.bookCode, currentNumber);
   }
 
   void matchingAnswer() {
+    Future.delayed(Duration(seconds: 1));
+    isCorrect = true;
     final answer = kidokQuestionController.kidokQuestionData!.answer;
     if (selectedAnswers[currentNumber - 1]! + 1 == int.parse(answer)) {
       setState(() {
         matchedAnswers[currentNumber - 1] = true;
+        hideCheckMarks[currentNumber - 1] = true;
       });
     }
   }
@@ -95,14 +109,13 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
       backgroundColor: kidokColor,
       appBar: MainAppBar(
         isContent: true,
+        isKidok: true,
         title: '',
-        onTapBackIcon: () => showBackDialog(false),
+        onTapBackIcon: () => showKidokBackDialog(false),
       ),
       body: Center(
         child: SizedBox(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.85
-              : double.infinity,
+          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Column(
@@ -110,8 +123,7 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                 Expanded(
                   flex: 6,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 64.0, vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 64.0, vertical: 8.0),
                     child: Row(
                       children: [
                         Expanded(
@@ -134,29 +146,23 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                                 child: ClipPath(
                                   clipper: KidokQuestionClipper(),
                                   child: Container(
-                                    decoration: BoxDecoration(
-                                        color: mBackWhite,
-                                        boxShadow: [BoxShadow()]),
+                                    decoration: BoxDecoration(color: mBackWhite, boxShadow: [BoxShadow()]),
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12.0),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                       child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Expanded(
                                             flex: 1,
                                             child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 8.0),
+                                              padding: const EdgeInsets.only(right: 8.0),
                                               child: Center(
-                                                child: Text(
-                                                    '${kidokQuestion.questionNumber}',
+                                                child: Text('${kidokQuestion.questionNumber}',
                                                     style: const TextStyle(
+                                                      // 색 바꿀지 물어보자
                                                       color: Colors.green,
                                                       fontSize: 40,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontWeight: FontWeight.bold,
                                                     ),
                                                     softWrap: false),
                                               ),
@@ -165,16 +171,11 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                                           Expanded(
                                             flex: 7,
                                             child: Padding(
-                                              padding: EdgeInsets.only(
-                                                  left: 8.0, right: 16.0),
+                                              padding: EdgeInsets.only(left: 8.0, right: 16.0),
                                               child: Text(
-                                                autoWrapText(
-                                                    kidokQuestion.question, 22),
+                                                autoWrapText(kidokQuestion.question, 22),
                                                 style: TextStyle(
-                                                    color: fontMain,
-                                                    fontSize: 8.sp,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
                                                 softWrap: true,
                                                 overflow: TextOverflow.visible,
                                                 textAlign: TextAlign.start,
@@ -216,9 +217,7 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 64.0),
                       child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.yellow,
-                            border: Border.all(color: Colors.orange)),
+                        decoration: BoxDecoration(color: Colors.yellow, border: Border.all(color: Colors.orange)),
                         child: Center(
                           child: RichText(
                             text: exampleText(kidokQuestion.example),
@@ -241,39 +240,51 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                               flex: 1,
                               child: GestureDetector(
                                 onTap: () async {
-                                  if (currentNumber != 1)
-                                    await _fetchPrevQuestion();
+                                  if (currentNumber != 1) await _fetchPrevQuestion();
                                   setState(() {});
-                                  WidgetsBinding.instance
-                                      .addPostFrameCallback((_) {
-                                    if (kidokQuestionController
-                                            .kidokQuestionData !=
-                                        null) {
-                                      _playSound(kidokQuestionController
-                                          .kidokQuestionData!.sound);
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    if (kidokQuestionController.kidokQuestionData != null) {
+                                      _playSound(kidokQuestionController.kidokQuestionData!.sound);
                                     }
                                   });
                                 },
                                 child: currentNumber != 1
-                                    ? Icon(Icons.navigate_before,
-                                        size: 30.sp, color: fontMain)
+                                    ? Icon(Icons.navigate_before, size: 30.sp, color: fontMain)
                                     : SizedBox.shrink(),
                               ),
                             ),
                             Expanded(
                               flex: 8,
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children:
-                                    List.generate(options.length, (index) {
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: List.generate(options.length, (index) {
                                   final option = options[index];
 
                                   return GestureDetector(
                                     onTap: () {
+                                      if (selectedAnswers[currentNumber - 1] != null) return;
+
                                       setState(() {
-                                        selectedAnswers[currentNumber - 1] =
-                                            index;
+                                        selectedAnswers[currentNumber - 1] = index;
+                                      });
+
+
+                                      answerTimer?.cancel();
+                                      answerTimer = Timer(const Duration(seconds: 1), () {
+                                        if (mounted) {
+                                          setState(() {
+                                            if (selectedAnswers[currentNumber - 1]! + 1 == int.parse(kidokQuestion.answer)) {
+                                              correctAnswers[currentNumber - 1] = true;
+                                              hideCheckMarks[currentNumber - 1] = true;
+
+                                              SoundManager.playCorrect();
+                                            } else {
+                                              hideCheckMarks[currentNumber - 1] = false;
+                                              SoundManager.playNo();
+                                            }
+                                            showNextButtons[currentNumber -1 ] = true;
+                                          });
+                                        }
                                       });
                                     },
                                     child: Stack(
@@ -283,9 +294,8 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                                           text: option['text'],
                                           constraints: constraints,
                                         ),
-                                        if (selectedAnswers[
-                                                currentNumber - 1] ==
-                                            index)
+
+                                        if (selectedAnswers[currentNumber - 1] == index && !hideCheckMarks[currentNumber - 1])
                                           Positioned(
                                             top: 0,
                                             bottom: 0,
@@ -295,7 +305,15 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                                               'assets/images/icons/check.png',
                                               scale: 3,
                                             ),
-                                          )
+                                          ),
+                                        if (int.parse(kidokQuestion.answer) == index + 1 && showNextButtons[currentNumber - 1])
+                                          Positioned(
+                                            top: 0,
+                                            bottom: 0,
+                                            left: 0,
+                                            right: 0,
+                                            child: Image.asset('assets/images/icons/circle.png'),
+                                          ),
                                       ],
                                     ),
                                   );
@@ -306,17 +324,19 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                               flex: 1,
                               child: GestureDetector(
                                 onTap: () async {
+                                  setState(() {
+                                    isCorrect = (selectedAnswers[currentNumber - 1] != null);
+                                  });
                                   matchingAnswer();
                                   if (currentNumber != 10) {
                                     await _fetchNextQuestion();
-                                    setState(() {});
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      if (kidokQuestionController
-                                              .kidokQuestionData !=
-                                          null) {
-                                        _playSound(kidokQuestionController
-                                            .kidokQuestionData!.sound);
+
+                                    setState(() {
+                                      isCorrect = (selectedAnswers[currentNumber - 1] != null);
+                                    });
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      if (kidokQuestionController.kidokQuestionData != null) {
+                                        _playSound(kidokQuestionController.kidokQuestionData!.sound);
                                       }
                                     });
                                   } else if (currentNumber == 10) {
@@ -326,8 +346,7 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                                       confirm: () {
                                         Get.back();
                                         Get.back();
-                                        kidokResultService(selectedAnswers,
-                                            widget.bookCode, widget.keycode);
+                                        kidokResultService(selectedAnswers, widget.bookCode, widget.keycode);
                                         Get.to(() => KidokResultScreen(
                                               matchedAnswers: matchedAnswers,
                                             ));
@@ -342,11 +361,9 @@ class _KidokQuestionScreenState extends State<KidokQuestionScreen> {
                                     );
                                   }
                                 },
-                                child:
-                                    (selectedAnswers[currentNumber - 1] != null)
-                                        ? Icon(Icons.navigate_next,
-                                            size: 30.sp, color: fontMain)
-                                        : SizedBox.shrink(),
+                                child: (selectedAnswers[currentNumber - 1] != null && showNextButtons[currentNumber-1])
+                                    ? Icon(Icons.navigate_next, size: 30.sp, color: fontMain)
+                                    : SizedBox.shrink(),
                               ),
                             ),
                           ],
@@ -405,8 +422,7 @@ class KidokShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     double offset = 0.0; // 그림자 오프셋 크기
-    Path shadowPath =
-        KidokQuestionClipper().getClip(size).shift(Offset(offset, offset));
+    Path shadowPath = KidokQuestionClipper().getClip(size).shift(Offset(offset, offset));
 
     Paint shadowPaint = Paint()
       ..color = Colors.black.withOpacity(0.1) // 그림자 색상

@@ -4,12 +4,10 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/join_dto.dart';
 import 'package:hani_booki/screens/auth/auth_widgets/auth_button.dart';
 import 'package:hani_booki/screens/auth/join_widgets/join_select_verification_screen.dart';
-import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
 import 'package:hani_booki/services/auth/dupe_check_service.dart';
 import 'package:hani_booki/utils/encryption.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/custom_text_field.dart';
-import 'package:hani_booki/widgets/dialog.dart';
 
 class JoinScreen extends StatefulWidget {
   const JoinScreen({super.key});
@@ -159,10 +157,11 @@ class _JoinScreenState extends State<JoinScreen> {
                           pwdCheckController.text.isNotEmpty &&
                           joinInputController.isComplete.value) {
                         joinController.updateIdAndPassword(idController.text,
-                            md5_convertHash(pwdController.text));
+                            pwdController.text);
 
                         // showCodeQuantityDialog();
-                        Get.to(() => const JoinSelectVerificationScreen());
+                        Get.to(() => const JoinSelectVerificationScreen
+                          (loginCode: '0000',));
                       }
                     },
                     text: '다음',

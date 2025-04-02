@@ -8,6 +8,8 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/screens/auth/join_widgets/join_once_verification_screen.dart';
 import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
 import 'package:hani_booki/services/auth/withdraw_service.dart';
+import 'package:hani_booki/services/notice/notice_list_service.dart';
+import 'package:hani_booki/widgets/notice/notice_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -72,28 +74,365 @@ void showGameCompleteDialog({
   );
 }
 
+// void showBackDialog(isPortraitMode) {
+//   Get.defaultDialog(
+//       backgroundColor: mBackWhite,
+//       title: '안내',
+//       middleText: '학습을 취소하고 나가시겠습니까?\n'
+//           '진행중인 콘텐츠가 저장되지 않습니다.',
+//       onConfirm: () async {
+//         if (isPortraitMode == true) {
+//           if (Platform.isIOS) {
+//             await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
+//           } else {
+//             await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+//           }
+//         }
+//         Get.back();
+//         Get.back();
+//       },
+//       textConfirm: '확인',
+//       onCancel: () {},
+//       textCancel: '취소',
+//       buttonColor: Colors.green);
+// }
+
 void showBackDialog(isPortraitMode) {
-  Get.defaultDialog(
-      title: '안내',
-      middleText: '학습을 취소하고 나가시겠습니까?\n'
-          '진행중인 콘텐츠가 저장되지 않습니다.',
-      onConfirm: () async {
-        if (isPortraitMode == true) {
-          if (Platform.isIOS) {
-            await SystemChrome.setPreferredOrientations(
-                [DeviceOrientation.landscapeRight]);
-          } else {
-            await SystemChrome.setPreferredOrientations(
-                [DeviceOrientation.landscapeLeft]);
-          }
-        }
-        Get.back();
-        Get.back();
-      },
-      textConfirm: '확인',
-      onCancel: () {},
-      textCancel: '취소',
-      buttonColor: Colors.green);
+  Get.generalDialog(
+    // barrierDismissible: true,
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black26,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Lottie.asset(
+                    'assets/lottie/back.json',
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '별 포인트를 받기 전에 나가면 저장이 되지 않아요!\n정말로 나가시겠어요?',
+                          style: TextStyle(
+                            color: fontWhite,
+                            fontSize: 8.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.back();
+                            Get.back();
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.17,
+                            height: MediaQuery.of(context).size.height * 0.13,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '나가기',
+                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.17,
+                            height: MediaQuery.of(context).size.height * 0.13,
+                            decoration: BoxDecoration(
+                              color: Colors.yellow,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '계속 하기',
+                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  );
+}
+
+void showKidokBackDialog(isPortraitMode) {
+  Get.generalDialog(
+    // barrierDismissible: true,
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black26,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Lottie.asset(
+                    'assets/lottie/back.json',
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '지금 나가면 문제들은 저장이 되지 않아요!\n정말로 나가시겠어요?',
+                          style: TextStyle(
+                            color: fontWhite,
+                            fontSize: 8.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.back();
+                            Get.back();
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.17,
+                            height: MediaQuery.of(context).size.height * 0.13,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '나가기',
+                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.17,
+                            height: MediaQuery.of(context).size.height * 0.13,
+                            decoration: BoxDecoration(
+                              color: Colors.yellow,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '계속 하기',
+                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  );
+}
+
+void verticalBackDialog(isPortraitMode) {
+  Get.generalDialog(
+    // barrierDismissible: true,
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black.withOpacity(0.6),
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.6,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Lottie.asset('assets/lottie/back.json', height: MediaQuery.of(context).size.height * 0.5),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        children: [
+                          TextSpan(
+                            text: '별 포인트를 받기 전에 \n나가면 저장이 되지 않아요!\n정말로 나가시겠어요?',
+                            style: TextStyle(
+                              color: fontWhite,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () async {
+                            if (Platform.isIOS) {
+                              await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
+                            } else {
+                              await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+                            }
+
+                            Get.back();
+                            Get.back();
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '나가기',
+                                style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            decoration: BoxDecoration(
+                              color: Colors.yellow,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '계속 하기',
+                                style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  );
 }
 
 void showCodeErrorDialog({
@@ -104,7 +443,7 @@ void showCodeErrorDialog({
 }) {
   Get.defaultDialog(
     barrierDismissible: false,
-    backgroundColor: Colors.white,
+    backgroundColor: mBackWhite,
     title: title,
     middleText: content,
     buttonColor: Colors.green,
@@ -113,8 +452,7 @@ void showCodeErrorDialog({
   );
 }
 
-void lottieDialog(
-    {required VoidCallback onMain, required VoidCallback onReset}) {
+void lottieDialog({required VoidCallback onMain, required VoidCallback onReset}) {
   Get.generalDialog(
     // barrierDismissible: true,
     barrierLabel: 'Dialog',
@@ -136,8 +474,8 @@ void lottieDialog(
               children: [
                 Expanded(
                   flex: 7,
-                  child: Lottie.asset('assets/lottie/star_point.json',
-                      height: MediaQuery.of(context).size.height * 0.5),
+                  child:
+                      Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
                 ),
                 Expanded(
                   flex: 1,
@@ -146,7 +484,7 @@ void lottieDialog(
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: '+1스타 ',
+                            text: '+1 스타 ',
                             style: TextStyle(
                               color: Colors.yellow,
                               fontSize: 8.sp,
@@ -185,10 +523,7 @@ void lottieDialog(
                             child: Center(
                               child: Text(
                                 '다시하기',
-                                style: TextStyle(
-                                    color: fontMain,
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -208,10 +543,117 @@ void lottieDialog(
                             child: Center(
                               child: Text(
                                 '메인으로',
-                                style: TextStyle(
-                                    color: fontMain,
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  );
+}
+
+void verticalLottieDialog({required VoidCallback onMain, required VoidCallback onReset}) {
+  Get.generalDialog(
+    // barrierDismissible: true,
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black26,
+    // 다이얼로그 배경 어둡게 처리
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.5,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child:
+                      Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        children: [
+                          TextSpan(
+                            text: '+1 스타 ',
+                            style: TextStyle(
+                              color: Colors.yellow,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '획득!',
+                            style: TextStyle(
+                              color: fontWhite,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: onReset,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '다시하기',
+                                style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: GestureDetector(
+                          onTap: onMain,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            decoration: BoxDecoration(
+                              color: Colors.yellow,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '메인으로',
+                                style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -237,6 +679,7 @@ void lottieDialog(
 
 void versionDialog(String platform) {
   Get.defaultDialog(
+    backgroundColor: mBackWhite,
     title: '버전 불일치',
     middleText: '최신 버전이 아니면 원활한 진행이 어렵습니다.',
     textConfirm: '확인',
@@ -247,8 +690,7 @@ void versionDialog(String platform) {
       // 앱 스토어 URL 설정
       String url = '';
       if (platform == "AOS") {
-        url =
-            'https://play.google.com/store/apps/details?id=com.hohoedu.hani_booki';
+        url = 'https://play.google.com/store/apps/details?id=com.hohoedu.hani_booki';
       } else if (platform == "IOS") {
         url = 'https://apps.apple.com/app/id6741888275';
       }
@@ -325,6 +767,7 @@ void showWithdrawDialog() {
 void showCodeDeleteDialog({required VoidCallback onDeleteConfirmed}) {
   Get.dialog(
     Dialog(
+      backgroundColor: mBackWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
@@ -337,7 +780,7 @@ void showCodeDeleteDialog({required VoidCallback onDeleteConfirmed}) {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '회원탈퇴',
+                  '가입코드 삭제',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
@@ -347,8 +790,7 @@ void showCodeDeleteDialog({required VoidCallback onDeleteConfirmed}) {
                     style: DefaultTextStyle.of(context).style,
                     children: [
                       const TextSpan(
-                        text:
-                            '가입코드 삭제시 연결된 E-BOOK 정보가 모두 삭제되며\n데이터 복구가 불가능합니다.\n',
+                        text: '가입코드 삭제시 연결된 E-BOOK 정보가 모두 삭제되며\n데이터 복구가 불가능합니다.\n',
                       ),
                       TextSpan(
                         text: '반드시 잘못 입력하셨을 경우에만 삭제',
@@ -376,8 +818,7 @@ void showCodeDeleteDialog({required VoidCallback onDeleteConfirmed}) {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey,
                       ),
-                      child: Text('삭제에 동의합니다.',
-                          style: TextStyle(color: Colors.white)),
+                      child: Text('삭제에 동의합니다.', style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -464,5 +905,28 @@ void showNameCheckDialog({
     onConfirm: confirmOnTap,
     textCancel: cancelButtonText,
     onCancel: cancelOnTap,
+  );
+}
+
+void showNoticeDialog(BuildContext context) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.85,
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: NoticeScreen(),
+          ),
+        ),
+      );
+    },
   );
 }

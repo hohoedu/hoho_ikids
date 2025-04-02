@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/sibling_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
-import 'package:hani_booki/_data/star_data.dart';
+import 'package:hani_booki/_data/star/star_data.dart';
 import 'package:hani_booki/screens/home/home_screen.dart';
 import 'package:hani_booki/screens/home/sibling_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -13,7 +13,7 @@ import 'package:logger/logger.dart';
 
 // 형제 리스트 조회
 Future<void> siblingService(tel) async {
-  final siblingData = Get.put(SiblingDataController());
+  final siblingData = Get.put(SiblingDataController(), permanent: true);
   final userData = Get.put(UserDataController());
   String url = dotenv.get('SIBLING_URL');
 

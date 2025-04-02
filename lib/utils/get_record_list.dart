@@ -47,9 +47,8 @@ Future<void> getRecordList(String keyCode, String type) async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        final List<dynamic> userRecordListDataList = resultList['data']
-            .map((json) => UserRecordListData.fromJson(json))
-            .toList();
+        final List<dynamic> userRecordListDataList =
+            resultList['data'].map((json) => UserRecordListData.fromJson(json)).toList();
         userRecordList.setUserRecordListDataList(userRecordListDataList);
       }
       // 응답 데이터가 오류일 때("9999": 오류)

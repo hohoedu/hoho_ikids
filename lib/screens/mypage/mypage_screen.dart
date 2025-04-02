@@ -60,14 +60,12 @@ class _MypageScreenState extends State<MypageScreen> {
     Get.find<BgmController>().pauseBgm();
     code1FocusNode.addListener(() {
       if (!code1FocusNode.hasFocus) {
-        codeVerifyController.checkClassCode(
-            code: code1Controller.text, codeIndex: 1);
+        codeVerifyController.checkClassCode(code: code1Controller.text, codeIndex: 1);
       }
     });
     code2FocusNode.addListener(() {
       if (!code2FocusNode.hasFocus) {
-        codeVerifyController.checkClassCode(
-            code: code2Controller.text, codeIndex: 2);
+        codeVerifyController.checkClassCode(code: code2Controller.text, codeIndex: 2);
       }
     });
   }
@@ -93,11 +91,6 @@ class _MypageScreenState extends State<MypageScreen> {
       }
     }
 
-    Logger().d('code1 = $code1');
-    Logger().d('code2 = $code2');
-    Logger().d('pin1 = $pin1');
-    Logger().d('pin2 = $pin2');
-
     // 아무것도 변경 없음
     if (code1.isEmpty && code2.isEmpty) {
       return true;
@@ -105,11 +98,6 @@ class _MypageScreenState extends State<MypageScreen> {
 
     // code1 변경, code2 없음
     if (code1.isNotEmpty && (code2.isEmpty && pin2.isEmpty)) {
-      await keyCodeService(
-        userData.userData!.id,
-        code1,
-        userData.userData!.year,
-      );
       return true;
     }
 
@@ -118,16 +106,6 @@ class _MypageScreenState extends State<MypageScreen> {
       if (code1.substring(5, 6) == code2.substring(5, 6)) {
         return false;
       } else {
-        await keyCodeService(
-          userData.userData!.id,
-          code1,
-          userData.userData!.year,
-        );
-        await keyCodeService(
-          userData.userData!.id,
-          code2,
-          userData.userData!.year,
-        );
         return true;
       }
     }
@@ -136,11 +114,6 @@ class _MypageScreenState extends State<MypageScreen> {
       if (pin1.substring(5, 6) == code2.substring(5, 6)) {
         return false;
       } else {
-        await keyCodeService(
-          userData.userData!.id,
-          code2,
-          userData.userData!.year,
-        );
         return true;
       }
     }
@@ -149,11 +122,6 @@ class _MypageScreenState extends State<MypageScreen> {
       if (pin2.substring(5, 6) == code1.substring(5, 6)) {
         return false;
       } else {
-        await keyCodeService(
-          userData.userData!.id,
-          code1,
-          userData.userData!.year,
-        );
         return true;
       }
     }
@@ -162,8 +130,8 @@ class _MypageScreenState extends State<MypageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isCode2 = userCodeData.userCodeDataList.length > 1 &&
-        userCodeData.userCodeDataList[1].className.isNotEmpty;
+    bool isCode2 = userCodeData.userCodeDataList.length > 1 && userCodeData.userCodeDataList[1].className.isNotEmpty;
+    bool isManager = userData.userData!.userType == 'M';
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Color(0xFFFFFAE6),
@@ -172,10 +140,7 @@ class _MypageScreenState extends State<MypageScreen> {
         isContent: false,
         isInfo: true,
         onTapBackIcon: () {
-          if (!isPwdChanged &&
-              isEditingCode1 &&
-              (isEditingCode2 && code2Controller.text.isEmpty ||
-                  !isEditingCode2 && !isCode2)) {
+          if ((isEditingCode1 && code1Controller.text.isEmpty) && (isEditingCode2 && code2Controller.text.isEmpty)) {
             oneButtonDialog(
                 isBarrier: false,
                 title: '안내',
@@ -212,8 +177,7 @@ class _MypageScreenState extends State<MypageScreen> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         '내 정보',
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -240,13 +204,11 @@ class _MypageScreenState extends State<MypageScreen> {
                                     flex: 2,
                                     child: Text(
                                       'ID',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     )),
                                 Expanded(
                                   flex: 8,
-                                  child:
-                                      UserInfoBox(text: userData.userData!.id),
+                                  child: UserInfoBox(text: userData.userData!.id),
                                 ),
                               ],
                             ),
@@ -256,22 +218,20 @@ class _MypageScreenState extends State<MypageScreen> {
                                   flex: 2,
                                   child: Text(
                                     '비밀번호',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 Expanded(
                                   flex: 8,
                                   child: GestureDetector(
-                                    onTap: passwordField,
+                                    onTap: !isManager ? passwordField : null,
                                     child: isEditingPassword
                                         ? InfoTextField(
                                             controller: passwordController,
                                             focusNode: passwordFocusNode,
                                             hintText: '비밀번호',
                                             isObscure: true)
-                                        : UserInfoBox(
-                                            text: '00000000', isPwd: true),
+                                        : UserInfoBox(text: '00000000', isPwd: true),
                                   ),
                                 ),
                               ],
@@ -282,21 +242,19 @@ class _MypageScreenState extends State<MypageScreen> {
                                     flex: 2,
                                     child: Text(
                                       '비밀번호 확인',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     )),
                                 Expanded(
                                   flex: 8,
                                   child: GestureDetector(
-                                    onTap: passwordField,
+                                    onTap: !isManager ? passwordField : null,
                                     child: isEditingPassword
                                         ? InfoTextField(
                                             controller: pwdConfirmController,
                                             focusNode: pwdConfirmFocusNode,
                                             hintText: '비밀번호 확인',
                                             isObscure: true)
-                                        : UserInfoBox(
-                                            text: '00000000', isPwd: true),
+                                        : UserInfoBox(text: '00000000', isPwd: true),
                                   ),
                                 ),
                               ],
@@ -307,28 +265,20 @@ class _MypageScreenState extends State<MypageScreen> {
                                     flex: 2,
                                     child: Text(
                                       '학생 이름',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     )),
                                 Expanded(
                                   flex: 8,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        isEditingName = true;
-                                      });
-                                    },
-                                    child: isEditingName
-                                        ? InfoTextField(
-                                            controller: nameController,
-                                            focusNode: nameFocusNode,
-                                            hintText: '학생 이름',
-                                            isObscure: false,
-                                          )
-                                        : UserInfoBox(
-                                            text: userData.userData!.username,
-                                          ),
-                                  ),
+                                  child: isEditingName
+                                      ? InfoTextField(
+                                          controller: nameController,
+                                          focusNode: nameFocusNode,
+                                          hintText: '학생 이름',
+                                          isObscure: false,
+                                        )
+                                      : UserInfoBox(
+                                          text: userData.userData!.username,
+                                        ),
                                 ),
                               ],
                             ),
@@ -338,52 +288,43 @@ class _MypageScreenState extends State<MypageScreen> {
                                     flex: 2,
                                     child: Text(
                                       '가입코드',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontWeight: FontWeight.bold),
                                     )),
                                 Expanded(
                                   flex: 8,
                                   child: GestureDetector(
-                                      onTap: () {
-                                        showCodeDeleteDialog(
-                                          onDeleteConfirmed: () async {
-                                            await delUserCode(userCodeData
-                                                .userCodeDataList[0].pin);
-                                            setState(() {
-                                              isEditingCode1 = true;
-                                            });
-                                          },
-                                        );
-                                      },
-                                      child: isEditingCode1
-                                          ? Obx(
-                                              () => InfoTextField(
-                                                controller: code1Controller,
-                                                focusNode: code1FocusNode,
-                                                hintText: '가입코드',
-                                                isObscure: false,
-                                                onFocusLost: (_) {
-                                                  codeVerifyController
-                                                      .resetValidationMessage(
-                                                          codeIndex: 1);
-                                                  codeVerifyController
-                                                      .checkClassCode(
-                                                          code: code1Controller
-                                                              .text,
-                                                          codeIndex: 1);
-                                                },
-                                                completeText:
-                                                    codeVerifyController
-                                                        .code1Message.value,
-                                                messageColor:
-                                                    codeVerifyController
-                                                        .messageColor1.value,
-                                              ),
+                                    onTap: () {
+                                      !isManager
+                                          ? showCodeDeleteDialog(
+                                              onDeleteConfirmed: () async {
+                                                await delUserCode(userCodeData.userCodeDataList[0].pin);
+                                                setState(() {
+                                                  isEditingCode1 = true;
+                                                });
+                                              },
                                             )
-                                          : UserInfoBox(
-                                              text: userCodeData
-                                                  .userCodeDataList[0].pin,
-                                              isSuffixIcon: true)),
+                                          : null;
+                                    },
+                                    child: isEditingCode1
+                                        ? Obx(
+                                            () => InfoTextField(
+                                              controller: code1Controller,
+                                              focusNode: code1FocusNode,
+                                              hintText: '가입 코드',
+                                              isObscure: false,
+                                              onFocusLost: (_) {
+                                                codeVerifyController.resetValidationMessage(codeIndex: 1);
+                                                codeVerifyController.checkClassCode(
+                                                    code: code1Controller.text, codeIndex: 1);
+                                              },
+                                              completeText: codeVerifyController.code1Message.value,
+                                              messageColor: codeVerifyController.messageColor1.value,
+                                            ),
+                                          )
+                                        : UserInfoBox(
+                                            text: userCodeData.userCodeDataList[0].pin,
+                                            isSuffixIcon: !isManager ? true : false),
+                                  ),
                                 ),
                               ],
                             ),
@@ -393,29 +334,29 @@ class _MypageScreenState extends State<MypageScreen> {
                                     flex: 2,
                                     child: isEditingCode2 || isCode2
                                         ? Text(
-                                            '가입코드 2',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold),
+                                            '가입 코드 2',
+                                            style: TextStyle(fontWeight: FontWeight.bold),
                                           )
                                         : SizedBox()),
                                 Expanded(
                                   flex: 8,
                                   child: GestureDetector(
                                     onTap: () {
-                                      if (!isCode2) {
-                                        setState(() {
-                                          isEditingCode2 = true;
-                                        });
-                                      } else {
-                                        showCodeDeleteDialog(
-                                          onDeleteConfirmed: () async {
-                                            await delUserCode(userCodeData
-                                                .userCodeDataList[1].pin);
-                                            setState(() {
-                                              isEditingCode2 = true;
-                                            });
-                                          },
-                                        );
+                                      if (!isManager) {
+                                        if (!isCode2) {
+                                          setState(() {
+                                            isEditingCode2 = true;
+                                          });
+                                        } else {
+                                          showCodeDeleteDialog(
+                                            onDeleteConfirmed: () async {
+                                              await delUserCode(userCodeData.userCodeDataList[1].pin);
+                                              setState(() {
+                                                isEditingCode2 = true;
+                                              });
+                                            },
+                                          );
+                                        }
                                       }
                                     },
                                     child: isEditingCode2
@@ -423,65 +364,75 @@ class _MypageScreenState extends State<MypageScreen> {
                                             () => InfoTextField(
                                               controller: code2Controller,
                                               focusNode: code2FocusNode,
-                                              hintText: '가입코드 2',
+                                              hintText: '가입 코드 2',
                                               isObscure: false,
                                               onFocusLost: (_) {
-                                                codeVerifyController
-                                                    .resetValidationMessage(
-                                                        codeIndex: 2);
-                                                codeVerifyController
-                                                    .checkClassCode(
-                                                        code: code2Controller
-                                                            .text,
-                                                        codeIndex: 2);
+                                                codeVerifyController.resetValidationMessage(codeIndex: 2);
+                                                codeVerifyController.checkClassCode(
+                                                    code: code2Controller.text, codeIndex: 2);
                                               },
-                                              completeText: codeVerifyController
-                                                  .code2Message.value,
-                                              messageColor: codeVerifyController
-                                                  .messageColor2.value,
+                                              completeText: codeVerifyController.code2Message.value,
+                                              messageColor: codeVerifyController.messageColor2.value,
                                             ),
                                           )
-                                        : UserInfoBox(
-                                            text: isCode2
-                                                ? userCodeData
-                                                    .userCodeDataList[1].pin
-                                                : '가입코드 추가하기',
-                                            isIcon: isCode2 ? false : true,
-                                            isSuffixIcon:
-                                                isCode2 ? true : false,
-                                            isBackground:
-                                                isCode2 ? false : true,
-                                          ),
+                                        : !isManager
+                                            ? UserInfoBox(
+                                                text: isCode2 ? userCodeData.userCodeDataList[1].pin : '가입 코드 추가하기',
+                                                isIcon: isCode2 ? false : true,
+                                                isSuffixIcon: isCode2 ? true : false,
+                                                isBackground: isCode2 ? false : true,
+                                              )
+                                            : SizedBox.shrink(),
                                   ),
                                 ),
                               ],
                             ),
                             GestureDetector(
                               onTap: () async {
-                                // 비밀번호를 변경할 때
+                                if (isManager) {
+                                  Get.back();
+                                  return;
+                                }
+
+
+                                bool isCodeChanged = false;
+
+                                // 비밀번호 변경 처리
                                 if (passwordController.text.isNotEmpty) {
                                   await updatePasswordService(
-                                      userData.userData!.id,
-                                      md5_convertHash(passwordController.text));
+                                      userData.userData!.id, md5_convertHash(passwordController.text));
                                   setState(() {
                                     isPwdChanged = true;
                                   });
                                 }
+
+                                if ((isEditingCode1 && code1Controller.text.isEmpty) &&
+                                    (isEditingCode2 && code2Controller.text.isEmpty)) {
+                                  oneButtonDialog(
+                                    title: '안내',
+                                    content: '가입 코드를 입력해 주세요.',
+                                    onTap: () => Get.back(),
+                                    buttonText: '확인',
+                                  );
+                                  return;
+                                }
+                                // 가입 코드 검증
                                 isValid = await codeValidation();
                                 if (isValid == false) {
                                   oneButtonDialog(
                                     title: '회원가입',
-                                    content: '수업 코드는 중복될 수 없습니다.',
+                                    content: '가입 코드는 중복될 수 없습니다.',
                                     onTap: () => Get.back(),
                                     buttonText: '확인',
                                   );
+                                  return; // 검증 실패 시 종료
                                 }
+
+                                // 가입 코드 입력 확인
                                 if (!isPwdChanged &&
                                     isEditingCode1 &&
                                     code1Controller.text.isEmpty &&
-                                    (isEditingCode2 &&
-                                            code2Controller.text.isEmpty ||
-                                        !isEditingCode2 && !isCode2)) {
+                                    (isEditingCode2 && code2Controller.text.isEmpty || !isEditingCode2 && !isCode2)) {
                                   isValid = false;
                                   oneButtonDialog(
                                       isBarrier: false,
@@ -491,100 +442,157 @@ class _MypageScreenState extends State<MypageScreen> {
                                         Get.back();
                                       },
                                       buttonText: '확인');
+                                  return;
                                 }
-                                if (isValid || isPwdChanged) {
+
+                                // 가입 코드 변경 처리
+                                if (isEditingCode1 &&
+                                    isValid &&
+                                    codeVerifyController.isComplete1.value == true &&
+                                    !isEditingCode2) {
+                                  await keyCodeService(
+                                    userData.userData!.id,
+                                    code1Controller.text,
+                                    userData.userData!.year,
+                                  );
+                                  isCodeChanged = true;
+                                } else if (!isEditingCode1 &&
+                                    isValid &&
+                                    codeVerifyController.isComplete2.value == true) {
+                                  await keyCodeService(
+                                    userData.userData!.id,
+                                    code2Controller.text,
+                                    userData.userData!.year,
+                                  );
+                                  isCodeChanged = true;
+                                } else if (isEditingCode1 &&
+                                    isValid &&
+                                    codeVerifyController.isComplete1.value == true &&
+                                    codeVerifyController.isComplete2.value == true) {
+                                  await keyCodeService(
+                                    userData.userData!.id,
+                                    code1Controller.text,
+                                    userData.userData!.year,
+                                  );
+                                  await keyCodeService(
+                                    userData.userData!.id,
+                                    code2Controller.text,
+                                    userData.userData!.year,
+                                  );
+                                  isCodeChanged = true;
+                                }
+
+                                // 비밀번호와 가입 코드 둘 다 변경된 경우
+                                if (isPwdChanged && isCodeChanged) {
                                   oneButtonDialog(
-                                      isBarrier: false,
-                                      title: '안내',
-                                      content: '정보가 변경되었습니다.\n다시 로그인해주세요.',
-                                      onTap: () {
-                                        Get.offAll(() => LoginScreen());
-                                      },
-                                      buttonText: '확인');
+                                    isBarrier: false,
+                                    title: '안내',
+                                    content: '비밀번호와 가입 코드가 변경되었습니다.\n다시 로그인해주세요.',
+                                    onTap: () {
+                                      Get.offAll(() => LoginScreen());
+                                    },
+                                    buttonText: '확인',
+                                  );
+                                  return;
+                                }
+
+                                // 비밀번호만 변경된 경우
+                                if (isPwdChanged && !isCodeChanged) {
+                                  oneButtonDialog(
+                                    isBarrier: false,
+                                    title: '안내',
+                                    content: '비밀번호가 변경되었습니다.\n다시 로그인해주세요.',
+                                    onTap: () {
+                                      Get.offAll(() => LoginScreen());
+                                    },
+                                    buttonText: '확인',
+                                  );
+                                  return;
+                                }
+
+                                // 가입 코드만 변경된 경우
+                                if (!isPwdChanged && isCodeChanged) {
+                                  oneButtonDialog(
+                                    isBarrier: false,
+                                    title: '안내',
+                                    content: '가입 코드가 변경되었습니다.\n다시 로그인해주세요.',
+                                    onTap: () {
+                                      Get.offAll(() => LoginScreen());
+                                    },
+                                    buttonText: '확인',
+                                  );
+                                  return;
                                 }
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Center(
                                   child: Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.2,
+                                    width: MediaQuery.of(context).size.width * 0.2,
                                     decoration: BoxDecoration(
-                                        color: Color(0xFFFE8900),
-                                        borderRadius:
-                                            BorderRadius.circular(50)),
+                                        color: Color(0xFFFE8900), borderRadius: BorderRadius.circular(50)),
                                     height: 50,
                                     child: Center(
                                       child: Text(
-                                        '변경하기',
-                                        style: TextStyle(
-                                            color: fontWhite,
-                                            fontSize: 7.sp,
-                                            fontWeight: FontWeight.bold),
+                                        !isManager ? '변경하기' : '확인',
+                                        style: TextStyle(color: fontWhite, fontSize: 7.sp, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: GestureDetector(
-                                onTap: () {
-                                  showWithdrawDialog();
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '회원탈퇴',
-                                        style: TextStyle(
-                                          color: fontGrey,
-                                        ),
-                                      ),
-                                      SizedBox(height: 2),
-                                      Container(
-                                        width: 60,
-                                        height: 1.5,
-                                        color: fontGrey,
-                                      ),
-                                      Visibility(
-                                        visible:
-                                            userData.userData!.id == 'haha',
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              GestureDetector(
-                                                  onTap: () async {
-                                                    await FirebaseMessaging
-                                                        .instance
-                                                        .subscribeToTopic(
-                                                            'test');
-                                                    Logger()
-                                                        .d("✅ 'test' 토픽 구독 완료");
-                                                  },
-                                                  child: Text('알림 구독')),
-                                              SizedBox(width: 10),
-                                              GestureDetector(
-                                                  onTap: () async {
-                                                    await FirebaseMessaging
-                                                        .instance
-                                                        .unsubscribeFromTopic(
-                                                            'test');
-                                                    Logger()
-                                                        .d("✅ 'test' 토픽 구독 취소");
-                                                  },
-                                                  child: Text('구독 취소')),
-                                            ],
+                            Visibility(
+                              visible: !isManager,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showWithdrawDialog();
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '회원탈퇴',
+                                          style: TextStyle(
+                                            color: fontGrey,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(height: 2),
+                                        Container(
+                                          width: 60,
+                                          height: 1.5,
+                                          color: fontGrey,
+                                        ),
+                                        Visibility(
+                                          visible: userData.userData!.id == 'hoho',
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                GestureDetector(
+                                                    onTap: () async {
+                                                      await FirebaseMessaging.instance.subscribeToTopic('test');
+                                                      Logger().d("✅ 'test' 토픽 구독 완료");
+                                                    },
+                                                    child: Text('알림 구독')),
+                                                SizedBox(width: 10),
+                                                GestureDetector(
+                                                    onTap: () async {
+                                                      await FirebaseMessaging.instance.unsubscribeFromTopic('test');
+                                                      Logger().d("✅ 'test' 토픽 구독 취소");
+                                                    },
+                                                    child: Text('구독 취소')),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -606,7 +614,6 @@ class _MypageScreenState extends State<MypageScreen> {
 
   @override
   void dispose() {
-    Get.find<BgmController>().resumeBgm();
     super.dispose();
   }
 }

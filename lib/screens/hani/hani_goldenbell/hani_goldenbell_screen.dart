@@ -38,8 +38,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
     _audioPlayer = AudioPlayer();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final haniGoldenbell =
-          haniGoldenbellDataController.haniGoldenbellDataList[0];
+      final haniGoldenbell = haniGoldenbellDataController.haniGoldenbellDataList[0];
       if (haniGoldenbell.voicePath.isNotEmpty) {
         _playSound(haniGoldenbell.voicePath);
       }
@@ -50,9 +49,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
     try {
       await _audioPlayer.setUrl(url[currentIndex]);
       _audioPlayer.play();
-    } catch (e) {
-      Logger().d('Error playing sound: $e');
-    }
+    } catch (e) {}
   }
 
   void prevQuestion() {
@@ -60,22 +57,17 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
       setState(() {
         currentIndex--;
         resetQuestionState();
-        _playSound(
-            haniGoldenbellDataController.haniGoldenbellDataList[0].voicePath);
+        _playSound(haniGoldenbellDataController.haniGoldenbellDataList[0].voicePath);
       });
     }
   }
 
   void nextQuestion() {
-    if (currentIndex <
-        haniGoldenbellDataController
-                .haniGoldenbellDataList[0].questions.length -
-            1) {
+    if (currentIndex < haniGoldenbellDataController.haniGoldenbellDataList[0].questions.length - 1) {
       setState(() {
         currentIndex++;
         resetQuestionState();
-        _playSound(
-            haniGoldenbellDataController.haniGoldenbellDataList[0].voicePath);
+        _playSound(haniGoldenbellDataController.haniGoldenbellDataList[0].voicePath);
       });
     }
   }
@@ -100,8 +92,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
   void checkAnswer(int answerIndex) {
     _resetTimer?.cancel();
 
-    int correctAnswer = int.parse(haniGoldenbellDataController
-        .haniGoldenbellDataList[0].correctAnswer[currentIndex]);
+    int correctAnswer = int.parse(haniGoldenbellDataController.haniGoldenbellDataList[0].correctAnswer[currentIndex]);
 
     bool tappedAnswerIsCorrect = (answerIndex + 1) == correctAnswer;
 
@@ -130,15 +121,11 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final questions =
-        haniGoldenbellDataController.haniGoldenbellDataList[0].questions;
+    final questions = haniGoldenbellDataController.haniGoldenbellDataList[0].questions;
     final answers = [
-      haniGoldenbellDataController
-          .haniGoldenbellDataList[0].answer_1[currentIndex],
-      haniGoldenbellDataController
-          .haniGoldenbellDataList[0].answer_2[currentIndex],
-      haniGoldenbellDataController
-          .haniGoldenbellDataList[0].answer_3[currentIndex],
+      haniGoldenbellDataController.haniGoldenbellDataList[0].answer_1[currentIndex],
+      haniGoldenbellDataController.haniGoldenbellDataList[0].answer_2[currentIndex],
+      haniGoldenbellDataController.haniGoldenbellDataList[0].answer_3[currentIndex],
     ];
 
     return Scaffold(
@@ -151,9 +138,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
       ),
       body: Center(
         child: SizedBox(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.85
-              : double.infinity,
+          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -201,15 +186,10 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
                                   onTap: () => checkAnswer(index),
                                   child: Image.network(answer),
                                 ),
-                                if (selectedAnswerIndex != null &&
-                                    selectedAnswerIndex == index)
+                                if (selectedAnswerIndex != null && selectedAnswerIndex == index)
                                   Icon(
-                                    isCorrect == true
-                                        ? Icons.circle_outlined
-                                        : Icons.close,
-                                    color: isCorrect == true
-                                        ? Colors.green
-                                        : Colors.red,
+                                    isCorrect == true ? Icons.circle_outlined : Icons.close,
+                                    color: isCorrect == true ? Colors.green : Colors.red,
                                     size: 40.sp,
                                   ),
                               ],
@@ -250,7 +230,6 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
     _resetTimer?.cancel();
     super.dispose();
   }

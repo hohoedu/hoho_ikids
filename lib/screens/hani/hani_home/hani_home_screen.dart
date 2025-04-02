@@ -33,8 +33,7 @@ class HaniHomeScreen extends StatefulWidget {
   State<HaniHomeScreen> createState() => _HaniHomeScreenState();
 }
 
-class _HaniHomeScreenState extends State<HaniHomeScreen>
-    with WidgetsBindingObserver, RouteAware {
+class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObserver, RouteAware {
   final bgmController = Get.find<BgmController>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final haniHomeData = Get.find<HaniHomeDataController>();
@@ -54,9 +53,9 @@ class _HaniHomeScreenState extends State<HaniHomeScreen>
     final ModalRoute? route = ModalRoute.of(context);
     if (route is PageRoute) {
       routeObserver.subscribe(this, route);
-
     }
   }
+
   @override
   void didPopNext() {
     super.didPopNext();
@@ -68,8 +67,7 @@ class _HaniHomeScreenState extends State<HaniHomeScreen>
     final haniData = haniHomeData.haniHomeData;
     String id = userData.userData!.id;
     String year = userData.userData!.year;
-    final bool isSibling =
-        userData.userData!.siblingCount == '1' ? false : true;
+    final bool isSibling = userData.userData!.siblingCount == '1' ? false : true;
     return Scaffold(
       key: scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -90,9 +88,7 @@ class _HaniHomeScreenState extends State<HaniHomeScreen>
       ),
       body: Center(
         child: Container(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.9
-              : double.infinity,
+          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFFFDDE2),
@@ -156,30 +152,27 @@ class _HaniHomeScreenState extends State<HaniHomeScreen>
                                 ? HaniContents(
                                     path: '${haniData['clean']}',
                                     onTap: () {
-                                      haniEraseService(
-                                          id, widget.keyCode, year);
+                                      haniEraseService(id, widget.keyCode, year);
                                     },
                                   )
                                 : HaniContents(
                                     path: '${haniData['puz']}',
                                     onTap: () {
-                                      haniPuzzleService(
-                                          id, widget.keyCode, year);
+                                      haniPuzzleService(id, widget.keyCode, year);
                                     },
                                   ),
                             widget.keyCode.substring(0, 1) == 'S'
                                 ? HaniContents(
                                     path: '${haniData['bell']}',
                                     onTap: () {
-                                      haniGoldenbellService(
-                                          id, widget.keyCode, year);
+                                      bgmController.stopBgm();
+                                      haniGoldenbellService(id, widget.keyCode, year);
                                     },
                                   )
                                 : HaniContents(
                                     path: '${haniData['han']}',
                                     onTap: () {
-                                      haniHanjaSongService(
-                                          id, widget.keyCode, year);
+                                      haniHanjaSongService(id, widget.keyCode, year);
                                     },
                                   ),
                           ],

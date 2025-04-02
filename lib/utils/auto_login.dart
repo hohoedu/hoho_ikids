@@ -4,27 +4,28 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/screens/auth/login_screen.dart';
 import 'package:hani_booki/services/auth/login_service.dart';
+import 'package:logger/logger.dart';
+
+final Future<void> autoLoginFuture = _checkAutoLogin();
+
+Future<void> _checkAutoLogin() async {
+  final storage = Get.find<FlutterSecureStorage>();
+  final storedId = await storage.read(key: 'user_id');
+  final storedPwd = await storage.read(key: 'user_pwd');
+  if (storedId != null && storedPwd != null) {
+    await loginService(storedId, storedPwd, true);
+  } else {
+    Get.offAll(() => const LoginScreen());
+  }
+}
 
 class AutoLogin extends StatelessWidget {
   const AutoLogin({super.key});
 
-  Future<Widget> _checkAutoLogin() async {
-    final storage = Get.find<FlutterSecureStorage>();
-    final storedId = await storage.read(key: 'user_id');
-    final storedPwd = await storage.read(key: 'user_pwd');
-    if (storedId != null && storedPwd != null) {
-      await loginService(storedId, storedPwd, true);
-
-      return Container();
-    } else {
-      return const LoginScreen();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Widget>(
-      future: _checkAutoLogin(),
+    return FutureBuilder(
+      future: autoLoginFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -35,10 +36,10 @@ class AutoLogin extends StatelessWidget {
           );
         }
         if (snapshot.hasError) {
-          // 에러 발생 시 로그인 화면으로 이동
           return const LoginScreen();
         }
-        return snapshot.data!;
+
+        return const LoginScreen();
       },
     );
   }

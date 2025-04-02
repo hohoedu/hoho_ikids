@@ -23,10 +23,10 @@ class NotificationController extends GetxController {
     });
     await saveNotificationSettings();
     if (value) {
-      await FirebaseMessaging.instance.subscribeToTopic('all-users');
+      await FirebaseMessaging.instance.subscribeToTopic('test');
       print("✅ 'test' 토픽 구독 완료");
     } else {
-      await FirebaseMessaging.instance.unsubscribeFromTopic('all-users');
+      await FirebaseMessaging.instance.unsubscribeFromTopic('test');
       print("✅ 'test' 토픽 구독 취소");
     }
   }
@@ -58,11 +58,11 @@ class NotificationController extends GetxController {
 
     // 앱 실행 시 전체 알림 구독 여부 확인 후 토픽 적용
     if (allChecked.value) {
-      await FirebaseMessaging.instance.subscribeToTopic('all-users');
-      print("✅ 앱 실행 시 'all-users' 토픽 구독 유지");
+      await FirebaseMessaging.instance.subscribeToTopic('test');
+      print("✅ 앱 실행 시 'test' 토픽 구독 유지");
     } else {
-      await FirebaseMessaging.instance.unsubscribeFromTopic('all-users');
-      print("✅ 앱 실행 시 'all-users' 토픽 구독 취소");
+      await FirebaseMessaging.instance.unsubscribeFromTopic('test');
+      print("✅ 앱 실행 시 'test' 토픽 구독 취소");
     }
   }
 

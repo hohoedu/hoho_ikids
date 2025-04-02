@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/kidok/kidok_bookcase.data.dart';
+import 'package:hani_booki/_data/kidok/kidok_chart_data.dart';
 import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_book_list.dart';
 import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_graph.dart';
 import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_list_view.dart';
@@ -63,9 +64,7 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
       ),
       body: Center(
         child: SizedBox(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.85
-              : double.infinity,
+          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
           child: Row(
             children: [
               Expanded(
@@ -80,32 +79,23 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
                           Expanded(
                             child: ListView.builder(
                               padding: EdgeInsets.zero,
-                              itemCount: kidokBookcaseController
-                                  .kidokBookcaseDataList.length,
+                              itemCount: kidokBookcaseController.kidokBookcaseDataList.length,
                               itemBuilder: (context, index) {
-                                int reversedIndex = kidokBookcaseController
-                                        .kidokBookcaseDataList.length -
-                                    1 -
-                                    index;
-                                final bookcase = kidokBookcaseController
-                                    .kidokBookcaseDataList[reversedIndex];
+                                int reversedIndex = kidokBookcaseController.kidokBookcaseDataList.length - 1 - index;
+                                final bookcase = kidokBookcaseController.kidokBookcaseDataList[reversedIndex];
 
                                 return GestureDetector(
                                   onTap: () async {
+                                    Get.delete<KidokChartDataController>();
                                     await kidokSublistService(
-                                        kidokBookcaseController
-                                            .kidokBookcaseDataList[
-                                                reversedIndex]
-                                            .volume,
+                                        kidokBookcaseController.kidokBookcaseDataList[reversedIndex].volume,
                                         widget.keyCode);
-                                    await kidokChartService(   kidokBookcaseController
-                                        .kidokBookcaseDataList[
-                                    reversedIndex]
-                                        .volume,
-                                        widget.keyCode,);
+                                    await kidokChartService(
+                                      kidokBookcaseController.kidokBookcaseDataList[reversedIndex].volume,
+                                      widget.keyCode,
+                                    );
                                     setState(() {
-                                      isSelectedList = List.generate(
-                                          items.length, (i) => i == index);
+                                      isSelectedList = List.generate(items.length, (i) => i == index);
                                     });
                                   },
                                   child: KidokListView(
@@ -138,8 +128,7 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
                     ),
                     Expanded(
                       child: Padding(
-                        padding:
-                            const EdgeInsets.only(bottom: 16.0, right: 16.0),
+                        padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,

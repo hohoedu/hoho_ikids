@@ -2,15 +2,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_booki_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/screens/alert/alert_screen.dart';
 import 'package:hani_booki/screens/home/sibling_screen.dart';
-import 'package:hani_booki/screens/record/record_home_shool/record_home_school_screen.dart';
+import 'package:hani_booki/screens/record/record_home_school/record_home_school_screen.dart';
 import 'package:hani_booki/screens/record/record_screen.dart';
 import 'package:hani_booki/screens/setting/setting_screen.dart';
 import 'package:hani_booki/screens/setting/setting_widgets/setting_terms.dart';
 import 'package:hani_booki/services/auth/logout.dart';
 import 'package:hani_booki/services/content_star_service.dart';
+import 'package:hani_booki/services/notice/notice_list_service.dart';
+import 'package:hani_booki/services/record/booki/booki_record_home_service.dart';
+import 'package:hani_booki/services/record/hani/hani_record_home_service.dart';
 import 'package:hani_booki/utils/get_record_list.dart';
 import 'package:hani_booki/utils/get_user_code.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
@@ -30,9 +34,19 @@ class MainDrawer extends StatelessWidget {
     this.keyCode = '',
   });
 
+  String truncateUsername(String username, int maxLength) {
+    if (username.length <= maxLength) {
+      return username; // 글자 수가 8 이하일 경우 그대로 반환
+    }
+    return '${username.substring(0, maxLength)}...'; // 8글자까지만 표시하고 '...' 추가
+  }
+
   @override
   Widget build(BuildContext context) {
     final userData = Get.find<UserDataController>();
+
+
+    bool isManager = userData.userData!.userType == 'M';
     return Drawer(
       backgroundColor: mBackWhite,
       child: Padding(
@@ -57,14 +71,13 @@ class MainDrawer extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${userData.userData!.username} 어린이',
-                            style: TextStyle(
-                                color: fontMain,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold),
+                            !isManager
+                                ? '${userData.userData!.username} 어린이'
+                                : truncateUsername('${userData.userData!.username} 어린이', 6),
+                            style: TextStyle(color: fontMain, fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            userData.userData!.schoolName,
+                            truncateUsername(userData.userData!.schoolName, 10),
                             style: TextStyle(color: fontSub),
                           ),
                         ],
@@ -72,98 +85,49 @@ class MainDrawer extends StatelessWidget {
                     ),
                   ],
                 ),
-                // GestureDetector(
-                //   onTap: () {
-                //     Get.back();
-                //     Get.to(() => const AlertScreen());
-                //   },
-                //   child: SizedBox(
-                //     width: 25,
-                //     height: 25,
-                //     child: Image.asset(
-                //       'assets/images/icons/bell.png',
-                //     ),
-                //   ),
-                // ),
+                GestureDetector(
+                  onTap: () {
+                    noticeListService();
+                    Get.back();
+                    Get.to(() => AlertScreen());
+                  },
+                  child: SizedBox(
+                    width: 25,
+                    height: 25,
+                    child: Image.asset(
+                      'assets/images/icons/bell.png',
+                    ),
+                  ),
+                ),
               ],
             ),
             Divider(),
-            // GestureDetector(
-            //   onTap: () {
-            //     Get.back();
-            //     showGeneralDialog(
-            //       context: context,
-            //       barrierDismissible: false,
-            //       pageBuilder: (context, animation, secondaryAnimation) {
-            //         return Center(
-            //           child: Material(
-            //             color: Colors.transparent,
-            //             child: Container(
-            //               width: MediaQuery.of(context).size.width * 0.85,
-            //               height: MediaQuery.of(context).size.height * 0.9,
-            //               decoration: BoxDecoration(
-            //                 color: Colors.white,
-            //                 borderRadius: BorderRadius.circular(25),
-            //               ),
-            //               child: NoticeScreen(),
-            //             ),
-            //           ),
-            //         );
-            //       },
-            //     );
-            //   },
-            //   child: Padding(
-            //     padding:
-            //         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            //     child: Row(
-            //       children: [
-            //         SizedBox(
-            //           width: 20,
-            //           height: 20,
-            //           child: Image.asset(
-            //               'assets/images/icons/learning_record.png'),
-            //         ),
-            //         const SizedBox(width: 16),
-            //         const Expanded(
-            //           child: Text('공지사항'),
-            //         ),
-            //         const Icon(Icons.navigate_next),
-            //       ],
-            //     ),
-            //   ),
-            // ),
             Expanded(
               flex: 7,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // 학습 기록
-                  Visibility(
-                    visible: !isHome,
-                    child: GestureDetector(
-                      onTap: () async {
-                        Navigator.pop(context);
-                        await contentStarService(keyCode);
-                        await getRecordList(keyCode, type);
-                        // Get.to(() => RecordScreen(keyCode: keyCode, type: type));
-                        Get.to(() => RecordHomeSchoolScreen(type: type));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: Image.asset(
-                                  'assets/images/icons/learning_record.png'),
-                            ),
-                            const SizedBox(width: 16),
-                            const Expanded(child: Text('학습 기록')),
-                            const Icon(Icons.navigate_next),
-                          ],
-                        ),
+                  GestureDetector(
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await getRecordList(keyCode, type);
+                      await contentStarService(keyCode, type);
+                      Get.to(() => RecordScreen(keyCode: keyCode, type: type));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Image.asset('assets/images/icons/learning_record.png'),
+                          ),
+                          const SizedBox(width: 16),
+                          const Expanded(child: Text('학습 기록')),
+                          const Icon(Icons.navigate_next),
+                        ],
                       ),
                     ),
                   ),
@@ -174,15 +138,13 @@ class MainDrawer extends StatelessWidget {
                       await getUserCode();
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Row(
                         children: [
                           SizedBox(
                             width: 20,
                             height: 20,
-                            child:
-                                Image.asset('assets/images/icons/my_info.png'),
+                            child: Image.asset('assets/images/icons/my_info.png'),
                           ),
                           const SizedBox(width: 16),
                           const Expanded(child: Text('내 정보')),
@@ -193,22 +155,20 @@ class MainDrawer extends StatelessWidget {
                   ),
                   // 형제 변경
                   Visibility(
-                    visible: isSibling,
+                    visible: isSibling && !isManager,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
                         Get.offAll(() => SiblingScreen());
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: Row(
                           children: [
                             SizedBox(
                               width: 20,
                               height: 20,
-                              child: Image.asset(
-                                  'assets/images/icons/change_sibling.png'),
+                              child: Image.asset('assets/images/icons/change_sibling.png'),
                             ),
                             const SizedBox(width: 16),
                             const Expanded(child: Text('형제 변경')),
@@ -225,15 +185,13 @@ class MainDrawer extends StatelessWidget {
                       Get.to(() => SettingScreen());
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Row(
                         children: [
                           SizedBox(
                             width: 20,
                             height: 20,
-                            child:
-                                Image.asset('assets/images/icons/setting.png'),
+                            child: Image.asset('assets/images/icons/setting.png'),
                           ),
                           const SizedBox(width: 16),
                           const Expanded(child: Text('설정')),
@@ -249,15 +207,13 @@ class MainDrawer extends StatelessWidget {
                       logout();
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Row(
                         children: [
                           SizedBox(
                             width: 20,
                             height: 20,
-                            child:
-                                Image.asset('assets/images/icons/logout.png'),
+                            child: Image.asset('assets/images/icons/logout.png'),
                           ),
                           const SizedBox(width: 16),
                           const Expanded(child: Text('로그아웃')),

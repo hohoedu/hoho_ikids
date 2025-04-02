@@ -6,13 +6,15 @@ import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen.dart';
 import 'package:hani_booki/services/total_star_service.dart';
+import 'package:hani_booki/utils/connectivityController.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 하니 이북 콘텐츠 리스트
 Future<void> haniContentService(keyCode, schoolId, year) async {
-  String url = dotenv.get('HANI_EBOOK_CONTENT_LIST_URL');
   final haniHomeController = Get.put(HaniHomeDataController());
+
+  String url = dotenv.get('HANI_EBOOK_CONTENT_LIST_URL');
   final Map<String, dynamic> requestData = {
     'keycode': keyCode,
     'schoolid': schoolId,

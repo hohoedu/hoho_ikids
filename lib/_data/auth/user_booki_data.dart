@@ -24,7 +24,7 @@ class UserBookiDataController extends GetxController {
   List<UserBookiData> _userBookiDataList = <UserBookiData>[].obs;
 
   void setUserBookiDataList(List<UserBookiData> userBookiDataList) {
-    _userBookiDataList = List.from(userBookiDataList);
+    _userBookiDataList = List.from(userBookiDataList.reversed.toList());
     update();
   }
 

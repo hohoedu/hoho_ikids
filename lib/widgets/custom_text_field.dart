@@ -87,8 +87,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     ? [FilteringTextInputFormatter.digitsOnly]
                     : widget.isKoreanOnly == true
                         ? [
-                  FilteringTextInputFormatter.allow(
-                      RegExp(r'[ㄱ-ㅎㅏ-ㅣ가-힣\u3130-\u318F\uAC00-\uD7A3\u119E\u119E\u11A2\u11A2]'))
+                            FilteringTextInputFormatter.allow(RegExp(
+                                r'[ㄱ-ㅎㅏ-ㅣ가-힣\u3130-\u318F\uAC00-\uD7A3\u119E\u119E\u11A2\u11A2]'))
                           ]
                         : widget.isUserId == true
                             ? [

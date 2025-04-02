@@ -1,6 +1,8 @@
 PODS:
   - audio_session (0.0.1):
     - Flutter
+  - connectivity_plus (0.0.1):
+    - Flutter
   - Firebase/CoreOnly (11.7.0):
     - FirebaseCore (~> 11.7.0)
   - Firebase/Messaging (11.7.0):
@@ -104,6 +106,7 @@ PODS:
 
 DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
@@ -136,6 +139,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_messaging:
@@ -169,6 +174,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   Firebase: a64bf6a8546e6eab54f1c715cd6151f39d2329f4
   firebase_core: 3d36094af9b47c46bfb965943413a39eebaca4db
   firebase_messaging: 5881ea6744fe41f0759bc52844c530d64f3c37e3

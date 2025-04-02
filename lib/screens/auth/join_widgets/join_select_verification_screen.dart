@@ -3,13 +3,30 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/screens/auth/join_widgets/join_once_verification_screen.dart';
 import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
+import 'package:hani_booki/screens/auth/legacy/legacy_once_user_screen.dart';
+import 'package:hani_booki/screens/auth/legacy/legacy_twice_user_screen.dart';
+import 'package:hani_booki/screens/auth/referral/referral_once_code_screen.dart';
+import 'package:hani_booki/screens/auth/referral/referral_twice_code_screen.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:logger/logger.dart';
 
 class JoinSelectVerificationScreen extends StatelessWidget {
-  const JoinSelectVerificationScreen({super.key});
+  final String loginCode;
+  final String? id;
+  final String? password;
+  final bool? isAutoLoginChecked;
+
+  const JoinSelectVerificationScreen({
+    super.key,
+    required this.loginCode,
+    this.id,
+    this.password,
+    this.isAutoLoginChecked,
+  });
 
   @override
   Widget build(BuildContext context) {
+    Logger().d('loginCode = $loginCode');
     return Scaffold(
       backgroundColor: mBackAuth,
       extendBodyBehindAppBar: true,
@@ -47,7 +64,22 @@ class JoinSelectVerificationScreen extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Get.to(() => JoinOnceVerificationScreen());
+                        if (loginCode == '0000') {
+                          Get.to(() => JoinOnceVerificationScreen());
+                        } else if (loginCode == '6666') {
+                          Get.to(
+                            () => ReferralOnceCodeScreen(
+                                id: id!,
+                                password: password!,
+                                isAutoLoginChecked: isAutoLoginChecked!),
+                          );
+                        } else if (loginCode == '7777') {
+                          Get.to(
+                            () => LegacyOnceUserScreen(
+                                id: id!,
+                                isAutoLoginChecked: isAutoLoginChecked!),
+                          );
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -71,7 +103,22 @@ class JoinSelectVerificationScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Get.to(() => JoinTwiceVerificationScreen());
+                        if (loginCode == '0000') {
+                          Get.to(() => JoinTwiceVerificationScreen());
+                        } else if (loginCode == '6666') {
+                          Get.to(
+                            () => ReferralTwiceCodeScreen(
+                                id: id!,
+                                password: password!,
+                                isAutoLoginChecked: isAutoLoginChecked!),
+                          );
+                        } else if (loginCode == '7777') {
+                          Get.to(
+                            () => LegacyTwiceUserScreen(
+                                id: id!,
+                                isAutoLoginChecked: isAutoLoginChecked!),
+                          );
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -81,13 +128,14 @@ class JoinSelectVerificationScreen extends StatelessWidget {
                               color: mBackWhite,
                               borderRadius: BorderRadius.circular(25)),
                           child: Center(
-                              child: Text(
-                            '2개',
-                            style: TextStyle(
-                                color: fontMain,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 35),
-                          )),
+                            child: Text(
+                              '2개',
+                              style: TextStyle(
+                                  color: fontMain,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 35),
+                            ),
+                          ),
                         ),
                       ),
                     ),

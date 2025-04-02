@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/screens/setting/setting_screen.dart';
 import 'package:hani_booki/services/auth/logout.dart';
 import 'package:hani_booki/services/auth/withdraw_service.dart';
+import 'package:hani_booki/services/notice/notice_list_service.dart';
+import 'package:hani_booki/services/notice/notice_view_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:hani_booki/widgets/notice/notice_screen.dart';
 import 'package:logger/logger.dart';
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -14,6 +18,8 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool? isVisibleLeading;
   final bool isContent;
   final bool isInfo;
+  final bool isMain;
+  final bool isKidok;
   final VoidCallback? onTap;
   final VoidCallback? onTapBackIcon;
 
@@ -23,6 +29,8 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.isPortraitMode = false,
     required this.isContent,
     this.isInfo = false,
+    this.isMain = false,
+    this.isKidok = false,
     this.onTap,
     this.isVisibleLeading = true,
     this.onTapBackIcon,
@@ -56,9 +64,9 @@ class _MainAppBarState extends State<MainAppBar> {
           onTap: () async {
             if (widget.isContent) {
               widget.onTapBackIcon!();
-            } else if(widget.isInfo){
+            } else if (widget.isInfo) {
               widget.onTapBackIcon!();
-            }else{
+            } else {
               Get.back();
             }
           },
@@ -93,7 +101,7 @@ class _MainAppBarState extends State<MainAppBar> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

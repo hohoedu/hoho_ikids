@@ -12,14 +12,17 @@ import 'package:logger/logger.dart';
 
 Future<void> setupFcm() async {
   // FCM 초기화
-  await Firebase.initializeApp(
-    name: 'hanibooki',
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      name: 'hanibooki',
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
   Get.put(NotificationController());
 
-  // iOS: 포그라운드 메시지 프레젠테이션 옵션 업데이트
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+// 알림 권한 요청 (iOS 전용)
+  NotificationSettings settings = await messaging.requestPermission(
     alert: true,
     badge: true,
     sound: true,

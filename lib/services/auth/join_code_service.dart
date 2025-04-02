@@ -9,7 +9,7 @@ import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 수업코드 확인
+// 가입 코드 확인
 Future<bool> joinCodeService(TextEditingController classCode) async {
   final JoinUserDataController joinUserDataController =
       Get.put(JoinUserDataController(), permanent: true);
@@ -68,7 +68,7 @@ Future<bool> joinCodeService(TextEditingController classCode) async {
   }
 }
 
-// 수업코드 확인
+// 가입 코드 확인
 Future<bool> codeVerifyService(String classCode) async {
   String url = dotenv.get('JOIN_CODE_URL');
 

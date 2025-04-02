@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/kidok/kidok_chart_data.dart';
 import 'package:logger/logger.dart';
@@ -26,15 +27,12 @@ class KidokGraph extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
-                decoration: BoxDecoration(
-                    color: const Color(0xFFF7F5EA),
-                    borderRadius: BorderRadius.circular(15)),
+                decoration: BoxDecoration(color: const Color(0xFFF7F5EA), borderRadius: BorderRadius.circular(15)),
                 child: Obx(() {
-                  // kidokChartDataList가 비어있으면 "데이터 없음" 표시
                   if (kidokChart.kidokChartDataList.isEmpty) {
                     return const Center(
                       child: Text(
-                        "데이터가 없습니다.",
+                        "학습 데이터가 없습니다.",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     );
@@ -53,11 +51,15 @@ class KidokGraph extends StatelessWidget {
                   return LayoutBuilder(
                     builder: (context, constraints) {
                       return Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                         child: BarChart(
                           BarChartData(
                             maxY: 2,
+                            minY: 0,
                             barGroups: _generateBarGroups(scores, constraints),
+                            barTouchData: BarTouchData(
+                              enabled: false,
+                            ),
                             titlesData: FlTitlesData(
                               bottomTitles: AxisTitles(
                                 sideTitles: SideTitles(
@@ -66,10 +68,19 @@ class KidokGraph extends StatelessWidget {
                                     const categories = ['이해', '감정', '어휘', '표현', '지식', '사고'];
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(categories[value.toInt()]),
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          categories[value.toInt()],
+                                          style: TextStyle(
+                                            fontSize: 6.sp,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     );
                                   },
-                                  reservedSize: constraints.maxHeight / 4,
+                                  reservedSize: constraints.maxHeight * 0.12,
                                 ),
                               ),
                               leftTitles: AxisTitles(
@@ -85,11 +96,12 @@ class KidokGraph extends StatelessWidget {
                             gridData: FlGridData(
                               drawVerticalLine: false,
                               show: true,
+                              horizontalInterval: 0.5,
                               getDrawingHorizontalLine: (value) {
                                 return FlLine(
                                   color: Colors.grey[400],
                                   strokeWidth: 1,
-                                  dashArray: [4, 2],
+                                  dashArray: [5, 5],
                                 );
                               },
                             ),
@@ -116,7 +128,6 @@ class KidokGraph extends StatelessWidget {
       ),
     );
   }
-
 
   List<BarChartGroupData> _generateBarGroups(List<double> scores, BoxConstraints constraints) {
     return List.generate(scores.length, (index) {

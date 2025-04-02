@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
@@ -55,9 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.5,
             child: SingleChildScrollView(
-              physics: isKeyboardVisible
-                  ? AlwaysScrollableScrollPhysics()
-                  : NeverScrollableScrollPhysics(),
+              physics: isKeyboardVisible ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -87,20 +86,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        isAutoLoginChecked =
-                            !isAutoLoginChecked; // true/false 토글
+                        isAutoLoginChecked = !isAutoLoginChecked;
                       });
                     },
                     child: Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                           child: Image.asset(
                             isAutoLoginChecked
-                                ? 'assets/images/icons/checkbox.png' // 체크된 상태
+                                ? 'assets/images/icons/checkbox.png'
                                 : 'assets/images/icons/checkbox_blank.png',
-                            // 체크 해제된 상태
                             fit: BoxFit.contain,
                             scale: 2,
                           ),
@@ -132,10 +128,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           buttonText: '확인',
                         );
                       } else {
-                        loginService(
-                            idController.text,
-                            md5_convertHash(pwdController.text),
-                            isAutoLoginChecked);
+                        // 로딩 시작
+                        EasyLoading.show(status: '로그인 중...', dismissOnTap: false);
+
+                        try {
+                          await loginService(idController.text, pwdController.text, isAutoLoginChecked);
+
+                          // 로딩 종료
+                          EasyLoading.dismiss();
+                        } catch (e) {
+                          // 에러 발생 시 로딩 종료
+                          EasyLoading.dismiss();
+                          oneButtonDialog(
+                            title: '오류',
+                            content: '로그인에 실패했습니다.\n다시 시도해주세요.',
+                            onTap: () => Get.back(),
+                            buttonText: '확인',
+                          );
+                        }
                       }
                     },
                     text: '로그인',
@@ -147,9 +157,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Get.to(() => SearchIdScreen());
+                            Get.to(() => const SearchIdScreen());
                           },
-                          child: Center(child: const Text('아이디 찾기')),
+                          child: const Text('아이디 찾기'),
                         ),
                         const SizedBox(
                           height: 16,
@@ -163,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onTap: () {
                             Get.to(() => const SearchPasswordScreen());
                           },
-                          child: Center(child: const Text('비밀번호 찾기')),
+                          child: const Text('비밀번호 찾기'),
                         ),
                         const SizedBox(
                           height: 16,
@@ -178,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             FocusManager.instance.primaryFocus?.unfocus();
                             Get.to(() => const JoinScreen());
                           },
-                          child: Center(child: const Text('회원가입')),
+                          child: const Text('회원가입'),
                         ),
                       ],
                     ),

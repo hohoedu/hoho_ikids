@@ -178,6 +178,82 @@ class _StrokeWordState extends State<StrokeWord> {
       Logger().e("SVG 데이터를 불러오는 중 오류 발생: $e");
     }
   }
+  // Future<void> _loadSvgPathFromAssets(Size size, int currentIndex) async {
+  //   try {
+  //     final svgData = await rootBundle.loadString('assets/images/sun.svg');
+  //
+  //     final st0PathData = SvgPathParser.getPathsByClassFromData(svgData, 'st0');
+  //     if (st0PathData.isNotEmpty) {
+  //       setState(() {
+  //         const svgSize = Size(200, 248);
+  //         final scaleX = size.width / svgSize.width;
+  //         final scaleY = size.height / svgSize.height;
+  //
+  //         firstPaths = st0PathData.map((pathData) {
+  //           final path = parseSvgPathData(pathData);
+  //           return path
+  //               .transform(Matrix4.diagonal3Values(scaleX, scaleY, 1).storage);
+  //         }).toList();
+  //       });
+  //     } else {
+  //       Logger().d("class='st0' 속성을 가진 path 데이터를 찾을 수 없습니다.");
+  //     }
+
+  //     List<List<Path>> groupPaths(List<Path> paths, int groupSize) {
+  //       List<List<Path>> groups = [];
+  //       for (int i = 0; i < paths.length; i += groupSize) {
+  //         int endIndex =
+  //         (i + groupSize) > paths.length ? paths.length : (i + groupSize);
+  //         groups.add(paths.sublist(i, endIndex));
+  //       }
+  //       return groups;
+  //     }
+  //
+  //     final allElements = SvgPathParser.getAllElementsFromData(svgData);
+  //
+  //     setState(() {
+  //       remainingStrokePaths = allElements
+  //           .where((element) {
+  //         final classAttr = (element['class'])?.trim() ?? '';
+  //         return classAttr.contains('st1') ||
+  //             classAttr.contains('st2') ||
+  //             classAttr.contains('st3');
+  //       })
+  //           .map((element) {
+  //         String? dAttribute;
+  //         if (element['type'] == 'path') {
+  //           dAttribute = element['d'];
+  //         } else if (element['type'] == 'line') {
+  //           dAttribute =
+  //           'M${element['x1']},${element['y1']} L${element['x2']},${element['y2']}';
+  //         }
+  //         if (dAttribute != null) {
+  //           final path = parseSvgPathData(dAttribute).transform(
+  //               Matrix4.diagonal3Values(
+  //                   size.width / 200, size.height / 248, 1)
+  //                   .storage);
+  //           final strokeClass = (element['class'] as String?)?.trim() ?? '';
+  //           return StrokePath(path: path, strokeClass: strokeClass);
+  //         }
+  //         return null;
+  //       })
+  //           .where((s) => s != null)
+  //           .cast<StrokePath>()
+  //           .toList();
+  //
+  //       List<List<StrokePath>> groups = groupPathsBySt1(remainingStrokePaths);
+  //
+  //       groupedPaths =
+  //           groups.map((group) => group.map((s) => s.path).toList()).toList();
+  //
+  //       if (remainingStrokePaths.isNotEmpty) {
+  //         _updatePointerPositionForGroup(currentGroupIndex);
+  //       }
+  //     });
+  //   } catch (e) {
+  //     Logger().e("SVG 데이터를 불러오는 중 오류 발생: $e");
+  //   }
+  // }
 
   void _updatePointerPositionForGroup(int groupIndex) {
     if (groupIndex < groupedPaths.length &&
