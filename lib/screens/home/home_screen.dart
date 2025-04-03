@@ -18,6 +18,7 @@ import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
+import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
 import 'package:badges/badges.dart' as badges;
 
@@ -53,12 +54,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final isHaniExist = userEbookDataController.userData!.isHani;
     final isBookiExist = userEbookDataController.userData!.isBooki;
+
     if (isHaniExist == false) {
       _currentIndex = 1;
     }
+
     final bool isSibling = userDataController.userData!.siblingCount == '1' ? false : true;
-    final bookiKeyCode = Get.find<UserBookiDataController>();
-    final haniKeyCode = Get.find<UserHaniDataController>();
+
     return Scaffold(
       key: scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -76,8 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
         isHome: true,
         type: _currentIndex == 0 ? 'hani' : 'booki',
         isSibling: isSibling,
-        keyCode:
-            _currentIndex == 0 ? haniKeyCode.userHaniDataList[0].keyCode : bookiKeyCode.userBookiDataList[0].keyCode,
       ),
       body: Center(
         child: Container(

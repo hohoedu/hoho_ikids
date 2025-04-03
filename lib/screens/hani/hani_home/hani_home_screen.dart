@@ -83,7 +83,6 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
       endDrawer: MainDrawer(
         isHome: false,
         type: 'hani',
-        keyCode: widget.keyCode,
         isSibling: isSibling,
       ),
       body: Center(

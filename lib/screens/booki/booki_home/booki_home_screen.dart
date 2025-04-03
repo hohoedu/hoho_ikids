@@ -93,7 +93,6 @@ class _BookiHomeScreenState extends State<BookiHomeScreen>
       endDrawer: MainDrawer(
         isHome: false,
         type: 'booki',
-        keyCode: widget.keyCode,
         isSibling: isSibling,
       ),
       body: Center(

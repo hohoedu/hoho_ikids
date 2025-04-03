@@ -73,7 +73,6 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
       endDrawer: MainDrawer(
         isHome: false,
         type: type,
-        keyCode: widget.keyCode,
         isSibling: widget.isSibling,
       ),
       body: Center(

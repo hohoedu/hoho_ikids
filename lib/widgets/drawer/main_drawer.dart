@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/user_booki_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
+import 'package:hani_booki/_data/auth/user_hani_data.dart';
 import 'package:hani_booki/screens/alert/alert_screen.dart';
 import 'package:hani_booki/screens/home/sibling_screen.dart';
 import 'package:hani_booki/screens/record/record_home_school/record_home_school_screen.dart';
@@ -20,9 +21,8 @@ import 'package:hani_booki/utils/get_user_code.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
 import 'package:logger/logger.dart';
 
-class MainDrawer extends StatelessWidget {
+class MainDrawer extends StatefulWidget {
   final bool isHome;
-  final String keyCode;
   final String type;
   final bool isSibling;
 
@@ -31,8 +31,15 @@ class MainDrawer extends StatelessWidget {
     required this.isHome,
     required this.type,
     required this.isSibling,
-    this.keyCode = '',
   });
+
+  @override
+  State<MainDrawer> createState() => _MainDrawerState();
+}
+
+class _MainDrawerState extends State<MainDrawer> {
+  UserHaniDataController haniData = UserHaniDataController();
+  UserBookiDataController bookiData = UserBookiDataController();
 
   String truncateUsername(String username, int maxLength) {
     if (username.length <= maxLength) {
@@ -42,11 +49,31 @@ class MainDrawer extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    if (widget.type == 'hani') {
+      haniData = Get.find<UserHaniDataController>();
+    }
+
+    if (widget.type == 'booki') {
+      bookiData = Get.find<UserBookiDataController>();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final userData = Get.find<UserDataController>();
 
-
     bool isManager = userData.userData!.userType == 'M';
+    String keyCode = '';
+    if(widget.type == 'hani'){
+      keyCode = haniData.userHaniDataList[0].keyCode;
+    }
+    if(widget.type == 'booki'){
+      keyCode = bookiData.userBookiDataList[0].keyCode;
+    }
+
     return Drawer(
       backgroundColor: mBackWhite,
       child: Padding(
@@ -61,7 +88,7 @@ class MainDrawer extends StatelessWidget {
                     Container(
                       width: 50,
                       height: 50,
-                      child: type == 'hani'
+                      child: widget.type == 'hani'
                           ? Image.asset('assets/images/icons/hani.png')
                           : Image.asset('assets/images/icons/booki.png'),
                     ),
@@ -111,9 +138,9 @@ class MainDrawer extends StatelessWidget {
                   GestureDetector(
                     onTap: () async {
                       Navigator.pop(context);
-                      await getRecordList(keyCode, type);
-                      await contentStarService(keyCode, type);
-                      Get.to(() => RecordScreen(keyCode: keyCode, type: type));
+                      await getRecordList(keyCode, widget.type);
+                      await contentStarService(keyCode, widget.type);
+                      Get.to(() => RecordScreen(keyCode: keyCode, type: widget.type));
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -155,7 +182,7 @@ class MainDrawer extends StatelessWidget {
                   ),
                   // 형제 변경
                   Visibility(
-                    visible: isSibling && !isManager,
+                    visible: widget.isSibling && !isManager,
                     child: GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
