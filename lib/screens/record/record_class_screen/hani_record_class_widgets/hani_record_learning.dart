@@ -9,7 +9,7 @@ import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
 class HaniRecordLearning extends StatelessWidget {
-  final recordLearningData = Get.find<HaniRecordLearningDataController>();
+  final recordLearningData = Get.put(HaniRecordLearningDataController());
 
   HaniRecordLearning({super.key});
 
