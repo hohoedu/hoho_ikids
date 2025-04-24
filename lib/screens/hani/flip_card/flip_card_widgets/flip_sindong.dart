@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_index_card.dart';
 
-class FlipSoojae extends StatefulWidget {
+class FlipSindong extends StatefulWidget {
   final List<dynamic> haniFlipDataList;
   final GlobalKey<FlipCardState> cardKey;
   final Function(int) updateSelectedCard;
@@ -14,7 +14,7 @@ class FlipSoojae extends StatefulWidget {
   final Set<int> flippedIndices;
   final VoidCallback completeGame;
 
-  const FlipSoojae({
+  const FlipSindong({
     super.key,
     required this.haniFlipDataList,
     required this.cardKey,
@@ -28,10 +28,10 @@ class FlipSoojae extends StatefulWidget {
   });
 
   @override
-  State<FlipSoojae> createState() => _FlipSoojaeState();
+  State<FlipSindong> createState() => _FlipSindongState();
 }
 
-class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateMixin {
+class _FlipSindongState extends State<FlipSindong> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isInitialAnimationDone = false;
@@ -80,6 +80,60 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
       children: [
         Expanded(
           flex: 1,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(
+                    children: List.generate(
+                      2,
+                      (index) => Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: FlipIndexCard(
+                            imageUrl: widget.haniFlipDataList[index].frontImagePath,
+                            index: index,
+                            onTap: (index, imageUrl) {
+                              widget.updateSelectedCard(index);
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Row(
+                    children: List.generate(
+                      2,
+                      (index) => Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: FlipIndexCard(
+                            imageUrl: widget.haniFlipDataList[index + 2].frontImagePath,
+                            index: index + 2,
+                            onTap: (index, imageUrl) {
+                              widget.updateSelectedCard(index);
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 1,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: LayoutBuilder(
@@ -112,7 +166,7 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
                             await widget.playSound(soundUrl);
                             if (!widget.flippedIndices.contains(widget.currentIndex)) {
                               widget.flippedIndices.add(widget.currentIndex);
-                              if (widget.flippedIndices.length == 6) {
+                              if (widget.flippedIndices.length == 8) {
                                 widget.completeGame();
                               }
                             }
@@ -128,22 +182,20 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
         Expanded(
           flex: 1,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 flex: 1,
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: List.generate(
-                      3,
+                      2,
                       (index) => Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: FlipIndexCard(
-                            imageUrl: widget.haniFlipDataList[index].frontImagePath,
-                            index: index,
+                            imageUrl: widget.haniFlipDataList[index + 4].frontImagePath,
+                            index: index + 4,
                             onTap: (index, imageUrl) {
                               widget.updateSelectedCard(index);
                             },
@@ -160,13 +212,13 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
                   alignment: Alignment.topCenter,
                   child: Row(
                     children: List.generate(
-                      3,
+                      2,
                       (index) => Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: FlipIndexCard(
-                            imageUrl: widget.haniFlipDataList[index + 3].frontImagePath,
-                            index: index + 3,
+                            imageUrl: widget.haniFlipDataList[index + 6].frontImagePath,
+                            index: index + 6,
                             onTap: (index, imageUrl) {
                               widget.updateSelectedCard(index);
                             },

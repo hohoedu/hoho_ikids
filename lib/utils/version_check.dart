@@ -1,48 +1,82 @@
 import 'dart:io';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:hani_booki/_core/http.dart';
+import 'package:app_version_update/app_version_update.dart';
+import 'package:flutter/material.dart';
+import 'package:hani_booki/screens/auth/login_screen.dart';
+import 'package:hani_booki/utils/auto_login.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-Future<void> versionCheck() async {
-  String url = dotenv.get('APP_VERSION_URL',
-      fallback: 'https://hohoschool.com/hohoeduAPI/version.html');
+class EntryPoint extends StatefulWidget {
+  const EntryPoint({super.key});
 
-  // HTTP POST 요청
-  final response = await dio.post(url);
+  @override
+  State<EntryPoint> createState() => _EntryPointState();
+}
 
-  try {
-    // 응답을 성공적으로 받았을 때
-    if (response.statusCode == 200) {
-      final List<dynamic> resultList = response.data;
+class _EntryPointState extends State<EntryPoint> {
+  late Future<bool> _versionFuture;
 
-      // 응답 결과가 있는 경우
-      if (resultList[0]['result'] == "0000") {
-        // 검토중일 경우 Y(버전체크 X), 검토가 아닐 경우 N(버전체크 O)
-        if (resultList[0]['chkyn'] == 'N') {
-          final packageInfo = await PackageInfo.fromPlatform();
-          if (Platform.isAndroid) {
-            if (resultList[0]['Androidver'] != packageInfo.version) {
-              versionDialog("AOS");
-            }
-          }
-          if (Platform.isIOS) {
-            if (resultList[0]['ISOver'] != packageInfo.version) {
-              versionDialog("IOS");
-            }
+  @override
+  void initState() {
+    super.initState();
+    _versionFuture = verifyVersion();
+  }
+
+  Future<bool> verifyVersion() async {
+    String appleId = '6741888275';
+    String playStoreId = 'com.hohoedu.hani_booki';
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    final result = await AppVersionUpdate.checkForUpdates(
+      appleId: appleId,
+      playStoreId: playStoreId,
+      country: 'kr',
+    );
+
+    Logger().d('appVersion = ${packageInfo.version}');
+    Logger().d('storeVersion = ${result.storeVersion}');
+
+    if (result.canUpdate == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        versionDialog(Platform.isAndroid ? 'AOS' : 'IOS', result.storeUrl!);
+      });
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _versionFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Spacer(),
+                Expanded(child: Center(child: CircularProgressIndicator())),
+                Expanded(child: Text('버전을 확인하고 있습니다.'))
+              ],
+            )),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(child: Text('버전 확인 중 오류 발생: ${snapshot.error}')),
+          );
+        } else {
+          bool versionOk = snapshot.data ?? false;
+          if (versionOk) {
+            return const AutoLogin();
+          } else {
+            return const LoginScreen();
           }
         }
-      }
-      // 응답 데이터가 오류일 때("9999": 오류)
-      else {
-        Logger().d('${resultList[0]['message']}');
-      }
-    }
-  }
-  // 예외처리
-  catch (e) {
-    Logger().d('e = $e');
+      },
+    );
   }
 }

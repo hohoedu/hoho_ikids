@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/hani/hani_Flip_data.dart';
+import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_sindong.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_soojae.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_default.dart';
 import 'package:hani_booki/services/star_update_service.dart';
@@ -47,8 +48,7 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
   void _updateSelectedCard(int index) {
     setState(() {
       _currentIndex = index;
-      _frontImage =
-          haniFlipDataController.haniFlipDataList[index].frontImagePath;
+      _frontImage = haniFlipDataController.haniFlipDataList[index].frontImagePath;
       _backImage = haniFlipDataController.haniFlipDataList[index].backImagePath;
 
       if (_cardKey.currentState != null && !_cardKey.currentState!.isFront) {
@@ -107,12 +107,9 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
       ),
       body: Center(
         child: Container(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.85
-              : double.infinity,
+          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
           child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               child: widget.keyCode.substring(0, 1) == 'Y'
                   ? FlipDefault(
                       haniFlipDataList: haniFlipDataController.haniFlipDataList,
@@ -125,17 +122,29 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
                       flippedIndices: flippedIndices,
                       completeGame: completeGame,
                     )
-                  : FlipSoojae(
-                      haniFlipDataList: haniFlipDataController.haniFlipDataList,
-                      cardKey: _cardKey,
-                      updateSelectedCard: _updateSelectedCard,
-                      frontImage: _buildCardImage(_frontImage),
-                      backImage: _buildCardImage(_backImage),
-                      playSound: _playSound,
-                      currentIndex: _currentIndex,
-                      flippedIndices: flippedIndices,
-                      completeGame: completeGame,
-                    )),
+                  : widget.keyCode.substring(0, 1) == 'G'
+                      ? FlipSindong(
+                          haniFlipDataList: haniFlipDataController.haniFlipDataList,
+                          cardKey: _cardKey,
+                          updateSelectedCard: _updateSelectedCard,
+                          frontImage: _buildCardImage(_frontImage),
+                          backImage: _buildCardImage(_backImage),
+                          playSound: _playSound,
+                          currentIndex: _currentIndex,
+                          flippedIndices: flippedIndices,
+                          completeGame: completeGame,
+                        )
+                      : FlipSoojae(
+                          haniFlipDataList: haniFlipDataController.haniFlipDataList,
+                          cardKey: _cardKey,
+                          updateSelectedCard: _updateSelectedCard,
+                          frontImage: _buildCardImage(_frontImage),
+                          backImage: _buildCardImage(_backImage),
+                          playSound: _playSound,
+                          currentIndex: _currentIndex,
+                          flippedIndices: flippedIndices,
+                          completeGame: completeGame,
+                        )),
         ),
       ),
     );

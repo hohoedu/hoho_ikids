@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
@@ -30,6 +31,11 @@ class _NoticeListState extends State<NoticeList> {
 
     return now.difference(notificationDate).inDays < 14;
   }
+@override
+  void initState() {
+    super.initState();
+    badgeController.markNotificationAsRead(widget.noticeListData.noticeDataList[0].index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,60 +57,63 @@ class _NoticeListState extends State<NoticeList> {
                       setState(() {
                         currentIndex = index;
                       });
+// badgeController.resetBadge();
                       badgeController.markNotificationAsRead(noticeData.index);
                       await noticeViewService(
                         noticeData.index,
                         noticeData.type,
                       );
                     },
-                    // child: Obx(
-                    //   () => badges.Badge(
-                    //     position: badges.BadgePosition.topEnd(top: 5, end: 0),
-                    //     showBadge: badgeController.isBadgeVisible.value,
-                    //     badgeStyle: badges.BadgeStyle(
-                    //       badgeColor: Colors.red,
-                    //       padding: EdgeInsets.all(5),
-                    //     ),
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 8.0),
-                          child: Container(
-                            width: double.infinity,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: noticeTitleColor[noticeData.type],
-                              border: Border.all(
-                                width: 3,
-                                color: index == currentIndex
-                                    ? noticeTitleActiveColor[noticeData.type]!
-                                    : Colors.transparent,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Image.asset(
-                                    '${noticeIcon[noticeData.type]}',
-                                    scale: 2.5,
-                                  ),
+                    child: GetBuilder<BadgeController>(
+                      builder: (controller) {
+                        return badges.Badge(
+                          position: badges.BadgePosition.topEnd(top: 5, end: 0),
+                          showBadge: !badgeController.isRead(noticeData.index.toString()),
+                          badgeStyle: badges.BadgeStyle(
+                            badgeColor: Colors.red,
+                            padding: EdgeInsets.all(5),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 8.0),
+                            child: Container(
+                              width: double.infinity,
+                              height: 65.h,
+                              decoration: BoxDecoration(
+                                color: noticeTitleColor[noticeData.type],
+                                border: Border.all(
+                                  width: 3,
+                                  color: index == currentIndex
+                                      ? noticeTitleActiveColor[noticeData.type]!
+                                      : Colors.transparent,
                                 ),
-                                Text(
-                                  formatNoticeTitle(noticeData.title),
-                                  // formatNoticeTitle(noticeData.title),
-                                  style: TextStyle(
-                                    color: fontWhite,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset(
+                                      '${noticeIcon[noticeData.type]}',
+                                      scale: 2.5,
+                                    ),
                                   ),
-                                )
-                              ],
+                                  Text(
+                                    formatNoticeTitle(noticeData.title),
+                                    // formatNoticeTitle(noticeData.title),
+                                    style: TextStyle(
+                                      color: fontWhite,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                  //   ),
-                  // ),
+                        );
+                      },
+                    ),
+                  ),
                   Visibility(
                     visible: isNewActive(noticeData.createdAt),
                     child: SizedBox(width: 30, child: Image.asset('assets/images/icons/board_new.png')),

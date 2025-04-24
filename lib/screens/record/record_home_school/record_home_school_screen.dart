@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -30,6 +32,9 @@ class _RecordHomeSchoolScreenState extends State<RecordHomeSchoolScreen> {
   final star = Get.find<ReportStarDataController>();
 
   final contentStar = Get.find<ContentStarDataController>();
+  bool isOnTap = false;
+  bool isGraphTap = false;
+  Timer? _tooltipTimer;
 
   @override
   void initState() {
@@ -48,10 +53,7 @@ class _RecordHomeSchoolScreenState extends State<RecordHomeSchoolScreen> {
       ),
       body: Center(
         child: Container(
-          width: MediaQuery
-              .of(context)
-              .size
-              .width * 0.85,
+          width: MediaQuery.of(context).size.width * 0.85,
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Column(
@@ -67,12 +69,9 @@ class _RecordHomeSchoolScreenState extends State<RecordHomeSchoolScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.7,
+                      width: MediaQuery.of(context).size.width * 0.7,
                       child: Container(
-                        decoration: BoxDecoration(color: Color(0xFFFFF3C8), borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(color: Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(20)),
                         child: Row(
                           children: [
                             Expanded(
@@ -81,8 +80,7 @@ class _RecordHomeSchoolScreenState extends State<RecordHomeSchoolScreen> {
                                 padding: const EdgeInsets.all(16.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color:widget.type == 'hani'? 
-                                    Color(0xFFFF754C) : Color(0xFF00BCA8),
+                                    color: widget.type == 'hani' ? Color(0xFFFF754C) : Color(0xFF00BCA8),
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                   child: Padding(
@@ -101,16 +99,15 @@ class _RecordHomeSchoolScreenState extends State<RecordHomeSchoolScreen> {
                                           child: Padding(
                                             padding: const EdgeInsets.only(top: 8.0),
                                             child: Obx(
-                                                  () =>
-                                                  Text(
-                                                    '${star.totalStar.value}개\n획득',
-                                                    style: TextStyle(
-                                                      color: fontWhite,
-                                                      fontSize: 8.sp,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
+                                              () => Text(
+                                                '${star.totalStar.value}개\n획득',
+                                                style: TextStyle(
+                                                  color: fontWhite,
+                                                  fontSize: 8.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
                                             ),
                                           ),
                                         )
@@ -122,9 +119,83 @@ class _RecordHomeSchoolScreenState extends State<RecordHomeSchoolScreen> {
                             ),
                             Expanded(
                               flex: 3,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: RecordGraph(contentStar: contentStar, type: widget.type),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return Stack(
+                                    children: [
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(top: 8.0, right: 16.0),
+                                          child: Row(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: isGraphTap
+                                                    ? null
+                                                    : () {
+                                                        setState(() {
+                                                          isOnTap = true;
+                                                        });
+                                                        _tooltipTimer?.cancel();
+                                                        _tooltipTimer = Timer(Duration(seconds: 2), () {
+                                                          if (mounted) {
+                                                            setState(() {
+                                                              isOnTap = false;
+                                                            });
+                                                          }
+                                                        });
+                                                      },
+                                                child: Icon(CupertinoIcons.question_circle, color: Colors.grey),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 16.0),
+                                        child: RecordGraph(
+                                          contentStar: contentStar,
+                                          type: widget.type,
+                                          isOnTap: isOnTap,
+                                          onGraphTapChanged: (val) {
+                                            setState(() {
+                                              isGraphTap = val;
+                                              if (val && isOnTap) {
+                                                _tooltipTimer?.cancel();
+                                                isOnTap = false;
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: constraints.maxHeight / 4,
+                                        left: 0,
+                                        right: 0,
+                                        child: Visibility(
+                                          visible: isOnTap && !isGraphTap,
+                                          child: Align(
+                                            alignment: Alignment.topCenter,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withOpacity(0.6),
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Text(
+                                                  '각 그래프를 클릭하시면, 영역별 콘텐츠 활동을 보실 수 있습니다.',
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                             )
                           ],

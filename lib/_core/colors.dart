@@ -86,4 +86,10 @@ const Map<String, Color> haniReportTextColor = {
   "3": Color(0xFF8997FF),
   "4": Color(0xFF00AFB1),
   "5": Color(0xFFFF754C),
+};const Map<String, Color> bookiReportTextColor = {
+  "1": Color(0xFF0F68B3),
+  "2": Color(0xFFA9570B),
+  "3": Color(0xFFBE3B73),
+  "4": Color(0xFF753FB0),
+  "5": Color(0xFF1D923B),
 };

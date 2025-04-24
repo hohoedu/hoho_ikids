@@ -5,15 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
-import 'package:hani_booki/_data/auth/user_booki_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_ebook_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
 import 'package:hani_booki/_data/notice/notice_list_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/home/home_widgets/home_carousel_slider.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
 import 'package:hani_booki/utils/badge_controller.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/version_check.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
@@ -37,16 +38,20 @@ class _HomeScreenState extends State<HomeScreen> {
   final userDataController = Get.find<UserDataController>();
   final userEbookDataController = Get.find<UserEbookDataController>();
   final BadgeController badgeController = Get.put(BadgeController());
+  final GlobalKey logoKey = GlobalKey();
+  final GlobalKey carouselKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    badgeController.initHive();
+
+    badgeController.initHive(userDataController.userData!.id);
     Future.delayed(Duration(milliseconds: 500), () {
       setState(() {
         _currentIndex = 0; // 3에서 0으로 변경
       });
     });
+    noticeListService();
     Get.lazyPut<NoticeListDataController>(() => NoticeListDataController());
   }
 
@@ -134,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       Center(
+                                        key: logoKey,
                                         child: Container(
                                           color: Colors.transparent,
                                           child: SizedBox(
@@ -213,44 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    Positioned(
-                      bottom: 0,
-                      child: GestureDetector(
-                        onTap: () async {
-                          await noticeListService();
-                          // badgeController.resetBadge();
-                          // badgeController.hideBadge();
-                          showNoticeDialog(Get.context!);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          // child: Obx(
-                          //   () => badges.Badge(
-                          //     position: badges.BadgePosition.topEnd(top: -5, end: -5),
-                          //     showBadge: badgeController.isBadgeVisible.value,
-                          //     badgeStyle: badges.BadgeStyle(
-                          //       badgeColor: Colors.red,
-                          //       padding: EdgeInsets.all(10),
-                          //     ),
-                          child: Container(
-                            width: 65,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: mBackWhite,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.asset(
-                                'assets/images/icons/notification.png',
-                                scale: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // ),
-                    // ),
+
                   ],
                 ),
               ),
@@ -264,6 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 flex: 5,
                 child: HomeCarouselSlider(
+                  key: carouselKey,
                   currentIndex: _currentIndex,
                   carouselController: carouselController,
                 ),
@@ -275,3 +245,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+// Positioned(
+//   bottom: 0,
+//   left: 20,
+//   child: GestureDetector(
+//     onTap: () async {
+//       // badgeController.resetBadge();
+//       showNoticeDialog(Get.context!);
+//     },
+//     child: Obx(
+//       () {
+//         return badges.Badge(
+//           position: badges.BadgePosition.topEnd(top: 5, end: 5),
+//           showBadge: badgeController.isBadgeVisible.value,
+//           badgeContent: Text(
+//             '${badgeController.unReadCount()}',
+//             style: TextStyle(color: fontWhite, fontSize: 14),
+//           ),
+//           badgeStyle: badges.BadgeStyle(
+//             badgeColor: Colors.red,
+//             padding: EdgeInsets.all(6),
+//           ),
+//           child: Padding(
+//             padding: EdgeInsets.all(screenWidth >= 1000 ? 24.0 : 16.0),
+//             child: Container(
+//               decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(20),
+//               ),
+//               child: Padding(
+//                 padding: const EdgeInsets.all(8.0),
+//                 child: Image.asset(
+//                   'assets/images/icons/notification.png',
+//                   scale: screenWidth >= 1000 ? 2 : 3,
+//                 ),
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     ),
+//   ),
+// ),

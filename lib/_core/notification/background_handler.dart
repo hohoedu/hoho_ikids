@@ -11,7 +11,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   // BadgeController 초기화
   final BadgeController badgeController = Get.put(BadgeController());
-  await badgeController.initHive();
+  // await badgeController.initHive();
 
   String index = message.data['index'];
 

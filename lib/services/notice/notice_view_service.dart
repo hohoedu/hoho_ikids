@@ -18,7 +18,7 @@ Future<void> noticeViewService(idx, gb) async {
   };
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-
+  Logger().d('response = $response');
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
@@ -27,7 +27,7 @@ Future<void> noticeViewService(idx, gb) async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        final NoticeViewData noticeViewData = NoticeViewData.fromJson(resultList);
+        final NoticeViewData noticeViewData = NoticeViewData.fromJson(resultList, type: gb);
         noticeViewDataController.setNoticeViewData(noticeViewData);
       }
       // 응답 데이터가 오류일 때("9999": 오류)

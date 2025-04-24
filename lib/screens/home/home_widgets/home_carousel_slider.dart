@@ -57,16 +57,16 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
   Widget build(BuildContext context) {
     final List<dynamic> userDataList =
         widget.currentIndex == 1 ? bookiController.userBookiDataList : haniController.userHaniDataList;
-
+    final visibleDataList = userDataList.where((data) => int.parse(data.date) >= -10).toList();
     return userDataList.isNotEmpty
         ? CarouselSlider(
-            items: userDataList.map(
+            items: visibleDataList.map(
               (data) {
                 return Builder(
                   builder: (context) {
-                    final bool isTouchable = int.parse(data.date) >= 0;
+                    final bool isVisible = int.parse(data.date) >= 0;
                     return GestureDetector(
-                      onTap: isTouchable
+                      onTap: isVisible
                           ? () async {
                               // if (connectivityController.isConnected.value) {
                               widget.currentIndex == 1
@@ -124,7 +124,7 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
                                               width: 2, color: widget.currentIndex == 1 ? bookiColor : haniColor),
                                         ),
                                         child: Text(
-                                          '${data.date}일 남음',
+                                          (int.parse(data.date) >= 0) ? '${data.date}일 남음' : '0일 남음',
                                           style: TextStyle(color: widget.currentIndex == 1 ? bookiColor : haniColor),
                                         ),
                                       ),
@@ -141,10 +141,10 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
                                 ),
                               ),
                             ),
-                            if (!isTouchable)
+                            if (!isVisible)
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.withOpacity(0.6), // 회색 반투명 덮개
+                                  color: Colors.grey.withOpacity(0.6),
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
