@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/screens/auth/join_screen.dart';
 import 'package:hani_booki/screens/auth/login_screen.dart';
 import 'package:hani_booki/services/auth/login_service.dart';
+import 'package:hani_booki/utils/version_check.dart';
 import 'package:logger/logger.dart';
 
 final Future<void> autoLoginFuture = _checkAutoLogin();
@@ -39,7 +41,7 @@ class AutoLogin extends StatelessWidget {
           return const LoginScreen();
         }
 
-        return const LoginScreen();
+        return const JoinScreen();
       },
     );
   }

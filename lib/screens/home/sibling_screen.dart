@@ -59,15 +59,15 @@ class SiblingScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  double itemSize = constraints.maxWidth / 5; // 한 줄에 5개까지 배치
+                  double itemSize = constraints.maxWidth / 5;
                   return Center(
                     child: Wrap(
-                      spacing: 10.w, // 요소 간 간격
-                      runSpacing: 10.h, // 줄 간 간격
+                      spacing: 10.w,
+                      runSpacing: 10.h,
                       alignment: WrapAlignment.center,
                       children: List.generate(
                         siblingData.siblingDataList.length,
-                            (index) {
+                        (index) {
                           final selectedSibling = siblingData.siblingDataList[index];
                           return GestureDetector(
                             onTap: () async {

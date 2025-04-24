@@ -59,95 +59,91 @@ class _LegacyOnceUserScreenState extends State<LegacyOnceUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Scaffold(
-          extendBodyBehindAppBar: true,
-          backgroundColor: mBackAuth,
-          appBar: MainAppBar(
-            title: ' ',
-            isContent: false,
-          ),
-          body: Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: SingleChildScrollView(
-                physics: NeverScrollableScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Center(
-                      child: Text(
-                        '기관에서 안내받으신\n가입 코드를 입력해주세요',
-                        style: TextStyle(
-                          color: fontMain,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: mBackAuth,
+        appBar: MainAppBar(
+          title: ' ',
+          isContent: false,
+        ),
+        body: Center(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.5,
+            child: SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Center(
+                    child: Text(
+                      '기관에서 안내받으신\n가입 코드를 입력해주세요',
+                      style: TextStyle(
+                        color: fontMain,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 8,
-                          child: CustomTextField(
-                            controller: code1Controller,
-                            focusNode: code1FocusNode,
-                            hintText: '가입 코드',
-                            isObscure: false,
-                            suffix: isCode1Verified
-                                ? code1Controller.text.isNotEmpty
-                                    ? ' '
-                                    : null
-                                : null,
-                          ),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 8,
+                        child: CustomTextField(
+                          controller: code1Controller,
+                          focusNode: code1FocusNode,
+                          hintText: '가입 코드',
+                          isObscure: false,
+                          suffix: isCode1Verified
+                              ? code1Controller.text.isNotEmpty
+                                  ? ' '
+                                  : null
+                              : null,
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: Center(
-                            child: SizedBox(
-                              height: 50,
-                              child: VerifyButton(
-                                onTap: () async {
-                                  FocusManager.instance.primaryFocus?.unfocus();
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: SizedBox(
+                            height: 50,
+                            child: VerifyButton(
+                              onTap: () async {
+                                FocusManager.instance.primaryFocus?.unfocus();
 
-                                  await _verifyCode(code1Controller, true);
-                                },
-                                text: '인증',
-                                controller: code1Controller,
-                              ),
+                                await _verifyCode(code1Controller, true);
+                              },
+                              text: '인증',
+                              controller: code1Controller,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    AuthButton(
-                      onTap: () async {
-                        if (!isCode1Verified) {
-                          oneButtonDialog(
-                            title: '회원가입',
-                            content: '가입 코드를 입력하고 인증을 완료해주세요.',
-                            onTap: () => Get.back(),
-                            buttonText: '확인',
-                          );
-                        } else {
-                          await legacyUserService(
-                            id: widget.id,
-                            classCode1: code1Controller.text,
-                            isAutoLoginChecked: widget.isAutoLoginChecked,
-                          );
-                        }
-                      },
-                      text: '코드 등록하기',
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                  AuthButton(
+                    onTap: () async {
+                      if (!isCode1Verified) {
+                        oneButtonDialog(
+                          title: '회원가입',
+                          content: '가입 코드를 입력하고 인증을 완료해주세요.',
+                          onTap: () => Get.back(),
+                          buttonText: '확인',
+                        );
+                      } else {
+                        await legacyUserService(
+                          id: widget.id,
+                          classCode1: code1Controller.text,
+                          isAutoLoginChecked: widget.isAutoLoginChecked,
+                        );
+                      }
+                    },
+                    text: '코드 등록하기',
+                  ),
+                ],
               ),
             ),
           ),

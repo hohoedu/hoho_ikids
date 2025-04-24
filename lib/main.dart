@@ -81,6 +81,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusBar = MediaQuery.of(context).padding.top;
+
     return ScreenUtilInit(
       designSize: const Size(360, 722),
       minTextAdapt: true,
@@ -90,20 +91,18 @@ class MyApp extends StatelessWidget {
           padding: EdgeInsets.only(top: statusBar),
           child: GetMaterialApp(
             navigatorObservers: [routeObserver],
-            debugShowCheckedModeBanner: false,
+            debugShowCheckedModeBanner: true,
             theme: theme(),
             initialBinding: BindingsBuilder(
-              () async {
-                await versionCheck();
-              },
+              () async {},
             ),
             // home: const LoginScreen(),
-            home: AutoLogin(),
+            home: EntryPoint(),
             builder: (context, child) {
               return EasyLoading.init()(
                 context,
                 MediaQuery(
-                  data: MediaQuery.of(context).copyWith(),
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
                   child: child!,
                 ),
               );

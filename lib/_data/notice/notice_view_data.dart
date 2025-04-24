@@ -8,6 +8,7 @@ class NoticeViewData {
   final String note;
   final String typeString;
   final String linkUrl;
+  final String type;
 
   NoticeViewData({
     required this.title,
@@ -15,14 +16,16 @@ class NoticeViewData {
     required this.note,
     required this.typeString,
     required this.linkUrl,
+    required this.type,
   });
 
-  NoticeViewData.fromJson(Map<String, dynamic> json)
+  NoticeViewData.fromJson(Map<String, dynamic> json, {required String type})
       : title = json['title'] ?? '',
         imagePath = json['imgpath'] ?? '',
         note = json['note'] ?? '',
         typeString = json['gb_str'] ?? '',
-        linkUrl = json['linkurl'] ?? '';
+        linkUrl = json['linkurl'] ?? '',
+        type = type;
 }
 
 class NoticeViewDataController extends GetxController {

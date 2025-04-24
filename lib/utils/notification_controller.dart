@@ -23,11 +23,11 @@ class NotificationController extends GetxController {
     });
     await saveNotificationSettings();
     if (value) {
-      await FirebaseMessaging.instance.subscribeToTopic('test');
-      print("✅ 'test' 토픽 구독 완료");
+      await FirebaseMessaging.instance.subscribeToTopic('all-users');
+      print("✅ 'all-users' 토픽 구독 완료");
     } else {
-      await FirebaseMessaging.instance.unsubscribeFromTopic('test');
-      print("✅ 'test' 토픽 구독 취소");
+      await FirebaseMessaging.instance.unsubscribeFromTopic('all-users');
+      print("✅ 'all-users' 토픽 구독 취소");
     }
   }
 

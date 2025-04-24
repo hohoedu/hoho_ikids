@@ -19,7 +19,7 @@ class FlipIndexCard extends StatelessWidget {
         onTap(index, imageUrl);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: Image.network(

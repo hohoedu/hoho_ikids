@@ -15,8 +15,15 @@ import 'package:logger/logger.dart';
 class RecordGraph extends StatefulWidget {
   final ContentStarDataController contentStar;
   final String type;
+  final Function(bool) onGraphTapChanged;
+  bool isOnTap;
 
-  const RecordGraph({super.key, required this.contentStar, required this.type});
+  RecordGraph(
+      {super.key,
+      required this.contentStar,
+      required this.type,
+      required this.isOnTap,
+      required this.onGraphTapChanged});
 
   @override
   State<RecordGraph> createState() => _RecordGraphState();
@@ -96,6 +103,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                     setState(() {
                                       _currentIndex = response.spot!.touchedBarGroupIndex + 1;
                                       isGraphTap = true;
+                                      widget.onGraphTapChanged(true);
                                     });
                                   }
                                 },
@@ -112,6 +120,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                               _currentIndex = int.parse(
                                                   widget.contentStar.contentStarDataList[value.toInt()].index);
                                               isGraphTap = true;
+                                              widget.isOnTap = false;
                                             });
                                           },
                                           child: Container(
@@ -119,17 +128,19 @@ class _RecordGraphState extends State<RecordGraph> {
                                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
-                                                color: widget.type == 'hani'
-                                                    ? haniReportColor[
-                                                        widget.contentStar.contentStarDataList[value.toInt()].index]
-                                                    : bookiReportColor[
-                                                        widget.contentStar.contentStarDataList[value.toInt()].index],
+                                                color: Colors.transparent,
                                                 borderRadius: BorderRadius.vertical(bottom: Radius.circular(5))),
                                             child: Text(
                                               formattedSubject(
                                                   widget.contentStar.contentStarDataList[value.toInt()].subject),
-                                              style: const TextStyle(
-                                                  color: fontMain, fontWeight: FontWeight.bold, height: 1.2),
+                                              style: TextStyle(
+                                                  color: widget.type == 'hani'
+                                                      ? haniReportTextColor[
+                                                          widget.contentStar.contentStarDataList[value.toInt()].index]
+                                                      : bookiReportTextColor[
+                                                          widget.contentStar.contentStarDataList[value.toInt()].index],
+                                                  fontWeight: FontWeight.bold,
+                                                  height: 1.2),
                                               textAlign: TextAlign.center,
                                             ),
                                           ),
@@ -154,11 +165,13 @@ class _RecordGraphState extends State<RecordGraph> {
                               ),
                               gridData: FlGridData(
                                 drawVerticalLine: false,
-                                show: false,
+                                horizontalInterval: 1,
+                                show: true,
+                                drawHorizontalLine: true,
                                 getDrawingHorizontalLine: (value) {
                                   return FlLine(
                                     color: Colors.grey[400],
-                                    strokeWidth: 1,
+                                    strokeWidth: 0.3,
                                     dashArray: [4, 2],
                                   );
                                 },
@@ -182,7 +195,9 @@ class _RecordGraphState extends State<RecordGraph> {
                         child: GestureDetector(
                           onTap: () {
                             setState(() {
+                              widget.isOnTap = false;
                               isGraphTap = false;
+                              widget.onGraphTapChanged(false);
                             });
                           },
                           child: Container(
@@ -282,7 +297,7 @@ class _RecordGraphState extends State<RecordGraph> {
               toY: double.parse(widget.contentStar.contentStarDataList[index].score),
               color: widget.type == 'hani' ? haniReportColor['${index + 1}'] : bookiReportColor['${index + 1}'],
               width: constraints.maxWidth * 0.15,
-              borderRadius: BorderRadius.circular(0),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
             ),
           ],
         );

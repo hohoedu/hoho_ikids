@@ -16,8 +16,10 @@ import 'package:hani_booki/services/content_star_service.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
 import 'package:hani_booki/services/record/booki/booki_record_home_service.dart';
 import 'package:hani_booki/services/record/hani/hani_record_home_service.dart';
+import 'package:hani_booki/utils/badge_controller.dart';
 import 'package:hani_booki/utils/get_record_list.dart';
 import 'package:hani_booki/utils/get_user_code.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
 import 'package:logger/logger.dart';
 
@@ -40,6 +42,8 @@ class MainDrawer extends StatefulWidget {
 class _MainDrawerState extends State<MainDrawer> {
   UserHaniDataController haniData = UserHaniDataController();
   UserBookiDataController bookiData = UserBookiDataController();
+  final userDataController = Get.find<UserDataController>();
+  final BadgeController badgeController = Get.put(BadgeController());
 
   String truncateUsername(String username, int maxLength) {
     if (username.length <= maxLength) {
@@ -59,6 +63,8 @@ class _MainDrawerState extends State<MainDrawer> {
     if (widget.type == 'booki') {
       bookiData = Get.find<UserBookiDataController>();
     }
+
+    badgeController.initHive(userDataController.userData!.id);
   }
 
   @override
@@ -67,10 +73,10 @@ class _MainDrawerState extends State<MainDrawer> {
 
     bool isManager = userData.userData!.userType == 'M';
     String keyCode = '';
-    if(widget.type == 'hani'){
+    if (widget.type == 'hani') {
       keyCode = haniData.userHaniDataList[0].keyCode;
     }
-    if(widget.type == 'booki'){
+    if (widget.type == 'booki') {
       keyCode = bookiData.userBookiDataList[0].keyCode;
     }
 
@@ -153,6 +159,56 @@ class _MainDrawerState extends State<MainDrawer> {
                           ),
                           const SizedBox(width: 16),
                           const Expanded(child: Text('학습 기록')),
+                          const Icon(Icons.navigate_next),
+                        ],
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      Navigator.pop(context);
+                      showNoticeDialog(Get.context!);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Image.asset('assets/images/icons/notification.png'),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                const Text('공지 사항'),
+                                Positioned(
+                                  left: 60,
+                                  top: -10,
+                                  child: Obx(() {
+                                    return badgeController.isBadgeVisible.value
+                                        ? Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Text(
+                                              ' ',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          )
+                                        : const SizedBox.shrink();
+                                  }),
+                                ),
+                              ],
+                            ),
+                          ),
                           const Icon(Icons.navigate_next),
                         ],
                       ),

@@ -677,7 +677,7 @@ void verticalLottieDialog({required VoidCallback onMain, required VoidCallback o
   );
 }
 
-void versionDialog(String platform) {
+void versionDialog(String platform, String storeUrl) {
   Get.defaultDialog(
     backgroundColor: mBackWhite,
     title: '버전 불일치',

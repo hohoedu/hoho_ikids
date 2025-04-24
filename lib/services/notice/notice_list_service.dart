@@ -8,6 +8,7 @@ import 'package:hani_booki/_data/kidok/kidok_main_data.dart';
 import 'package:hani_booki/_data/kidok/kidok_sublist_data.dart';
 import 'package:hani_booki/_data/notice/notice_list_data.dart';
 import 'package:hani_booki/services/notice/notice_view_service.dart';
+import 'package:hani_booki/utils/badge_controller.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
@@ -15,6 +16,7 @@ import 'package:logger/logger.dart';
 Future<void> noticeListService() async {
   String url = dotenv.get('NOTICE_LIST_URL');
   final noticeListDataController = Get.put(NoticeListDataController());
+  final badgeController = Get.put(BadgeController());
   final userdata = Get.find<UserDataController>();
 
   final Map<String, dynamic> requestData = {
@@ -32,9 +34,15 @@ Future<void> noticeListService() async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        final List<NoticeListData> kidokBookcaseDataList =
+        final List<NoticeListData> noticeListDataList =
             (resultList['data'] as List).map((json) => NoticeListData.fromJson(json)).toList();
-        noticeListDataController.setNoticeListData(kidokBookcaseDataList);
+
+        noticeListDataController.setNoticeListData(noticeListDataList);
+
+        await badgeController.initHive(userdata.userData!.id);
+        badgeController.setUnreadNoticesFromList(
+          noticeListDataList.map((e) => {'idx': e.index}).toList(),
+        );
 
         await noticeViewService(
           noticeListDataController.noticeDataList[0].index,
