@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/notice/notice_view_data.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -50,9 +51,9 @@ class NoticeView extends StatelessWidget {
 
               Widget buildActionButton() {
                 if (type == '1') {
-                  return Image.asset('assets/images/icons/kakao.png', scale: 2);
+                  return Image.asset('assets/images/icons/kakao.png', scale: 2, fit: BoxFit.cover);
                 } else if (type == '2') {
-                  return Image.asset('assets/images/icons/youtube.png', scale: 2);
+                  return Image.asset('assets/images/icons/youtube.png', scale: 2, fit: BoxFit.cover);
                 } else {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -74,7 +75,8 @@ class NoticeView extends StatelessWidget {
                     right: 20,
                     bottom: 20,
                     child: GestureDetector(
-                      onTap: () => moveToUrl(linkUrl),
+                      // onTap: () => moveToUrl(linkUrl),
+                      onTap: () => showParentGateDialog(context, linkUrl),
                       child: Container(
                         width: 60.w,
                         height: 40.h,

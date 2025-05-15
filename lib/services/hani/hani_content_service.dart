@@ -4,6 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
+import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_su.dart';
+import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_young.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen.dart';
 import 'package:hani_booki/services/total_star_service.dart';
 import 'package:hani_booki/utils/connectivityController.dart';
@@ -34,7 +36,9 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
       if (resultValue == "0000") {
         haniHomeController.setHaniHomeDataMap(resultList['data']);
         await totalStarService(keyCode);
-        Get.to(() => HaniHomeScreen(keyCode: keyCode));
+        // Get.to(() => HaniHomeScreen(keyCode: keyCode));
+        Get.to(() => HaniHomeScreenYoung(keyCode: keyCode));
+        // Get.to(() => HaniHomeScreenSu(keyCode: keyCode));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

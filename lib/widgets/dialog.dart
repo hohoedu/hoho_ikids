@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -928,5 +930,143 @@ void showNoticeDialog(BuildContext context) {
         ),
       );
     },
+  );
+}
+
+void showParentGateDialog(BuildContext context, String url) {
+  final rand = Random();
+  final num1 = rand.nextInt(99) + 1;
+  final num2 = rand.nextInt(99) + 1;
+  final isAddition = rand.nextBool();
+  final operator = isAddition ? '+' : '-';
+  final correctAnswer = isAddition ? num1 + num2 : num1 - num2;
+
+  String input = '';
+  String? errorText;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext ctx) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.all(16),
+        content: SizedBox(
+          width: 500,
+          height: 250,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Row(
+                children: [
+                  // 왼쪽: 문제 및 입력 상태
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("부모님 확인", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 16),
+                        Text("문제: $num1 $operator $num2 = ?", style: const TextStyle(fontSize: 18)),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            input.isEmpty ? "정답 입력" : input,
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        if (errorText != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              errorText!,
+                              style: const TextStyle(color: Colors.red, fontSize: 14),
+                            ),
+                          ),
+                        const Spacer(),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text("취소"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const VerticalDivider(),
+
+                  // 오른쪽: 키패드
+                  Expanded(
+                    flex: 1,
+                    child: SizedBox(
+                      width: 220,
+                      child: _buildKeypad(onTap: (value) async {
+                        setState(() {
+                          if (value == '←') {
+                            if (input.isNotEmpty) input = input.substring(0, input.length - 1);
+                          } else if (value == '확인') {
+                            final answer = int.tryParse(input);
+                            if (answer == correctAnswer) {
+                              launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                              Navigator.of(ctx).pop();
+                            } else {
+                              errorText = "정답이 아닙니다.";
+                            }
+                          } else {
+                            if (input.length < 3) input += value;
+                          }
+                        });
+                      }),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget _buildKeypad({required void Function(String value) onTap}) {
+  final keys = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['←', '0', '확인'],
+  ];
+
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: keys
+        .map(
+          (row) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: row
+                .map(
+                  (key) => Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: ElevatedButton(
+                      onPressed: () => onTap(key),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(50, 45),
+                        backgroundColor: Colors.grey.shade200,
+                        foregroundColor: Colors.black,
+                      ),
+                      child: Text(key, style: const TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        )
+        .toList(),
   );
 }

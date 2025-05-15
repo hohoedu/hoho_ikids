@@ -40,8 +40,7 @@ class AutoLogin extends StatelessWidget {
         if (snapshot.hasError) {
           return const LoginScreen();
         }
-
-        return const JoinScreen();
+        return const LoginScreen();
       },
     );
   }
