@@ -7,10 +7,10 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/hani/hani_stroke_data.dart';
+import 'package:hani_booki/screens/hani/stroke/stroke_widgets/stroke_word.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
-import 'package:hani_booki/screens/hani/stroke/stroke_widgets/stroke_word.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
@@ -77,31 +77,30 @@ class _StrokeScreenState extends State<StrokeScreen> {
   void _onPrevWord() {
     setState(() {
       _onResetTracing();
-      currentIndex = (currentIndex - 1 + strokeData.haniStrokeDataList.length) %
-          strokeData.haniStrokeDataList.length;
+      currentIndex = (currentIndex - 1 + strokeData.haniStrokeDataList.length) % strokeData.haniStrokeDataList.length;
       _updateNote();
     });
   }
 
   void _completeWord() async {
-    _playSound(strokeData.haniStrokeDataList[currentIndex].voicePath);
+    setState(() {
+      isPointerShown = false;
+    });
     totalCompletedIndex++;
+    _playSound(strokeData.haniStrokeDataList[currentIndex].voicePath);
 
     if (totalCompletedIndex >= strokeData.haniStrokeDataList.length) {
       starUpdateService('write', widget.keyCode);
-      setState(() {
-        isDialogShown = true;
-      });
-      _showCompletionDialog();
-    } else {
-      setState(() {
-        isPointerShown = false;
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          isDialogShown = true;
+        });
+        _showCompletionDialog();
       });
     }
   }
 
   void _showCompletionDialog() async {
-    await Future.delayed(Duration(milliseconds: 500));
     verticalLottieDialog(
       onReset: () async {
         setState(() {
@@ -115,11 +114,9 @@ class _StrokeScreenState extends State<StrokeScreen> {
       },
       onMain: () async {
         if (Platform.isIOS) {
-          await SystemChrome.setPreferredOrientations(
-              [DeviceOrientation.landscapeRight]);
+          await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
         } else {
-          await SystemChrome.setPreferredOrientations(
-              [DeviceOrientation.landscapeLeft]);
+          await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
         }
         Get.back();
         Get.back();
@@ -133,35 +130,7 @@ class _StrokeScreenState extends State<StrokeScreen> {
     });
   }
 
-  // void showSnackBar() {
-  //   if (!Get.isSnackbarOpen) {
-  //     Get.snackbar(
-  //       '',
-  //       "모든 획순을 채워주세요",
-  //       snackPosition: SnackPosition.BOTTOM,
-  //       backgroundColor: mBackWhite,
-  //       colorText: fontMain,
-  //       duration: Duration(seconds: 2),
-  //       borderRadius: 8,
-  //       snackStyle: SnackStyle.FLOATING,
-  //       titleText: SizedBox.shrink(),
-  //       messageText: Center(
-  //         child: Text(
-  //           "모든 획순을 채워주세요",
-  //           style: TextStyle(
-  //             color: fontMain,
-  //             fontSize: 16,
-  //             fontWeight: FontWeight.bold,
-  //           ),
-  //           textAlign: TextAlign.center,
-  //         ),
-  //       ),
-  //     );
-  //   }
-  // }
-
   void _onResetTracing() {
-    // _showCompletionDialog();
     setState(() {
       isPointerShown = true;
     });
@@ -192,18 +161,13 @@ class _StrokeScreenState extends State<StrokeScreen> {
                       alignment: Alignment.bottomCenter,
                       child: RichText(
                         text: TextSpan(
-                          style: TextStyle(
-                              color: Color(0xFFE7610B),
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Color(0xFFE7610B), fontSize: 32, fontWeight: FontWeight.bold),
                           children: [
                             TextSpan(
                               text: '$totalCompletedIndex',
                             ),
                             TextSpan(
-                                text:
-                                    ' / ${strokeData.haniStrokeDataList.length}',
-                                style: TextStyle(color: fontMain)),
+                                text: ' / ${strokeData.haniStrokeDataList.length}', style: TextStyle(color: fontMain)),
                           ],
                         ),
                       ),
@@ -245,14 +209,11 @@ class _StrokeScreenState extends State<StrokeScreen> {
                         ),
                         SizedBox(width: 8),
                         Container(
-                          decoration: BoxDecoration(
-                              color: Color(0xFFE7610B),
-                              borderRadius: BorderRadius.circular(10)),
+                          decoration: BoxDecoration(color: Color(0xFFE7610B), borderRadius: BorderRadius.circular(10)),
                           child: Padding(
                             padding: EdgeInsets.all(2),
                             child: Text(
-                              strokeData
-                                  .haniStrokeDataList[currentIndex].phonetic,
+                              strokeData.haniStrokeDataList[currentIndex].phonetic,
                               // 음 (발음) 표시
                               style: TextStyle(
                                 color: fontWhite,
@@ -289,19 +250,15 @@ class _StrokeScreenState extends State<StrokeScreen> {
                           ),
                           Expanded(
                             child: GestureDetector(
-                                onTap: _onResetTracing,
-                                child: Icon(Icons.refresh,
-                                    size: 50, color: fontWhite)),
+                                onTap: _onResetTracing, child: Icon(Icons.refresh, size: 50, color: fontWhite)),
                           ),
                           Expanded(
                             child: GestureDetector(
                               onTap: () {
                                 _onNextWord();
                               },
-                              child: strokeData.haniStrokeDataList.length - 1 >
-                                      currentIndex
-                                  ? Icon(Icons.skip_next,
-                                      size: 50, color: fontWhite)
+                              child: strokeData.haniStrokeDataList.length - 1 > currentIndex
+                                  ? Icon(Icons.skip_next, size: 50, color: fontWhite)
                                   : SizedBox.shrink(),
                             ),
                           ),

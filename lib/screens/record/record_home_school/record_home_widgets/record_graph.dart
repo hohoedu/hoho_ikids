@@ -15,6 +15,7 @@ import 'package:logger/logger.dart';
 class RecordGraph extends StatefulWidget {
   final ContentStarDataController contentStar;
   final String type;
+  final String keyCode;
   final Function(bool) onGraphTapChanged;
   bool isOnTap;
 
@@ -23,7 +24,8 @@ class RecordGraph extends StatefulWidget {
       required this.contentStar,
       required this.type,
       required this.isOnTap,
-      required this.onGraphTapChanged});
+      required this.onGraphTapChanged,
+      required this.keyCode});
 
   @override
   State<RecordGraph> createState() => _RecordGraphState();
@@ -62,10 +64,8 @@ class _RecordGraphState extends State<RecordGraph> {
   void _setCurrentIndex() {
     if (widget.type == 'hani') {
       _currentIndex = haniData.userHaniDataList.length - 1;
-      contentStarService(haniData.userHaniDataList.reversed.toList()[_currentIndex].keyCode, widget.type);
     } else {
       _currentIndex = bookiData.userBookiDataList.length - 1;
-      contentStarService(bookiData.userBookiDataList.reversed.toList()[_currentIndex].keyCode, widget.type);
     }
   }
 
@@ -125,7 +125,6 @@ class _RecordGraphState extends State<RecordGraph> {
                                           },
                                           child: Container(
                                             width: constraints.maxWidth * 0.15,
-                                            padding: const EdgeInsets.symmetric(vertical: 8.0),
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
                                                 color: Colors.transparent,

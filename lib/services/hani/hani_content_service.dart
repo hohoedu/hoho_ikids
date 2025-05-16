@@ -36,8 +36,8 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
       if (resultValue == "0000") {
         haniHomeController.setHaniHomeDataMap(resultList['data']);
         await totalStarService(keyCode);
-        // Get.to(() => HaniHomeScreen(keyCode: keyCode));
-        Get.to(() => HaniHomeScreenYoung(keyCode: keyCode));
+        Get.to(() => HaniHomeScreen(keyCode: keyCode));
+        // Get.to(() => HaniHomeScreenYoung(keyCode: keyCode));
         // Get.to(() => HaniHomeScreenSu(keyCode: keyCode));
       }
       // 응답 데이터가 오류일 때("9999": 오류)

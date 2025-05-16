@@ -156,6 +156,7 @@ class _RecordHomeSchoolScreenState extends State<RecordHomeSchoolScreen> {
                                         padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, right: 16.0),
                                         child: RecordGraph(
                                           contentStar: contentStar,
+                                          keyCode: widget.keyCode,
                                           type: widget.type,
                                           isOnTap: isOnTap,
                                           onGraphTapChanged: (val) {

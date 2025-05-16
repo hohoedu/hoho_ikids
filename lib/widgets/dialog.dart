@@ -935,11 +935,33 @@ void showNoticeDialog(BuildContext context) {
 
 void showParentGateDialog(BuildContext context, String url) {
   final rand = Random();
-  final num1 = rand.nextInt(99) + 1;
-  final num2 = rand.nextInt(99) + 1;
-  final isAddition = rand.nextBool();
-  final operator = isAddition ? '+' : '-';
-  final correctAnswer = isAddition ? num1 + num2 : num1 - num2;
+  final isSimple = rand.nextBool();
+
+  late String question;
+  late int correctAnswer;
+
+  if (isSimple) {
+    int num1 = rand.nextInt(999) + 1;
+    int num2 = rand.nextInt(999) + 1;
+    bool isAddition = rand.nextBool();
+
+    if (!isAddition && num1 < num2) {
+      // num1이 더 작으면 두 숫자 스왑해서 양수 결과 보장
+      final temp = num1;
+      num1 = num2;
+      num2 = temp;
+    }
+
+    final operator = isAddition ? '+' : '-';
+    question = "$num1 $operator $num2";
+    correctAnswer = isAddition ? num1 + num2 : num1 - num2;
+  } else {
+    final a = rand.nextInt(9) + 1;
+    final b = rand.nextInt(9) + 1;
+    final c = rand.nextInt(9) + 1;
+    question = "$a × ($b + $c)";
+    correctAnswer = a * (b + c);
+  }
 
   String input = '';
   String? errorText;
@@ -962,11 +984,11 @@ void showParentGateDialog(BuildContext context, String url) {
                   Expanded(
                     flex: 1,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const Text("부모님 확인", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
-                        Text("문제: $num1 $operator $num2 = ?", style: const TextStyle(fontSize: 18)),
+                        Text("문제: $question = ?", style: const TextStyle(fontSize: 18)),
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -1019,7 +1041,7 @@ void showParentGateDialog(BuildContext context, String url) {
                               errorText = "정답이 아닙니다.";
                             }
                           } else {
-                            if (input.length < 3) input += value;
+                            if (input.length < 4) input += value;
                           }
                         });
                       }),
@@ -1045,28 +1067,40 @@ Widget _buildKeypad({required void Function(String value) onTap}) {
 
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
-    children: keys
-        .map(
-          (row) => Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: row
-                .map(
-                  (key) => Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: ElevatedButton(
-                      onPressed: () => onTap(key),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(50, 45),
-                        backgroundColor: Colors.grey.shade200,
-                        foregroundColor: Colors.black,
+    children: keys.map(
+      (row) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: row.map((key) {
+            return Padding(
+              padding: const EdgeInsets.all(4),
+              child: SizedBox(
+                width: 45,
+                height: 45,
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  color: CupertinoColors.systemGrey5,
+                  borderRadius: BorderRadius.circular(8),
+                  onPressed: () => onTap(key),
+                  child: Center(
+                    child: Text(
+                      key,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: CupertinoColors.black,
                       ),
-                      child: Text(key, style: const TextStyle(fontSize: 16)),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                )
-                .toList(),
-          ),
-        )
-        .toList(),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    ).toList(),
   );
 }

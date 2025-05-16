@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -75,8 +76,13 @@ class NoticeView extends StatelessWidget {
                     right: 20,
                     bottom: 20,
                     child: GestureDetector(
-                      // onTap: () => moveToUrl(linkUrl),
-                      onTap: () => showParentGateDialog(context, linkUrl),
+                      onTap: () {
+                        if (Platform.isIOS) {
+                          showParentGateDialog(context, linkUrl);
+                        } else {
+                          moveToUrl(linkUrl);
+                        }
+                      },
                       child: Container(
                         width: 60.w,
                         height: 40.h,

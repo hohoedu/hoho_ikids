@@ -29,6 +29,7 @@ import 'package:hani_booki/services/record/hani/hani_record_learning_service.dar
 import 'package:hani_booki/services/record/hani/hani_record_tenacity_service.dart';
 import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
 class RecordClassScreen extends StatefulWidget {
@@ -266,36 +267,6 @@ class _RecordClassScreenState extends State<RecordClassScreen> {
                           children: [
                             Expanded(
                               flex: 1,
-                              child: GestureDetector(
-                                onTap: toggleMode,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Visibility(
-                                    visible: widget.classStatus == 'c',
-                                    child: Image.asset(
-                                      isToggle
-                                          ? 'assets/images/records/booki_report.png'
-                                          : 'assets/images/records/hani_report.png',
-                                      scale: 1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Expanded(
-                              flex: 3,
-                              child: LeftArea(
-                                userData: userData,
-                                haniData: haniReportData,
-                                bookiData: bookiReportData,
-                                type: widget.type,
-                                isToggle: isToggle,
-                                hosu: hosu,
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
                               child: Row(
                                 children: [
                                   GestureDetector(
@@ -339,6 +310,46 @@ class _RecordClassScreenState extends State<RecordClassScreen> {
                                 ],
                               ),
                             ),
+                            SizedBox(height: 10),
+                            Expanded(
+                              flex: 4,
+                              child: LeftArea(
+                                userData: userData,
+                                haniData: haniReportData,
+                                bookiData: bookiReportData,
+                                type: widget.type,
+                                isToggle: isToggle,
+                                hosu: hosu,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: GestureDetector(
+                                onTap: toggleMode,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Visibility(
+                                    visible: widget.classStatus == 'c',
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(50),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.4),
+                                            blurRadius: 10,
+                                            offset: Offset(2, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Image.asset(isToggle
+                                          ? 'assets/images/records/booki_report.png'
+                                          : 'assets/images/records/hani_report.png'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10),
                           ],
                         ),
                       ),
@@ -359,13 +370,10 @@ class _RecordClassScreenState extends State<RecordClassScreen> {
                                     return RecordClassTab(
                                       onTap: () => onTabClick(index),
                                       text: isToggle ? haniTitles[index] : bookiTitles[index],
-                                      color: isSelected
-                                          ? Color(0xFFFFD200)
-                                          : isToggle
-                                              ? Color(0xFFA37EF2)
-                                              : Color(0xFF00BCA8),
-                                      fontColor:
-                                          isSelected ? (isToggle ? Color(0xFF3E2081) : Color(0xFF013D44)) : Colors.white,
+                                      color: isSelected ? Color(0xFFFFD200) : Color(isToggle ? 0xFFA37EF2 : 0xFF00BCA8),
+                                      fontColor: isSelected
+                                          ? (isToggle ? Color(0xFF402280) : Color(0xFF003D44))
+                                          : Colors.white,
                                       child: Container(),
                                     );
                                   }),
@@ -437,7 +445,7 @@ class LeftArea extends StatelessWidget {
     bool isManager = userData.userData!.userType == 'M';
     return RichText(
       text: TextSpan(
-        style: TextStyle(fontSize: 8.sp, color: Color(0xFF3E2081), letterSpacing: -0.5),
+        style: TextStyle(fontSize: 8.sp, color: Color(isToggle ? 0xFF3E2081 : 0xFF0A7C8A), letterSpacing: -0.5),
         children: [
           TextSpan(
             text: forceLineBreak('${userData.userData!.schoolName}\n', 8),

@@ -15,7 +15,6 @@ class SettingVolume extends StatefulWidget {
 }
 
 class _SettingVolumeState extends State<SettingVolume> {
-  late AudioPlayer _bgmPlayer;
   late AudioPlayer _effectPlayer;
 
   double _bgmValue = 10.0;
@@ -27,7 +26,6 @@ class _SettingVolumeState extends State<SettingVolume> {
   @override
   void initState() {
     super.initState();
-    _bgmPlayer = AudioPlayer();
     _effectPlayer = AudioPlayer();
     settingBox = Hive.box('settings');
 
@@ -39,19 +37,14 @@ class _SettingVolumeState extends State<SettingVolume> {
     double? volume = await FlutterVolumeController.getVolume();
     setState(() {
       _systemVolume = volume ?? 1.0;
-      _bgmValue = _systemVolume * 10; // 시스템 볼륨과 배경음 연동
     });
-    _applyVolumeSettings();
   }
 
   Future<void> _setSystemVolume(double value) async {
     await FlutterVolumeController.setVolume(value);
     setState(() {
       _systemVolume = value;
-      _bgmValue = value * 10;
     });
-    _applyVolumeSettings();
-    _saveVolumeSettings();
   }
 
   Future<void> _loadVolumeSettings() async {
@@ -71,13 +64,8 @@ class _SettingVolumeState extends State<SettingVolume> {
     double bgmNormalized = _bgmValue / 10;
     double effectNormalized = _effectValue / 10;
 
-    // 로컬 플레이어에 적용 (필요시)
-    _bgmPlayer.setVolume(bgmNormalized);
     _effectPlayer.setVolume(effectNormalized);
-
-    // 글로벌 SoundManager(효과음)와 BgmController(배경음)에 적용
     SoundManager.setEffectVolume(effectNormalized);
-    // GetX를 통해 등록된 BgmController 인스턴스에 음량 적용
     Get.find<BgmController>().setBgmVolume(bgmNormalized);
   }
 
@@ -88,8 +76,7 @@ class _SettingVolumeState extends State<SettingVolume> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -109,16 +96,27 @@ class _SettingVolumeState extends State<SettingVolume> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildSlider(
-                      '배경음',
+                      '시스템',
                       _systemVolume * 10,
-                          (value) {
+                      (value) {
                         _setSystemVolume(value / 10);
+                      },
+                    ),
+                    _buildSlider(
+                      '배경음',
+                      _bgmValue,
+                      (value) {
+                        setState(() {
+                          _bgmValue = value;
+                        });
+                        _applyVolumeSettings();
+                        _saveVolumeSettings();
                       },
                     ),
                     _buildSlider(
                       '효과음',
                       _effectValue,
-                          (value) {
+                      (value) {
                         setState(() {
                           _effectValue = value;
                         });
@@ -129,7 +127,6 @@ class _SettingVolumeState extends State<SettingVolume> {
                   ],
                 ),
               ),
-              const Spacer(flex: 1),
             ],
           ),
         ),
@@ -137,15 +134,14 @@ class _SettingVolumeState extends State<SettingVolume> {
     );
   }
 
-  Widget _buildSlider(
-      String label, double value, ValueChanged<double> onChanged) {
+  Widget _buildSlider(String label, double value, ValueChanged<double> onChanged) {
     return Row(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
             label,
-            style: TextStyle(color: fontSub, fontSize: 14),
+            style: TextStyle(color: fontSub, fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ),
         Expanded(
@@ -170,7 +166,6 @@ class _SettingVolumeState extends State<SettingVolume> {
 
   @override
   void dispose() {
-    _bgmPlayer.dispose();
     _effectPlayer.dispose();
     super.dispose();
   }
