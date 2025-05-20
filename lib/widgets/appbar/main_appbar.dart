@@ -22,6 +22,7 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isKidok;
   final VoidCallback? onTap;
   final VoidCallback? onTapBackIcon;
+  final TextStyle? titleStyle;
 
   const MainAppBar({
     super.key,
@@ -34,6 +35,7 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.isVisibleLeading = true,
     this.onTapBackIcon,
+    this.titleStyle,
   });
 
   @override
@@ -82,9 +84,11 @@ class _MainAppBarState extends State<MainAppBar> {
       title: widget.title != null
           ? Text(
               widget.title!,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+              style: widget.titleStyle == null
+                  ? TextStyle(
+                      fontWeight: FontWeight.bold,
+                    )
+                  : widget.titleStyle,
             )
           : null,
       centerTitle: true,

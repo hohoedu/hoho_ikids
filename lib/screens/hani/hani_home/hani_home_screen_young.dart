@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
+import 'package:hani_booki/screens/hani/drag_puzzle/drag_puzzle_screen.dart';
+import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
 import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
@@ -74,10 +76,15 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.green,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.to(() => MakeCardScreen());
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        color: Colors.green,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -95,10 +102,15 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> {
                                   ),
                                 ),
                                 Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.indigo,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.to(() => DragPuzzleScreen());
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        color: Colors.indigo,
+                                      ),
                                     ),
                                   ),
                                 ),

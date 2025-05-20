@@ -107,10 +107,11 @@ final List<Color> strokeColors = [
 ];
 
 final Map<String, String> noticeIcon = {
+  '0': 'assets/images/icons/board_type4.png', // 공지사항
   '1': 'assets/images/icons/board_type3.png', // 교육정보
   '2': 'assets/images/icons/board_type2.png', // 한자성어
-  '0': 'assets/images/icons/board_type4.png', // 공지사항
-  '8': 'assets/images/icons/board_type1.png', // 호호스타
+  '7': 'assets/images/icons/board_type5.png', // 호호스타 발표
+  '8': 'assets/images/icons/board_type1.png', // 호호스타 콘텐츠
 };
 
 final List<String> pentagons = [
@@ -134,4 +135,3 @@ final List<String> bookiTitles = [
   '우리반 언어활동',
   '지식확장 독서활동',
 ];
-

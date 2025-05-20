@@ -19,29 +19,35 @@ class _QuizScreenState extends State<QuizScreen> {
       backgroundColor: Color(0xFFFFFDE5),
       appBar: MainAppBar(
         isContent: true,
-        title: ' ',
+        title: '공통으로 들어가는 한자를 찾아보세요!',
+        titleStyle: TextStyle(
+          fontSize: 22,
+        ),
         onTapBackIcon: () => showBackDialog(false),
       ),
       body: Center(
         child: SizedBox(
           width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.8 : double.infinity,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Center(child: Text('공통으로 들어가는 한자를 찾아보세요!')),
+              Spacer(
+                flex: 1,
+              ),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          color: Colors.red,
-                          child: Column(
-                            children: List.generate(2, (rowIndex) {
-                              return Expanded(
+                flex: 12,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(2, (rowIndex) {
+                            return Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16.0),
                                 child: Row(
                                   children: List.generate(2, (colIndex) {
                                     final index = rowIndex * 2 + colIndex;
@@ -53,42 +59,39 @@ class _QuizScreenState extends State<QuizScreen> {
                                     ];
 
                                     return Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                        child: Image.asset(
-                                          imagePaths[index],
-                                        ),
+                                      child: Image.asset(
+                                        imagePaths[index],
                                       ),
                                     );
                                   }),
                                 ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: List.generate(
+                            2,
+                            (index) {
+                              List<String> answer = ['a1', 'a2'];
+                              return Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Image.asset('assets/images/temp/${answer[index]}.png'),
+                                ),
                               );
-                            }),
+                            },
                           ),
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: List.generate(
-                              2,
-                              (index) {
-                                List<String> answer = ['a1', 'a2'];
-                                return Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Image.asset('assets/images/temp/${answer[index]}.png'),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               )
             ],

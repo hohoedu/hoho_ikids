@@ -54,19 +54,24 @@ class _EntryPointState extends State<EntryPoint> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
+            backgroundColor: Colors.white,
             body: Center(
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Spacer(),
                 Expanded(child: Center(child: CircularProgressIndicator())),
-                Expanded(child: Text('버전을 확인하고 있습니다.'))
+                Expanded(
+                  child: Text('버전을 확인하고 있습니다.'),
+                ),
               ],
             )),
           );
         } else if (snapshot.hasError) {
           return Scaffold(
-            body: Center(child: Text('버전 확인 중 오류 발생: ${snapshot.error}')),
+            body: Center(
+              child: Text('버전 확인 중 오류 발생'),
+            ),
           );
         } else {
           bool versionOk = snapshot.data ?? false;

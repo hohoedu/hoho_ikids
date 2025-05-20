@@ -41,13 +41,15 @@ const Map<String, Color> noticeTitleColor = {
   '0': Color(0xFFF286AC),
   '1': Color(0xFF1AD0C1),
   '2': Color(0xFFA974C5),
-  '8': Color(0xFFFFC12C),
+  '7': Color(0xFF84CB39), // 호호스타 발표
+  '8': Color(0xFFFFC12C), // 호호스타 콘텐츠
 };
 const Map<String, Color> noticeTitleActiveColor = {
   '0': Color(0xFFE73F7A),
   '1': Color(0xFF00AA9C),
   '2': Color(0xFF7D38A1),
-  '8': Color(0xFFFF9600),
+  '7': Color(0xFF59A426), // 호호스타 발표
+  '8': Color(0xFFFF9600), // 호호스타 콘텐츠
 };
 
 const Map<String, Color> HighFiveColor = {
@@ -86,7 +88,8 @@ const Map<String, Color> haniReportTextColor = {
   "3": Color(0xFF8997FF),
   "4": Color(0xFF00AFB1),
   "5": Color(0xFFFF754C),
-};const Map<String, Color> bookiReportTextColor = {
+};
+const Map<String, Color> bookiReportTextColor = {
   "1": Color(0xFF0F68B3),
   "2": Color(0xFFA9570B),
   "3": Color(0xFFBE3B73),
