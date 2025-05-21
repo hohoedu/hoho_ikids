@@ -125,9 +125,9 @@ class BookiRecordReading extends StatelessWidget {
                                                 child: Text(
                                                   autoWrapText(
                                                     readingData.recordReadingDataList[index].subject ?? '제목 없음',
-                                                    4,
+                                                    7,
                                                   ),
-                                                  style: TextStyle(fontSize: 7.sp),
+                                                  style: TextStyle(fontSize: 7.sp, height: 1.2),
                                                   textAlign: TextAlign.center,
                                                 ),
                                               ),

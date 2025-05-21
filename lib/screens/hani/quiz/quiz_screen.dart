@@ -1,17 +1,35 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hani_booki/_data/hani/hani_quiz_data.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:logger/logger.dart';
 
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
+  final String keyCode;
+
+  const QuizScreen({super.key, required this.keyCode});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  late List<String> answer;
+  final quizData = Get.find<HaniQuizDataController>();
+  int currectIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    answer = [
+      quizData.haniQuizDataList[currectIndex].correct,
+      quizData.haniQuizDataList[currectIndex].wrong,
+    ]..shuffle();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,14 +70,14 @@ class _QuizScreenState extends State<QuizScreen> {
                                   children: List.generate(2, (colIndex) {
                                     final index = rowIndex * 2 + colIndex;
                                     final imagePaths = [
-                                      'assets/images/temp/q1_1.png',
-                                      'assets/images/temp/q1_2.png',
-                                      'assets/images/temp/q1_3.png',
-                                      'assets/images/temp/q00.png',
+                                      quizData.haniQuizDataList[currectIndex].first,
+                                      quizData.haniQuizDataList[currectIndex].second,
+                                      quizData.haniQuizDataList[currectIndex].third,
+                                      quizData.haniQuizDataList[currectIndex].question,
                                     ];
 
                                     return Expanded(
-                                      child: Image.asset(
+                                      child: Image.network(
                                         imagePaths[index],
                                       ),
                                     );
@@ -79,11 +97,30 @@ class _QuizScreenState extends State<QuizScreen> {
                           children: List.generate(
                             2,
                             (index) {
-                              List<String> answer = ['a1', 'a2'];
                               return Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Image.asset('assets/images/temp/${answer[index]}.png'),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      final isCorrect =
+                                          answer[index] == quizData.haniQuizDataList[currectIndex].correct;
+                                      Logger().d(isCorrect ? '정답' : '오답');
+                                      if (isCorrect) {
+                                        if (currectIndex == quizData.haniQuizDataList.length - 1) {
+                                          return;
+                                        } else {
+                                          setState(() {
+                                            currectIndex++;
+                                            answer = [
+                                              quizData.haniQuizDataList[currectIndex].correct,
+                                              quizData.haniQuizDataList[currectIndex].wrong,
+                                            ]..shuffle();
+                                          });
+                                        }
+                                      }
+                                    },
+                                    child: Image.network(answer[index]),
+                                  ),
                                 ),
                               );
                             },

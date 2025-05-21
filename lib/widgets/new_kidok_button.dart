@@ -5,13 +5,15 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/kidok/kidok_theme_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/kidok/kidok_main_service.dart';
 import 'package:hani_booki/utils/text_format.dart';
 
 class NewKidokButton extends StatelessWidget {
   final String keycode;
   final String type;
-  final kidokThemeController = Get.find<KidokThemeDataController>();
+
+  // final kidokThemeController = Get.find<KidokThemeDataController>();
   final userData = Get.find<UserDataController>();
 
   NewKidokButton({super.key, required this.keycode, required this.type});
@@ -38,60 +40,54 @@ class NewKidokButton extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Align(
-                    alignment: const Alignment(0.0, 0.5),
-                    child: ClipPath(
-                      clipper: KidokClipper(),
-                      child: Container(
-                        height: MediaQuery.of(context).size.height * 0.35,
-                        decoration: BoxDecoration(
-                          color: Color(kidokThemeController.kidokThemeData!.boxColor),
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(50),
-                            bottomRight: Radius.circular(50),
+                  Padding(
+                    padding: screenWidth >= 1000 ? EdgeInsets.all(8.0) : EdgeInsets.symmetric(vertical: 16.0),
+                    child: Align(
+                      alignment: const Alignment(0.0, 0.5),
+                      child: ClipPath(
+                        clipper: KidokClipper(),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.35,
+                          decoration: BoxDecoration(
+                            // color: Color(kidokThemeController.kidokThemeData!.boxColor),
+                            color: Colors.green,
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(50),
+                              bottomRight: Radius.circular(50),
+                            ),
                           ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            AspectRatio(
-                              aspectRatio: 1.0,
-                              child: RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(
-                                  style: TextStyle(
-                                    color: fontMain,
-                                    fontFamily: 'Cookie',
-                                    fontSize: 8.sp,
-                                    height: 1.4,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              AspectRatio(
+                                aspectRatio: 1.0,
+                                child: RichText(
+                                  textAlign: TextAlign.center,
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      color: fontMain,
+                                      fontFamily: 'Cookie',
+                                      fontSize: 8.sp,
+                                      height: 1.4,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                          text: type == 'hani'
+                                              // ? '${kidokThemeController.kidokThemeData!.subject}'
+                                              ? '끈기'
+                                              : '지식확장'),
+                                      TextSpan(
+                                          text: '\n독서활동',
+                                          style: TextStyle(
+                                              // color: Color(kidokThemeController.kidokThemeData!.subjectColor),
+                                              color: Colors.red,
+                                              fontSize: 7.sp))
+                                    ],
                                   ),
-                                  children: [
-                                    TextSpan(
-                                        text: type == 'hani'
-                                            ? '${kidokThemeController.kidokThemeData!.subject}'
-                                            : '지식확장'),
-                                    TextSpan(
-                                        text: '\n독서활동',
-                                        style: TextStyle(
-                                            color: Color(kidokThemeController.kidokThemeData!.subjectColor),
-                                            fontSize: 7.sp))
-                                  ],
                                 ),
                               ),
-                              //   Text(
-                              //   insertNewlineAtFirstSpace(
-                              //       ? '${kidokThemeController.kidokThemeData!.subject}\n독서활동'
-                              //       : '지식확장\n독서활동'),
-                              //   style: TextStyle(
-                              //     color: fontMain,
-                              //     fontFamily: 'Cookie',
-                              //     fontSize: 10.sp,
-                              //     height: 1.2,
-                              //   ),
-                              //   textAlign: TextAlign.center,
-                              // ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

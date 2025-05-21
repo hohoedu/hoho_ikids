@@ -84,6 +84,7 @@ class _MainAppBarState extends State<MainAppBar> {
       title: widget.title != null
           ? Text(
               widget.title!,
+              textAlign: TextAlign.center,
               style: widget.titleStyle == null
                   ? TextStyle(
                       fontWeight: FontWeight.bold,

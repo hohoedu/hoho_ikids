@@ -27,7 +27,7 @@ Future<void> haniRecordTenacityService(teacherId, pin, hosu, schoolId) async {
     'hosu': hosu,
     'schoolid': schoolId
   };
-
+Logger().d(requestData);
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
 

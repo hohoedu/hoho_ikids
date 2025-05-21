@@ -26,6 +26,7 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
 
+  Logger().d(requestData);
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
@@ -36,9 +37,17 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
       if (resultValue == "0000") {
         haniHomeController.setHaniHomeDataMap(resultList['data']);
         await totalStarService(keyCode);
-        // Get.to(() => HaniHomeScreen(keyCode: keyCode));
-        Get.to(() => HaniHomeScreenYoung(keyCode: keyCode));
-        // Get.to(() => HaniHomeScreenSu(keyCode: keyCode));
+        if (keyCode.substring(3, 4) == '5') {
+          if (keyCode.substring(0, 1) == 'Y') {
+            Get.to(() => HaniHomeScreenYoung(keyCode: keyCode));
+            return;
+          }
+          if (keyCode.substring(0, 1) == 'G') {
+            Get.to(() => HaniHomeScreenSu(keyCode: keyCode));
+            return;
+          }
+        }
+        Get.to(() => HaniHomeScreen(keyCode: keyCode));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
+import 'package:hani_booki/_data/hani/hani_home_data.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_contents.dart';
 import 'package:hani_booki/services/hani/hani_erase_service.dart';
 import 'package:hani_booki/services/hani/hani_flip_service.dart';
@@ -11,9 +12,12 @@ import 'package:hani_booki/services/hani/hani_goldenbell_service.dart';
 import 'package:hani_booki/services/hani/hani_hanjasong_service.dart';
 import 'package:hani_booki/services/hani/hani_insung_service.dart';
 import 'package:hani_booki/services/hani/hani_puzzle_service.dart';
+import 'package:hani_booki/services/hani/hani_quiz_service.dart';
+import 'package:hani_booki/services/hani/hani_song_list_service.dart';
 import 'package:hani_booki/services/hani/hani_song_service.dart';
 import 'package:hani_booki/services/hani/hani_storke_service.dart';
 import 'package:hani_booki/services/hani/hani_story_service.dart';
+import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/kidok_button.dart';
@@ -31,14 +35,18 @@ class HaniHomeScreenSu extends StatefulWidget {
 }
 
 class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
+  final bgmController = Get.find<BgmController>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final haniHomeData = Get.find<HaniHomeDataController>();
   final userHaniData = Get.find<UserHaniDataController>();
   final userData = Get.find<UserDataController>();
 
   @override
   Widget build(BuildContext context) {
+    final haniData = haniHomeData.haniHomeData;
     String id = userData.userData!.id;
     String year = userData.userData!.year;
+    final bool isSibling = userData.userData!.siblingCount == '1' ? false : true;
     return Scaffold(
       key: scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -54,7 +62,7 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
       endDrawer: MainDrawer(
         isHome: false,
         type: 'hani',
-        isSibling: userData.userData!.siblingCount == '1' ? false : true,
+        isSibling: isSibling,
       ),
       body: Center(
         child: Padding(
@@ -74,87 +82,55 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
                       decoration: BoxDecoration(color: Colors.transparent),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // 윗줄 컨텐츠 3개
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.teal,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.indigo,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          Row(
+                            children: [
+                              HaniContents(
+                                path: '${haniData['han']}',
+                                onTap: () {
+                                  haniSongListService(id, widget.keyCode, year);
+                                },
+                              ),
+                              HaniContents(
+                                path: '${haniData['workbook']}',
+                                onTap: () {},
+                              ),
+                              HaniContents(
+                                path: '${haniData['quiz']}',
+                                onTap: () {},
+                              ),
+                              HaniContents(
+                                path: '${haniData['bell']}',
+                                onTap: () {},
+                              ),
+                            ],
                           ),
                           // 아랫줄 컨텐츠 2개
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.yellow,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.orange,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      color: Colors.pink,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+                          Row(
+                            children: [
+                              HaniContents(
+                                path: '${haniData['story1']}',
+                                onTap: () {},
+                              ),
+                              HaniContents(
+                                path: '${haniData['story2']}',
+                                onTap: () {},
+                              ),
+                              HaniContents(
+                                path: '${haniData['story3']}',
+                                onTap: () {},
+                              ),
+                              HaniContents(
+                                path: '${haniData['story4']}',
+                                onTap: () {},
+                              )
+                            ],
                           ),
                         ],
                       ),

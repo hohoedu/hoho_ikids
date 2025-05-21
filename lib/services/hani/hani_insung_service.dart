@@ -9,17 +9,23 @@ import 'package:logger/logger.dart';
 
 // 하니 인성이야기
 Future<void> haniInsungService(id, keycode, year) async {
-  String url = dotenv.get('HANI_INSUNG_URL');
-
+  String url = '';
+  if (keycode.substring(3, 4) == '5') {
+    url = dotenv.get('HANI_INSUNG_Y5_URL');
+  } else {
+    url = dotenv.get('HANI_INSUNG_URL');
+  }
+  Logger().d('url =$url');
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keycode,
     'yy': year,
   };
+  Logger().d(requestData);
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-
+Logger().d(response);
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {

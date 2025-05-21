@@ -75,8 +75,8 @@ class HaniRecordTenacity extends StatelessWidget {
                                   : const Text('이미지 없음'),
                             ),
                             Text(
-                              tenacityData.title,
-                              style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold),
+                              tenacityData.title.replaceAll(' ', '  '),
+                              style: TextStyle(fontSize: 7.sp, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -116,7 +116,7 @@ class HaniRecordTenacity extends StatelessWidget {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      color: !isInsungs[index] ? const Color(0xFFFFED77) : const Color(0xFFC7C7C8),
+                                      color: isInsungs[index] ? const Color(0xFFFFED77) : const Color(0xFFC7C7C8),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -150,7 +150,7 @@ class HaniRecordTenacity extends StatelessWidget {
                                             ),
                                           ),
                                           Image.asset(
-                                            !isInsungs[index]
+                                            isInsungs[index]
                                                 ? 'assets/images/icons/checkbox.png'
                                                 : 'assets/images/icons/checkbox_blank.png',
                                             scale: screenWidth >= 1000 ? 2 : 2.5,
