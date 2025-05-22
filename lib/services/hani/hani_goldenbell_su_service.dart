@@ -4,33 +4,25 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_data.dart';
-import 'package:hani_booki/_data/hani/hani_quiz_data.dart';
+import 'package:hani_booki/_data/hani/hani_goldenbell_su_data.dart';
 import 'package:hani_booki/screens/hani/hani_goldenbell/hani_goldenbell_screen.dart';
-import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
+import 'package:hani_booki/screens/hani/hani_goldenbell/hani_goldenbell_su_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 퀴즈사전
-Future<void> haniQuizService(id, keyCode, year) async {
-  String url = '';
-  if (keyCode.substring(0, 1) == 'Y') {
-    url = dotenv.get('HANI_QUIZ_Y5_URL');
-  }
-  if (keyCode.substring(0, 1) == 'G') {
-    url = dotenv.get('HANI_QUIZ_G5_URL');
-  }
+// 하니 골든벨(수재)
+Future<void> haniGoldenbellSuService(id, keyCode, year) async {
+  String url = dotenv.get('HANI_GOLDENBELL_G5_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,
     'yy': year,
   };
-  Logger().d(requestData);
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-  Logger().d(response);
-
+  Logger().d('response = $response');
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
@@ -40,14 +32,14 @@ Future<void> haniQuizService(id, keyCode, year) async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        List<HaniQuizData> haniQuizDataList = resultData.map((item) => HaniQuizData.fromJson(item)).toList();
-        // List<HaniGoldenbellData> haniGoldenbellDataList =
-        //     responseData.map((item) => HaniGoldenbellData.fromJson(item)).toList();
+        List<HaniGoldenbellSuData> haniGoldenbellSuDataList =
+            resultData.map((item) => HaniGoldenbellSuData.fromJson(item)).toList();
 
-        final haniQuizDataController = Get.put(HaniQuizDataController());
-        haniQuizDataController.setHaniQuizDataList(haniQuizDataList);
+        final haniGoldenbellSuDataController = Get.put(HaniGoldenbellSuDataController());
+        haniGoldenbellSuDataController.setHaniGoldenbellSuDataList(haniGoldenbellSuDataList);
 
-        Get.to(() => QuizScreen(keyCode: keyCode));
+        Logger().d('result = ${haniGoldenbellSuDataController.haniGoldenbellDataList[1].correctAnswer}');
+        Get.to(() => HaniGoldenbellSuScreen(keyCode: keyCode));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

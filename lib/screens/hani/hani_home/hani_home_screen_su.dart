@@ -9,8 +9,10 @@ import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_content
 import 'package:hani_booki/services/hani/hani_erase_service.dart';
 import 'package:hani_booki/services/hani/hani_flip_service.dart';
 import 'package:hani_booki/services/hani/hani_goldenbell_service.dart';
+import 'package:hani_booki/services/hani/hani_goldenbell_su_service.dart';
 import 'package:hani_booki/services/hani/hani_hanjasong_service.dart';
 import 'package:hani_booki/services/hani/hani_insung_service.dart';
+import 'package:hani_booki/services/hani/hani_make_card_service.dart';
 import 'package:hani_booki/services/hani/hani_puzzle_service.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
 import 'package:hani_booki/services/hani/hani_song_list_service.dart';
@@ -24,6 +26,7 @@ import 'package:hani_booki/widgets/kidok_button.dart';
 import 'package:hani_booki/widgets/new_kidok_button.dart';
 import 'package:hani_booki/widgets/new_star_count.dart';
 import 'package:hani_booki/widgets/star_count.dart';
+import 'package:logger/logger.dart';
 
 class HaniHomeScreenSu extends StatefulWidget {
   final String keyCode;
@@ -99,15 +102,21 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
                               ),
                               HaniContents(
                                 path: '${haniData['workbook']}',
-                                onTap: () {},
+                                onTap: () {
+                                  haniMakeCardService(id, widget.keyCode, year);
+                                },
                               ),
                               HaniContents(
                                 path: '${haniData['quiz']}',
-                                onTap: () {},
+                                onTap: () {
+                                  haniQuizService(id, widget.keyCode, year);
+                                },
                               ),
                               HaniContents(
                                 path: '${haniData['bell']}',
-                                onTap: () {},
+                                onTap: () {
+                                  haniGoldenbellSuService(id, widget.keyCode, year);
+                                },
                               ),
                             ],
                           ),
@@ -116,7 +125,9 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
                             children: [
                               HaniContents(
                                 path: '${haniData['story1']}',
-                                onTap: () {},
+                                onTap: () {
+                                  Logger().d('1');
+                                },
                               ),
                               HaniContents(
                                 path: '${haniData['story2']}',

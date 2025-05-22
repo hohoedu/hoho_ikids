@@ -4,7 +4,9 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hive/hive.dart';
 
 class MakeCardScreen extends StatelessWidget {
-  const MakeCardScreen({super.key});
+  final String keyCode;
+
+  const MakeCardScreen({super.key, required this.keyCode});
 
   @override
   Widget build(BuildContext context) {

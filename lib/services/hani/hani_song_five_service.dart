@@ -7,22 +7,24 @@ import 'package:hani_booki/screens/video_player/video_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 인성이야기
-Future<void> haniInsungService(id, keyCode, year) async {
+Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
   String url = '';
-  if (keyCode.substring(0, 1) == 'Y' && keyCode.substring(3, 4) == '5') {
-    url = dotenv.get('HANI_INSUNG_Y5_URL');
-  } else {
-    url = dotenv.get('HANI_INSUNG_URL');
+  if (keyCode.substring(0, 1) == 'Y') {
+    url = dotenv.get('HANI_SONG_Y5_URL');
   }
-  Logger().d('url =$url');
+  if (keyCode.substring(0, 1) == 'G') {
+    url = dotenv.get('HANI_SONG_G5_URL');
+  }
+  Logger().d(hosu);
+  Logger().d(keyCode.substring(0, 1));
+
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,
     'yy': year,
+    'hosu': hosu,
   };
   Logger().d(requestData);
-
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
   Logger().d(response);
@@ -33,11 +35,20 @@ Future<void> haniInsungService(id, keyCode, year) async {
 
       // 응답 결과가 있는 경우
       if (responseData['result'] == "0000") {
-        if (responseData['insung'] != null) {
+        if(responseData['han'] != null){
+          Get.to(
+                () => VideoScreen(
+              content: 'han',
+              videoId: responseData['han'],
+              keyCode: keyCode,
+            ),
+          );
+        }
+        if (responseData['song'] != null) {
           Get.to(
             () => VideoScreen(
-              content: 'insung',
-              videoId: responseData['insung'],
+              content: 'Song',
+              videoId: responseData['song'],
               keyCode: keyCode,
             ),
           );

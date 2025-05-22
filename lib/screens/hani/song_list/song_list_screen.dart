@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_song_list_data.dart';
+import 'package:hani_booki/services/hani/hani_song_five_service.dart';
+import 'package:hani_booki/services/hani/hani_song_service.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
@@ -18,6 +21,7 @@ class SongListScreen extends StatefulWidget {
 
 class _SongListScreenState extends State<SongListScreen> {
   final haniSongList = Get.find<HaniSongListController>();
+  final userData = Get.find<UserDataController>().userData;
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +50,12 @@ class _SongListScreenState extends State<SongListScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: GestureDetector(
                             onTap: () {
-                              Logger().d('ontap');
-                              Logger().d(haniSongList.haniSongList[index].category);
+                              haniSongFiveService(
+                                userData!.id,
+                                widget.keyCode,
+                                userData!.year,
+                                haniSongList.haniSongList[index].category,
+                              );
                             },
                             child: Image.network(
                               '${haniSongList.haniSongList[index].imagePath}',
