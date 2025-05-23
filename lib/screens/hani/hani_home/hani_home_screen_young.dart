@@ -13,6 +13,7 @@ import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_content
 import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
 import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
 import 'package:hani_booki/screens/hani/rotate/rotate_screen.dart';
+import 'package:hani_booki/services/hani/hani_drag_puzzle_service.dart';
 import 'package:hani_booki/services/hani/hani_insong_list_service.dart';
 import 'package:hani_booki/services/hani/hani_insung_service.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
@@ -133,7 +134,7 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                             HaniContents(
                               path: '${haniData['puz']}',
                               onTap: () {
-                                Get.to(() => DragPuzzleScreen());
+                                haniDragPuzzleService(id, widget.keyCode, year);
                               },
                             ),
                           ],

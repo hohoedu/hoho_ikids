@@ -2,17 +2,20 @@ import 'package:get/get.dart';
 
 class HaniMakeCardData {
   final String first;
+  final String second;
   final String correct;
   final String wrong;
 
   HaniMakeCardData({
     required this.first,
+    required this.second,
     required this.correct,
     required this.wrong,
   });
 
   HaniMakeCardData.fromJson(Map<String, dynamic> json)
       : first = json["first"],
+        second = json["second"],
         correct = json["correct"],
         wrong = json["wrong"];
 }

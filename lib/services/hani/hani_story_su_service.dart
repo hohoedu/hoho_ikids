@@ -7,14 +7,15 @@ import 'package:hani_booki/screens/video_player/video_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 동화
-Future<void> haniStoryService(id, keycode, year) async {
-  String url = dotenv.get('HANI_STORY_URL');
+// 하니 수재5호 동화
+Future<void> haniStorySuService(id, keycode, year, week) async {
+  String url = dotenv.get('HANI_STORY_G5_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keycode,
     'yy': year,
+    'week': week,
   };
 
   // HTTP POST 요청

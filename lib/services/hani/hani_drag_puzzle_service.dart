@@ -3,17 +3,20 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
+import 'package:hani_booki/_data/hani/hani_drag_puzzle_data.dart';
 import 'package:hani_booki/_data/hani/hani_make_card_data.dart';
 import 'package:hani_booki/_data/hani/hani_puzzle_data.dart';
+import 'package:hani_booki/screens/hani/drag_puzzle/drag_puzzle_screen.dart';
 import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
 import 'package:hani_booki/screens/hani/puzzle/puzzle_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 어휘 만들기
-Future<void> haniMakeCardService(id, keyCode, year) async {
-  final makeCardDataController = Get.put(HaniMakeCardDataController());
-  String url = dotenv.get('HANI_MAKE_CARD_URL');
+// 하니 창의표현 퍼즐
+Future<void> haniDragPuzzleService(id, keyCode, year) async {
+  final dragPuzzleData = Get.put(HaniDragPuzzleDataController());
+  String url = dotenv.get('HANI_PUZZLE_Y5_URL');
+  Logger().d(url);
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,
@@ -28,12 +31,14 @@ Future<void> haniMakeCardService(id, keyCode, year) async {
       final responseData = json.decode(response.data);
       final resultValue = responseData['result'];
       final List<dynamic> resultData = responseData['data'];
+
       if (resultValue == "0000") {
-        List<HaniMakeCardData> makeCardDataList = resultData.map((item) => HaniMakeCardData.fromJson(item)).toList();
+        List<HaniDragPuzzleData> dragPuzzleDataList =
+            resultData.map((item) => HaniDragPuzzleData.fromJson(item)).toList();
 
-        makeCardDataController.setMakeCardDataList(makeCardDataList);
+        dragPuzzleData.setDragPuzzleDataList(dragPuzzleDataList);
 
-        Get.to(() => MakeCardScreen(keyCode: keyCode));
+        Get.to(() => DragPuzzleScreen(keyCode: keyCode));
       } else {
         oneButtonDialog(
           title: '불러오기 실패',

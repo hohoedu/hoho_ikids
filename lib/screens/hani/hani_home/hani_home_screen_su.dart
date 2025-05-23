@@ -19,6 +19,7 @@ import 'package:hani_booki/services/hani/hani_song_list_service.dart';
 import 'package:hani_booki/services/hani/hani_song_service.dart';
 import 'package:hani_booki/services/hani/hani_storke_service.dart';
 import 'package:hani_booki/services/hani/hani_story_service.dart';
+import 'package:hani_booki/services/hani/hani_story_su_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
@@ -126,20 +127,26 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
                               HaniContents(
                                 path: '${haniData['story1']}',
                                 onTap: () {
-                                  Logger().d('1');
+                                  haniStorySuService(id, widget.keyCode, year, '1');
                                 },
                               ),
                               HaniContents(
                                 path: '${haniData['story2']}',
-                                onTap: () {},
+                                onTap: () {
+                                  haniStorySuService(id, widget.keyCode, year, '2');
+                                },
                               ),
                               HaniContents(
                                 path: '${haniData['story3']}',
-                                onTap: () {},
+                                onTap: () {
+                                  haniStorySuService(id, widget.keyCode, year, '3');
+                                },
                               ),
                               HaniContents(
                                 path: '${haniData['story4']}',
-                                onTap: () {},
+                                onTap: () {
+                                  haniStorySuService(id, widget.keyCode, year, '4');
+                                },
                               )
                             ],
                           ),

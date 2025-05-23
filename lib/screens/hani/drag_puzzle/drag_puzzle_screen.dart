@@ -1,24 +1,56 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hani_booki/_data/hani/hani_drag_puzzle_data.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hive/hive.dart';
 
 class DragPuzzleScreen extends StatefulWidget {
-  const DragPuzzleScreen({super.key});
+  final String keyCode;
+
+  const DragPuzzleScreen({super.key, required this.keyCode});
 
   @override
   State<DragPuzzleScreen> createState() => _DragPuzzleScreenState();
 }
 
 class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
+  final dragPuzzleData = Get.find<HaniDragPuzzleDataController>();
   List<bool> isSolved = List.generate(8, (_) => false);
+  int currentIndex = 0;
+  List<Map<String, dynamic>> shuffledCards = [];
 
-  final String mainImageUrl = 'https://picsum.photos/id/1005/400/300';
+  @override
+  void initState() {
+    super.initState();
+    shuffleCards(currentIndex);
+  }
 
-  final List<String> questionImages = List.generate(8, (index) => 'https://picsum.photos/id/${20 + index}/60/60');
-  final List<String> answerImages = List.generate(8, (index) => 'https://picsum.photos/id/${20 + index}/60/60');
+  void shuffleCards(int index) {
+    final cardImages = dragPuzzleData.dragPuzzleDataList[index].cardImages;
+
+    shuffledCards = List.generate(
+      8,
+          (i) => {
+        'index': i,      // 정답 위치 (DragTarget index와 비교용)
+        'img': cardImages[i],
+      },
+    )..shuffle(); // 드래그 카드만 셔플
+  }
+
+  void goToNextPuzzle() {
+    if (currentIndex < dragPuzzleData.dragPuzzleDataList.length - 1) {
+      setState(() {
+        currentIndex++;
+        isSolved = List.generate(8, (_) => false);
+        shuffleCards(currentIndex);
+      });
+    } else {
+
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +90,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(25),
                                     child: Image.network(
-                                      mainImageUrl,
+                                      dragPuzzleData.dragPuzzleDataList[currentIndex].boardImage,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -66,7 +98,6 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                     8,
                                     (index) {
                                       late double left, top;
-
                                       if (index < 2) {
                                         // 위 2개
                                         top = 20;
@@ -90,7 +121,16 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                           child: DragTarget<int>(
                                             onAccept: (data) {
                                               if (data == index) {
-                                                setState(() => isSolved[index] = true);
+                                                setState(() {
+                                                  isSolved[index] = true;
+
+                                                  if (isSolved.every((e) => e)) {
+                                                    // 모든 퍼즐 조각이 맞춰졌을 때
+                                                    Future.delayed(const Duration(milliseconds: 300), () {
+                                                      goToNextPuzzle(); // 다음 퍼즐로 이동
+                                                    });
+                                                  }
+                                                });
                                               }
                                             },
                                             builder: (context, candidateData, rejectedData) => Container(
@@ -103,7 +143,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(8),
                                                 child: Image.network(
-                                                  questionImages[index],
+                                                  dragPuzzleData.dragPuzzleDataList[currentIndex].questionImages[index],
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
@@ -135,25 +175,29 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                   physics: NeverScrollableScrollPhysics(),
                                   shrinkWrap: true,
                                   children: List.generate(8, (index) {
-                                    if (isSolved[index]) return const SizedBox.shrink();
+                                    final item = shuffledCards[index];
+                                    final realIndex = item['index']; // 정답 위치
+                                    final imageUrl = item['img'];
+
+                                    if (isSolved[realIndex]) return const SizedBox.shrink();
 
                                     return Draggable<int>(
-                                      data: index,
+                                      data: realIndex,
                                       feedback: ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
-                                          answerImages[index],
+                                          imageUrl,
                                           width: 60,
                                           height: 60,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
                                       childWhenDragging: Opacity(
-                                        opacity: 0.3,
+                                        opacity: 0.0,
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(8),
                                           child: Image.network(
-                                            answerImages[index],
+                                            imageUrl,
                                             width: 60,
                                             height: 60,
                                             fit: BoxFit.cover,
@@ -163,7 +207,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
-                                          answerImages[index],
+                                          imageUrl,
                                           width: 60,
                                           height: 60,
                                           fit: BoxFit.cover,
