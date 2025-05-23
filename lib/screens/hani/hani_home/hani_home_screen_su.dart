@@ -116,6 +116,7 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
                               HaniContents(
                                 path: '${haniData['bell']}',
                                 onTap: () {
+                                  bgmController.stopBgm();
                                   haniGoldenbellSuService(id, widget.keyCode, year);
                                 },
                               ),

@@ -3,17 +3,21 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:hani_booki/_data/hani/hani_rotate_data.dart';
 
 class RotateImages extends StatefulWidget {
+  final List<dynamic> items;
   final CarouselSliderController carouselController;
   final Function(int) onPageChanged;
+  final Function(int) onFirstTap;
+  final VoidCallback onComplete;
 
   const RotateImages({
     super.key,
+    required this.items,
     required this.carouselController,
     required this.onPageChanged,
+    required this.onFirstTap,
+    required this.onComplete,
   });
 
   @override
@@ -21,20 +25,14 @@ class RotateImages extends StatefulWidget {
 }
 
 class _RotateImagesState extends State<RotateImages> {
-  // final rotateData = Get.find<HaniRotateDataController>();
-  final rotateData = Get.put(HaniRotateDataController());
   late List<bool> isFlippedList;
-  late List<String> imgList;
   late List<GlobalKey<FlipCardState>> cardKeys = [];
 
   @override
   void initState() {
     super.initState();
-    cardKeys = List.generate(rotateData.rotateDataList.length, (index) => GlobalKey<FlipCardState>());
-    isFlippedList = List<bool>.filled(rotateData.rotateDataList.length, false);
-    imgList = List<String>.generate(rotateData.rotateDataList.length, (index) {
-      return 'https://sunandtree2.cafe24.com/app/memorize/80/img/8000${index + 1}_b.png';
-    });
+    cardKeys = List.generate(widget.items.length, (_) => GlobalKey<FlipCardState>());
+    isFlippedList = List<bool>.filled(widget.items.length, false);
   }
 
   @override
@@ -52,17 +50,25 @@ class _RotateImagesState extends State<RotateImages> {
         },
         viewportFraction: 0.65.sp,
       ),
-      items: List.generate(rotateData.rotateDataList.length, (index) {
+      items: List.generate(widget.items.length, (index) {
         return Builder(
           builder: (BuildContext context) {
             return Padding(
               padding: EdgeInsets.all(8.0.sp),
               child: FlipCard(
                 key: cardKeys[index],
-                flipOnTouch: false, // 자동으로 뒤집히지 않도록 설정
+                flipOnTouch: false,
                 front: GestureDetector(
                   onTap: () {
+                    widget.onFirstTap(index);
                     cardKeys[index].currentState?.toggleCard();
+
+                    if (!isFlippedList[index]) {
+                      setState(() => isFlippedList[index] = true);
+                      if (isFlippedList.every((flipped) => flipped)) {
+                        widget.onComplete();
+                      }
+                    }
                   },
                   child: preImage(index),
                 ),
@@ -89,7 +95,7 @@ class _RotateImagesState extends State<RotateImages> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: Image.network(
-          rotateData.rotateDataList[index].frontImage,
+          widget.items[index].frontImage,
           fit: BoxFit.cover,
         ),
       ),
@@ -105,7 +111,7 @@ class _RotateImagesState extends State<RotateImages> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: Image.network(
-          rotateData.rotateDataList[index].backImage,
+          widget.items[index].backImage,
           fit: BoxFit.cover,
         ),
       ),

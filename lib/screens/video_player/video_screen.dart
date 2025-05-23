@@ -101,23 +101,18 @@ class _VideoScreenState extends State<VideoScreen> {
         onLoadStop: (controller, url) async {
           await controller.evaluateJavascript(
               source: '''function mergeTimeRanges(timeRanges, tolerance = 0.1) {
-  // TimeRanges 객체를 배열로 변환
   let ranges = [];
   for (let i = 0; i < timeRanges.length; i++) {
     ranges.push([timeRanges.start(i), timeRanges.end(i)]);
   }
-  
-  // 시작 시간 기준 정렬
   ranges.sort((a, b) => a[0] - b[0]);
-  
-  // 병합된 범위를 담을 배열
+
   let merged = [];
   for (let range of ranges) {
     if (merged.length === 0) {
       merged.push(range);
     } else {
       let last = merged[merged.length - 1];
-      // 겹치거나 오차(tolerance) 이내면 병합
       if (range[0] - last[1] <= tolerance) {
         last[1] = Math.max(last[1], range[1]);
       } else {
@@ -128,17 +123,16 @@ class _VideoScreenState extends State<VideoScreen> {
   return merged;
 }
 
-function hasPlayedEntireVideo(video) {
-  let played = video.played;
-  let tolerance = 0.1;
-  let mergedRanges = mergeTimeRanges(played, tolerance);
-  
-  // 병합된 범위가 하나여야 하고, 시작이 0에 가깝고 끝이 video.duration에 가깝다면 전체 재생으로 판단
-  if (mergedRanges.length === 1) {
-    let range = mergedRanges[0];
-    return range[0] <= tolerance && (video.duration - range[1]) <= tolerance;
-  }
-  return false;
+function hasPlayedEntireVideo(video, threshold = 0.9, tolerance = 0.1) {
+  const played = video.played;
+  const mergedRanges = mergeTimeRanges(played, tolerance);
+
+  // 재생된 구간 길이의 합 계산
+  const playedSeconds = mergedRanges
+    .reduce((sum, r) => sum + (r[1] - r[0]), 0);
+
+  // 90% 이상 재생되었으면 true
+  return playedSeconds >= threshold * video.duration;
 }
 
 function handleVideo(video) {
@@ -148,10 +142,10 @@ function handleVideo(video) {
   
   video.addEventListener('ended', function() {
     if (hasPlayedEntireVideo(video)) {
-      console.log("전체 재생 완료 (건너뛰기 없이)");
+      console.log("전체 재생 완료 (90% 이상 시청)");
       window.flutter_inappwebview.callHandler('videoEnded');
     } else {
-      console.log("중간에 건너뛰거나 재생되지 않은 구간이 있음");
+      console.log("재생되지 않은 구간이 있습니다");
     }
   });
 }
@@ -162,7 +156,7 @@ if (video) {
   handleVideo(video);
 }
 
-// MutationObserver를 사용하여 동적으로 추가되는 video 감지
+// 동적으로 추가되는 video 감지
 var observer = new MutationObserver(function(mutations) {
   mutations.forEach(function(mutation) {
     mutation.addedNodes.forEach(function(node) {
@@ -172,7 +166,6 @@ var observer = new MutationObserver(function(mutations) {
     });
   });
 });
-
 observer.observe(document.body, { childList: true, subtree: true });
 ''');
         },

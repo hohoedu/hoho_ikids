@@ -123,6 +123,7 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
   @override
   Widget build(BuildContext context) {
     final question = haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].question;
+    Logger().d('question.length = ${haniGoldenbellDataController.haniGoldenbellDataList.length-1}');
     final answers = [
       haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].answer_1,
       haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].answer_2,
@@ -203,7 +204,7 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
                           flex: 1,
                           child: GestureDetector(
                             onTap: () {
-                              if (currentIndex < question.length - 1) {
+                              if (currentIndex < haniGoldenbellDataController.haniGoldenbellDataList.length-1) {
                                 nextQuestion();
                               } else {
                                 endQuestion();

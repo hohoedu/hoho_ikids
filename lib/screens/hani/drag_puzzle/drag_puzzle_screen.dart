@@ -6,6 +6,7 @@ import 'package:hani_booki/_data/hani/hani_drag_puzzle_data.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hive/hive.dart';
+import 'package:logger/logger.dart';
 
 class DragPuzzleScreen extends StatefulWidget {
   final String keyCode;
@@ -18,42 +19,77 @@ class DragPuzzleScreen extends StatefulWidget {
 
 class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
   final dragPuzzleData = Get.find<HaniDragPuzzleDataController>();
-  List<bool> isSolved = List.generate(8, (_) => false);
+
+  late List<HaniDragPuzzleData> _puzzleSets;
+
+  List<bool> isSolved = [];
   int currentIndex = 0;
   List<Map<String, dynamic>> shuffledCards = [];
 
   @override
   void initState() {
     super.initState();
-    shuffleCards(currentIndex);
+
+    _initPuzzleSets();
+
+    _prepareCurrentPuzzle();
   }
 
-  void shuffleCards(int index) {
-    final cardImages = dragPuzzleData.dragPuzzleDataList[index].cardImages;
+  void _initPuzzleSets() {
+    _puzzleSets = List.of(dragPuzzleData.dragPuzzleDataList)..shuffle();
+  }
 
-    shuffledCards = List.generate(
-      8,
-          (i) => {
-        'index': i,      // 정답 위치 (DragTarget index와 비교용)
-        'img': cardImages[i],
+  void _prepareCurrentPuzzle() {
+    final set = _puzzleSets[currentIndex];
+    shuffledCards = List.generate(8, (i) => {'index': i, 'img': set.cardImages[i]})..shuffle();
+
+    isSolved = List<bool>.filled(8, false);
+  }
+
+  void completeGame() async {
+    // await starUpdateService('card', widget.keyCode);
+    Future.delayed(
+      Duration(seconds: 1),
+      () {
+        lottieDialog(
+          onReset: () {
+            _resetGame();
+            Get.back();
+          },
+          onMain: () {
+            Get.back();
+            Get.back();
+          },
+        );
       },
-    )..shuffle(); // 드래그 카드만 셔플
+    );
+  }
+
+  void _resetGame() {
+    setState(() {
+      _initPuzzleSets();
+      currentIndex = 0;
+      _prepareCurrentPuzzle();
+    });
   }
 
   void goToNextPuzzle() {
-    if (currentIndex < dragPuzzleData.dragPuzzleDataList.length - 1) {
+    if (currentIndex < _puzzleSets.length - 1) {
       setState(() {
         currentIndex++;
-        isSolved = List.generate(8, (_) => false);
-        shuffleCards(currentIndex);
+        _prepareCurrentPuzzle();
       });
     } else {
-
+      completeGame();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final set = _puzzleSets[currentIndex];
+    final boardImage = set.boardImage;
+    final questionImages = set.questionImages;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Color(0xFFF3FcFF),
@@ -90,7 +126,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(25),
                                     child: Image.network(
-                                      dragPuzzleData.dragPuzzleDataList[currentIndex].boardImage,
+                                      boardImage,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -99,15 +135,12 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                     (index) {
                                       late double left, top;
                                       if (index < 2) {
-                                        // 위 2개
                                         top = 20;
                                         left = 80.0 + index * 100.0;
                                       } else if (index < 5) {
-                                        // 중간 3개
                                         top = 110;
                                         left = 40.0 + (index - 2) * 100.0;
                                       } else {
-                                        // 아래 3개
                                         top = 200;
                                         left = 40.0 + (index - 5) * 100.0;
                                       }
@@ -123,11 +156,9 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                               if (data == index) {
                                                 setState(() {
                                                   isSolved[index] = true;
-
                                                   if (isSolved.every((e) => e)) {
-                                                    // 모든 퍼즐 조각이 맞춰졌을 때
                                                     Future.delayed(const Duration(milliseconds: 300), () {
-                                                      goToNextPuzzle(); // 다음 퍼즐로 이동
+                                                      goToNextPuzzle();
                                                     });
                                                   }
                                                 });
@@ -143,7 +174,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(8),
                                                 child: Image.network(
-                                                  dragPuzzleData.dragPuzzleDataList[currentIndex].questionImages[index],
+                                                  questionImages[index],
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
@@ -176,7 +207,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                   shrinkWrap: true,
                                   children: List.generate(8, (index) {
                                     final item = shuffledCards[index];
-                                    final realIndex = item['index']; // 정답 위치
+                                    final realIndex = item['index'];
                                     final imageUrl = item['img'];
 
                                     if (isSolved[realIndex]) return const SizedBox.shrink();

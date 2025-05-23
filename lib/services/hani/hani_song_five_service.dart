@@ -15,8 +15,6 @@ Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
   if (keyCode.substring(0, 1) == 'G') {
     url = dotenv.get('HANI_SONG_G5_URL');
   }
-  Logger().d(hosu);
-  Logger().d(keyCode.substring(0, 1));
 
   final Map<String, dynamic> requestData = {
     'id': id,
@@ -36,7 +34,7 @@ Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
       // 응답 결과가 있는 경우
       if (responseData['result'] == "0000") {
         if(responseData['han'] != null){
-          Get.to(
+          Get.off(
                 () => VideoScreen(
               content: 'han',
               videoId: responseData['han'],
@@ -45,7 +43,7 @@ Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
           );
         }
         if (responseData['song'] != null) {
-          Get.to(
+          Get.off(
             () => VideoScreen(
               content: 'Song',
               videoId: responseData['song'],
