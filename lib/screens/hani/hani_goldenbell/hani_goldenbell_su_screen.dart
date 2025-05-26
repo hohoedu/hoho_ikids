@@ -47,8 +47,9 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
   }
 
   Future<void> _playSound(String url) async {
+    Logger().d('url = $url');
     try {
-      await _audioPlayer.setUrl(url[currentIndex]);
+      await _audioPlayer.setUrl(url);
       _audioPlayer.play();
     } catch (e) {}
   }
@@ -123,7 +124,7 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
   @override
   Widget build(BuildContext context) {
     final question = haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].question;
-    Logger().d('question.length = ${haniGoldenbellDataController.haniGoldenbellDataList.length-1}');
+    Logger().d('question.length = ${haniGoldenbellDataController.haniGoldenbellDataList.length - 1}');
     final answers = [
       haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].answer_1,
       haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].answer_2,
@@ -204,7 +205,7 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
                           flex: 1,
                           child: GestureDetector(
                             onTap: () {
-                              if (currentIndex < haniGoldenbellDataController.haniGoldenbellDataList.length-1) {
+                              if (currentIndex < haniGoldenbellDataController.haniGoldenbellDataList.length - 1) {
                                 nextQuestion();
                               } else {
                                 endQuestion();
@@ -233,6 +234,7 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
   @override
   void dispose() {
     _resetTimer?.cancel();
+    _audioPlayer.stop();
     super.dispose();
   }
 }

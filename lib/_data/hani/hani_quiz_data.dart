@@ -7,6 +7,7 @@ class HaniQuizData {
   final String question;
   final String correct;
   final String wrong;
+  final String voice;
 
   HaniQuizData({
     required this.first,
@@ -15,6 +16,7 @@ class HaniQuizData {
     required this.question,
     required this.correct,
     required this.wrong,
+    required this.voice,
   });
 
   HaniQuizData.fromJson(Map<String, dynamic> json)
@@ -23,7 +25,8 @@ class HaniQuizData {
         third = json['third'],
         question = json['question'],
         correct = json['correct'],
-        wrong = json['wrong'];
+        wrong = json['wrong'],
+        voice = json["voice"];
 }
 
 class HaniQuizDataController extends GetxController {

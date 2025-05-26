@@ -3,9 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/hani/hani_drag_puzzle_data.dart';
+import 'package:hani_booki/services/star_update_service.dart';
+import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hive/hive.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 
 class DragPuzzleScreen extends StatefulWidget {
@@ -19,9 +23,9 @@ class DragPuzzleScreen extends StatefulWidget {
 
 class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
   final dragPuzzleData = Get.find<HaniDragPuzzleDataController>();
-
+  final bgmController = Get.find<BgmController>();
   late List<HaniDragPuzzleData> _puzzleSets;
-
+  late AudioPlayer _audioPlayer;
   List<bool> isSolved = [];
   int currentIndex = 0;
   List<Map<String, dynamic>> shuffledCards = [];
@@ -29,10 +33,19 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
   @override
   void initState() {
     super.initState();
-
+    bgmController.playBgm('puzzle');
+    _audioPlayer = AudioPlayer();
     _initPuzzleSets();
-
     _prepareCurrentPuzzle();
+  }
+
+  Future<void> _playSound(String url) async {
+    try {
+      await _audioPlayer.setUrl(url);
+      _audioPlayer.play();
+    } catch (e) {
+      Logger().e('Error playing sound: $e');
+    }
   }
 
   void _initPuzzleSets() {
@@ -47,7 +60,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
   }
 
   void completeGame() async {
-    // await starUpdateService('card', widget.keyCode);
+    await starUpdateService('puz', widget.keyCode);
     Future.delayed(
       Duration(seconds: 1),
       () {
@@ -152,8 +165,9 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                           opacity: isSolved[index] ? 0 : 1,
                                           duration: const Duration(milliseconds: 400),
                                           child: DragTarget<int>(
-                                            onAccept: (data) {
+                                            onAccept: (data) async {
                                               if (data == index) {
+                                                await _playSound(set.voices[index]);
                                                 setState(() {
                                                   isSolved[index] = true;
                                                   if (isSolved.every((e) => e)) {
@@ -162,6 +176,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                                     });
                                                   }
                                                 });
+                                              } else {
+                                                SoundManager.playNo();
                                               }
                                             },
                                             builder: (context, candidateData, rejectedData) => Container(

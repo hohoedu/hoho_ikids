@@ -25,11 +25,9 @@ Future<void> haniQuizService(id, keyCode, year) async {
     'keycode': keyCode,
     'yy': year,
   };
-  Logger().d(requestData);
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-  Logger().d(response);
 
   try {
     // 응답을 성공적으로 받았을 때
@@ -41,13 +39,9 @@ Future<void> haniQuizService(id, keyCode, year) async {
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
         List<HaniQuizData> haniQuizDataList = resultData.map((item) => HaniQuizData.fromJson(item)).toList();
-        // List<HaniGoldenbellData> haniGoldenbellDataList =
-        //     responseData.map((item) => HaniGoldenbellData.fromJson(item)).toList();
 
         final haniQuizDataController = Get.put(HaniQuizDataController());
         haniQuizDataController.setHaniQuizDataList(haniQuizDataList);
-
-        Get.to(() => QuizScreen(keyCode: keyCode));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

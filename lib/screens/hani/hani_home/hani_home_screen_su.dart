@@ -5,7 +5,10 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_contents.dart';
+import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
+import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
 import 'package:hani_booki/services/hani/hani_erase_service.dart';
 import 'package:hani_booki/services/hani/hani_flip_service.dart';
 import 'package:hani_booki/services/hani/hani_goldenbell_service.dart';
@@ -38,12 +41,34 @@ class HaniHomeScreenSu extends StatefulWidget {
   State<HaniHomeScreenSu> createState() => _HaniHomeScreenSuState();
 }
 
-class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
+class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBindingObserver, RouteAware {
   final bgmController = Get.find<BgmController>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final haniHomeData = Get.find<HaniHomeDataController>();
   final userHaniData = Get.find<UserHaniDataController>();
   final userData = Get.find<UserDataController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    bgmController.playBgm('hani');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ModalRoute? route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    bgmController.playBgm('hani');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,14 +128,16 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
                               ),
                               HaniContents(
                                 path: '${haniData['workbook']}',
-                                onTap: () {
-                                  haniMakeCardService(id, widget.keyCode, year);
+                                onTap: () async {
+                                  await haniMakeCardService(id, widget.keyCode, year);
+                                  Get.to(() => MakeCardScreen(keyCode: widget.keyCode));
                                 },
                               ),
                               HaniContents(
                                 path: '${haniData['quiz']}',
-                                onTap: () {
-                                  haniQuizService(id, widget.keyCode, year);
+                                onTap: () async {
+                                  await haniQuizService(id, widget.keyCode, year);
+                                  Get.to(() => QuizScreen(keyCode: widget.keyCode));
                                 },
                               ),
                               HaniContents(
@@ -177,5 +204,13 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    routeObserver.unsubscribe(this);
+    bgmController.stopBgm();
+    super.dispose();
   }
 }

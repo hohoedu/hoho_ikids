@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/hani/hani_rotate_data.dart';
 import 'package:hani_booki/screens/hani/rotate/rotate_widgets/rotate_images.dart';
+import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -66,8 +67,7 @@ class _RotateScreenState extends State<RotateScreen> {
   }
 
   void completeGame() async {
-    // TODO:별포인트 적립
-    // await starUpdateService('card', widget.keyCode);
+    await starUpdateService('card', widget.keyCode);
     Future.delayed(
       Duration(seconds: 1),
       () {

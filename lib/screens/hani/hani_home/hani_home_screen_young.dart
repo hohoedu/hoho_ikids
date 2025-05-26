@@ -127,8 +127,9 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                             ),
                             HaniContents(
                               path: '${haniData['quiz']}',
-                              onTap: () {
-                                haniQuizService(id, widget.keyCode, year);
+                              onTap: () async {
+                                await haniQuizService(id, widget.keyCode, year);
+                                Get.to(() => QuizScreen(keyCode: widget.keyCode));
                               },
                             ),
                             HaniContents(

@@ -25,7 +25,8 @@ Future<void> haniDragPuzzleService(id, keyCode, year) async {
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-  Logger().d('어휘 만들기 = $response');
+  Logger().d(response);
+  print('어휘만들기 = ${response.data}');
   try {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);

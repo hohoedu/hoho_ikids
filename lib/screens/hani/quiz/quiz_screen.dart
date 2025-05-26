@@ -2,9 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_quiz_data.dart';
+import 'package:hani_booki/services/hani/hani_quiz_service.dart';
+import 'package:hani_booki/services/star_update_service.dart';
+import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -17,14 +23,28 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  final userData = Get.find<UserDataController>().userData;
   late List<String> answer;
+  final bgmController = Get.find<BgmController>();
   final quizData = Get.find<HaniQuizDataController>();
+  late AudioPlayer _audioPlayer;
   int currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    bgmController.playBgm('puzzle');
+    _audioPlayer = AudioPlayer();
     _setupAnswer();
+  }
+
+  Future<void> _playSound(String url) async {
+    try {
+      await _audioPlayer.setUrl(url);
+      _audioPlayer.play();
+    } catch (e) {
+      Logger().e('Error playing sound: $e');
+    }
   }
 
   void _setupAnswer() {
@@ -36,20 +56,44 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> _onAnswerTap(int index) async {
     final isCorrect = answer[index] == quizData.haniQuizDataList[currentIndex].correct;
-    Logger().d(isCorrect ? '정답' : '오답');
-
-    if (!isCorrect) return;
-
-    if (currentIndex == quizData.haniQuizDataList.length - 1) {
-      // 마지막 문제일 경우 처리
+    if (!isCorrect) {
+      await SoundManager.playNo();
       return;
+    } else if (isCorrect) {
+      await _playSound(quizData.haniQuizDataList[currentIndex].voice);
+      await Future.delayed(
+        Duration(seconds: 1),
+        () {
+          if (currentIndex >= quizData.haniQuizDataList.length - 1) {
+            starUpdateService('quiz', widget.keyCode);
+            lottieDialog(
+              onMain: () {
+                Get.back();
+                Get.back();
+              },
+              onReset: () {
+                Get.back();
+                resetQuiz();
+              },
+            );
+            return;
+          }
+          setState(() {
+            currentIndex++;
+            _setupAnswer();
+          });
+        },
+      );
     }
+  }
 
-    await Future.delayed(Duration(milliseconds: 300)); // 자연스럽게 전환
+  Future<void> resetQuiz() async {
+    await haniQuizService(userData!.id, widget.keyCode, userData!.year);
     setState(() {
-      currentIndex++;
+      currentIndex = 0; // 첫 번째 문제로 돌아감
       _setupAnswer();
     });
+    Logger().d('퀴즈가 리셋되었습니다.');
   }
 
   @override

@@ -19,7 +19,6 @@ Future<void> haniMakeCardService(id, keyCode, year) async {
     'keycode': keyCode,
     'yy': year,
   };
-
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
   Logger().d('어휘 만들기 = $response');
@@ -32,8 +31,6 @@ Future<void> haniMakeCardService(id, keyCode, year) async {
         List<HaniMakeCardData> makeCardDataList = resultData.map((item) => HaniMakeCardData.fromJson(item)).toList();
 
         makeCardDataController.setMakeCardDataList(makeCardDataList);
-
-        Get.to(() => MakeCardScreen(keyCode: keyCode));
       } else {
         oneButtonDialog(
           title: '불러오기 실패',

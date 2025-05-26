@@ -230,6 +230,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> {
 
   @override
   void dispose() {
+    _audioPlayer.stop();
     _resetTimer?.cancel();
     super.dispose();
   }

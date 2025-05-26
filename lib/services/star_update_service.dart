@@ -32,6 +32,7 @@ import 'package:logger/logger.dart';
 */
 
 Future<void> starUpdateService(type, keyCode) async {
+  Logger().d('호출 = $type');
   final userController = Get.find<UserDataController>();
   String url = dotenv.get('STAR_UPDATE_URL');
 
