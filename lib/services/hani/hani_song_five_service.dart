@@ -7,6 +7,7 @@ import 'package:hani_booki/screens/video_player/video_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
+// 하니 낱말 송(영재, 수재 5호)
 Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
   String url = '';
   if (keyCode.substring(0, 1) == 'Y') {

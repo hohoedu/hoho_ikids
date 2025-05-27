@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
-import 'package:hani_booki/_data/hani/hani_goldenbell_data.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_su_data.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
@@ -124,7 +123,6 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
   @override
   Widget build(BuildContext context) {
     final question = haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].question;
-    Logger().d('question.length = ${haniGoldenbellDataController.haniGoldenbellDataList.length - 1}');
     final answers = [
       haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].answer_1,
       haniGoldenbellDataController.haniGoldenbellDataList[currentIndex].answer_2,
@@ -190,11 +188,21 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
                                   child: Image.network(answer),
                                 ),
                                 if (selectedAnswerIndex != null && selectedAnswerIndex == index)
-                                  Icon(
-                                    isCorrect == true ? Icons.circle_outlined : Icons.close,
-                                    color: isCorrect == true ? Colors.green : Colors.red,
-                                    size: 40.sp,
-                                  ),
+                                  // SizedBox(
+                                  //   width: 100,
+                                  //   child: Image.asset(
+                                  //     isCorrect == true
+                                  //         ? 'assets/images/icons/circle.png'
+                                  //         : 'assets/images/icons/wrong.png',
+                                  //     color: isCorrect == true ? Colors.green : Colors.redAccent,
+                                  //     fit: BoxFit.contain,
+                                  //   ),
+                                  // )
+                                Icon(
+                                  isCorrect == true ? Icons.circle_outlined : Icons.close,
+                                  color: isCorrect == true ? Colors.green : Colors.red,
+                                  size: 40.sp,
+                                ),
                               ],
                             ),
                           ),

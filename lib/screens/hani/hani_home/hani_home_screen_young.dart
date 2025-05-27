@@ -7,14 +7,10 @@ import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
 import 'package:hani_booki/main.dart';
-import 'package:hani_booki/screens/booki/match/match_screen.dart';
 import 'package:hani_booki/screens/hani/drag_puzzle/drag_puzzle_screen.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_contents.dart';
-import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
 import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
-import 'package:hani_booki/screens/hani/rotate/rotate_screen.dart';
 import 'package:hani_booki/services/hani/hani_drag_puzzle_service.dart';
-import 'package:hani_booki/services/hani/hani_insong_list_service.dart';
 import 'package:hani_booki/services/hani/hani_insung_service.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
 import 'package:hani_booki/services/hani/hani_rotate_service.dart';
@@ -22,10 +18,8 @@ import 'package:hani_booki/services/hani/hani_song_list_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
-import 'package:hani_booki/widgets/kidok_button.dart';
 import 'package:hani_booki/widgets/new_kidok_button.dart';
 import 'package:hani_booki/widgets/new_star_count.dart';
-import 'package:hani_booki/widgets/star_count.dart';
 
 class HaniHomeScreenYoung extends StatefulWidget {
   final String keyCode;
@@ -134,8 +128,9 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                             ),
                             HaniContents(
                               path: '${haniData['puz']}',
-                              onTap: () {
-                                haniDragPuzzleService(id, widget.keyCode, year);
+                              onTap: () async {
+                                await haniDragPuzzleService(id, widget.keyCode, year);
+                                Get.to(() => DragPuzzleScreen(keyCode: widget.keyCode));
                               },
                             ),
                           ],

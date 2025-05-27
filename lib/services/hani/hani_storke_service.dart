@@ -10,7 +10,7 @@ import 'package:hani_booki/screens/video_player/video_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 동요
+// 하니 획순 따라쓰기
 Future<void> haniStrokeService(id, keyCode, year) async {
   final haniStrokeDataController = Get.put(HaniStrokeDataController());
   String url = dotenv.get('HANI_STROKE_URL');

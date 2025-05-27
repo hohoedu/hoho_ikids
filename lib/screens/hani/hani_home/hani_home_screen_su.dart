@@ -7,30 +7,18 @@ import 'package:hani_booki/_data/auth/user_hani_data.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_contents.dart';
-import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
+import 'package:hani_booki/screens/hani/make_word/make_word_screen.dart';
 import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
-import 'package:hani_booki/services/hani/hani_erase_service.dart';
-import 'package:hani_booki/services/hani/hani_flip_service.dart';
-import 'package:hani_booki/services/hani/hani_goldenbell_service.dart';
 import 'package:hani_booki/services/hani/hani_goldenbell_su_service.dart';
-import 'package:hani_booki/services/hani/hani_hanjasong_service.dart';
-import 'package:hani_booki/services/hani/hani_insung_service.dart';
 import 'package:hani_booki/services/hani/hani_make_card_service.dart';
-import 'package:hani_booki/services/hani/hani_puzzle_service.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
 import 'package:hani_booki/services/hani/hani_song_list_service.dart';
-import 'package:hani_booki/services/hani/hani_song_service.dart';
-import 'package:hani_booki/services/hani/hani_storke_service.dart';
-import 'package:hani_booki/services/hani/hani_story_service.dart';
 import 'package:hani_booki/services/hani/hani_story_su_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
-import 'package:hani_booki/widgets/kidok_button.dart';
 import 'package:hani_booki/widgets/new_kidok_button.dart';
 import 'package:hani_booki/widgets/new_star_count.dart';
-import 'package:hani_booki/widgets/star_count.dart';
-import 'package:logger/logger.dart';
 
 class HaniHomeScreenSu extends StatefulWidget {
   final String keyCode;
@@ -130,7 +118,7 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
                                 path: '${haniData['workbook']}',
                                 onTap: () async {
                                   await haniMakeCardService(id, widget.keyCode, year);
-                                  Get.to(() => MakeCardScreen(keyCode: widget.keyCode));
+                                  Get.to(() => MakeWordScreen(keyCode: widget.keyCode));
                                 },
                               ),
                               HaniContents(
@@ -186,7 +174,7 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
                 Expanded(
                   child: Column(
                     children: [
-                      Spacer(),
+                      Spacer(flex: 6),
                       NewKidokButton(
                         type: 'hani',
                         keycode: widget.keyCode,
@@ -194,7 +182,8 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
                       NewStarCount(
                         keyCode: widget.keyCode,
                         type: 'hani',
-                      )
+                      ),
+                      Spacer(flex: 1,),
                     ],
                   ),
                 ),

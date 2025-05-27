@@ -11,7 +11,7 @@ import 'package:hani_booki/screens/hani/song_list/song_list_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 모아부르기
+// 하니 모아부르기 (영재, 수재 5호)
 Future<void> haniSongListService(id, keyCode, year) async {
   String url = '';
   if (keyCode.substring(0, 1) == 'Y') {

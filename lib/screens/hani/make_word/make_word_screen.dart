@@ -2,25 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_make_card_data.dart';
-import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/hani/hani_make_card_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
-import 'package:hive/hive.dart';
-import 'package:logger/logger.dart';
 
-class MakeCardScreen extends StatefulWidget {
+class MakeWordScreen extends StatefulWidget {
   final String keyCode;
 
-  const MakeCardScreen({super.key, required this.keyCode});
+  const MakeWordScreen({super.key, required this.keyCode});
 
   @override
-  State<MakeCardScreen> createState() => _MakeCardScreenState();
+  State<MakeWordScreen> createState() => _MakeWordScreenState();
 }
 
-class _MakeCardScreenState extends State<MakeCardScreen> {
+class _MakeWordScreenState extends State<MakeWordScreen> {
   final makeWord = Get.find<HaniMakeCardDataController>();
   final userData = Get.find<UserDataController>().userData;
   int currentIndex = 0;

@@ -4,11 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_drag_puzzle_data.dart';
-import 'package:hani_booki/_data/hani/hani_make_card_data.dart';
-import 'package:hani_booki/_data/hani/hani_puzzle_data.dart';
-import 'package:hani_booki/screens/hani/drag_puzzle/drag_puzzle_screen.dart';
-import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
-import 'package:hani_booki/screens/hani/puzzle/puzzle_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
@@ -39,7 +34,7 @@ Future<void> haniDragPuzzleService(id, keyCode, year) async {
 
         dragPuzzleData.setDragPuzzleDataList(dragPuzzleDataList);
 
-        Get.to(() => DragPuzzleScreen(keyCode: keyCode));
+
       } else {
         oneButtonDialog(
           title: '불러오기 실패',

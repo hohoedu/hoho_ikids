@@ -4,9 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_make_card_data.dart';
-import 'package:hani_booki/_data/hani/hani_puzzle_data.dart';
-import 'package:hani_booki/screens/hani/make_card/make_card_screen.dart';
-import 'package:hani_booki/screens/hani/puzzle/puzzle_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 

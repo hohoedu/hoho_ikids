@@ -3,17 +3,12 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
-import 'package:hani_booki/_data/hani/hani_goldenbell_data.dart';
 import 'package:hani_booki/_data/hani/hani_insung_list_data.dart';
-import 'package:hani_booki/_data/hani/hani_song_list_data.dart';
-import 'package:hani_booki/screens/hani/hani_goldenbell/hani_goldenbell_screen.dart';
 import 'package:hani_booki/screens/hani/insung_list/insung_list_screen.dart';
-import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
-import 'package:hani_booki/screens/hani/song_list/song_list_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 인성이야기
+// 하니 인성이야기(리스트)
 Future<void> haniInsungListService(id, keyCode, year) async {
   String url = dotenv.get('HANI_INSUNG_LIST_URL');
 

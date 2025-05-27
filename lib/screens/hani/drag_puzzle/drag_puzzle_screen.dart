@@ -24,11 +24,14 @@ class DragPuzzleScreen extends StatefulWidget {
 class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
   final dragPuzzleData = Get.find<HaniDragPuzzleDataController>();
   final bgmController = Get.find<BgmController>();
+  final GlobalKey _imageKey = GlobalKey();
+
   late List<HaniDragPuzzleData> _puzzleSets;
   late AudioPlayer _audioPlayer;
   List<bool> isSolved = [];
   int currentIndex = 0;
   List<Map<String, dynamic>> shuffledCards = [];
+  Size? boardSize;
 
   @override
   void initState() {
@@ -37,6 +40,19 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
     _audioPlayer = AudioPlayer();
     _initPuzzleSets();
     _prepareCurrentPuzzle();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _imageKey.currentContext;
+      if (context != null) {
+        final renderBox = context.findRenderObject() as RenderBox;
+        final newSize = renderBox.size;
+        if (mounted) {
+          setState(() {
+            boardSize = newSize;
+          });
+        }
+      }
+    });
   }
 
   Future<void> _playSound(String url) async {
@@ -134,33 +150,42 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Stack(
-                                fit: StackFit.expand,
+                                fit: StackFit.loose,
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(25),
                                     child: Image.network(
                                       boardImage,
+                                      key: _imageKey,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
-                                  ...List.generate(
-                                    8,
-                                    (index) {
-                                      late double left, top;
+                                  if (boardSize != null)
+                                    ...List.generate(8, (index) {
+                                      const double baseWidth = 307.08;
+                                      const double baseHeight = 352.56;
+
+                                      final scaleX = boardSize!.width / baseWidth;
+                                      final scaleY = boardSize!.height / baseHeight;
+
+                                      final double puzzleWidth = 85 * scaleX;
+                                      final double puzzleHeight = 85 * scaleY;
+
+                                      double left, top;
                                       if (index < 2) {
                                         top = 20;
-                                        left = 80.0 + index * 100.0;
+                                        left = 71.0 + index * 100.0;
                                       } else if (index < 5) {
-                                        top = 110;
-                                        left = 40.0 + (index - 2) * 100.0;
+                                        top = 130;
+                                        left = 20.0 + (index - 2) * 100.0;
                                       } else {
-                                        top = 200;
-                                        left = 40.0 + (index - 5) * 100.0;
+                                        top = 240;
+                                        left = 20.0 + (index - 5) * 100.0;
                                       }
 
                                       return Positioned(
-                                        top: top,
-                                        left: left,
+                                        top: top * scaleY,
+                                        left: left * scaleX,
                                         child: AnimatedOpacity(
                                           opacity: isSolved[index] ? 0 : 1,
                                           duration: const Duration(milliseconds: 400),
@@ -180,26 +205,23 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                                 SoundManager.playNo();
                                               }
                                             },
-                                            builder: (context, candidateData, rejectedData) => Container(
-                                              width: 80,
-                                              height: 80,
-                                              decoration: BoxDecoration(
-                                                border: Border.all(color: Colors.white),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Image.network(
-                                                  questionImages[index],
-                                                  fit: BoxFit.cover,
+                                            builder: (context, candidateData, rejectedData) {
+                                              return SizedBox(
+                                                width: 80,
+                                                height: 80,
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  child: Image.network(
+                                                    questionImages[index],
+                                                    fit: BoxFit.contain,
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
+                                              );
+                                            },
                                           ),
                                         ),
                                       );
-                                    },
-                                  ),
+                                    }),
                                 ],
                               ),
                             ),
@@ -234,8 +256,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
                                           imageUrl,
-                                          width: 60,
-                                          height: 60,
+                                          width: 80,
+                                          height: 80,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -245,8 +267,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                           borderRadius: BorderRadius.circular(8),
                                           child: Image.network(
                                             imageUrl,
-                                            width: 60,
-                                            height: 60,
+                                            width: 80,
+                                            height: 80,
                                             fit: BoxFit.cover,
                                           ),
                                         ),

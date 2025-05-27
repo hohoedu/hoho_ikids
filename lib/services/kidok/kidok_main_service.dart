@@ -18,9 +18,10 @@ Future<void> kidokMainService(year, keyCode, isSibling) async {
     'keycode': keyCode,
   };
 
+  Logger().d(requestData);
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-
+  Logger().d(response);
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
@@ -29,12 +30,14 @@ Future<void> kidokMainService(year, keyCode, isSibling) async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        final List<KidokMainData> kidokDataList = (resultList['data'] as List)
-            .map((json) => KidokMainData.fromJson(json))
-            .toList();
+        final List<KidokMainData> kidokDataList =
+            (resultList['data'] as List).map((json) => KidokMainData.fromJson(json)).toList();
         kidokMainController.setKidokMainDataList(kidokDataList);
         await kidokBookcaseService(keyCode);
-        Get.to(() => KidokHomeScreen(keyCode: keyCode, isSibling: isSibling,));
+        Get.to(() => KidokHomeScreen(
+              keyCode: keyCode,
+              isSibling: isSibling,
+            ));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

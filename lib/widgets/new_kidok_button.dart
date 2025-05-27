@@ -13,7 +13,7 @@ class NewKidokButton extends StatelessWidget {
   final String keycode;
   final String type;
 
-  // final kidokThemeController = Get.find<KidokThemeDataController>();
+  final kidokThemeController = Get.find<KidokThemeDataController>();
   final userData = Get.find<UserDataController>();
 
   NewKidokButton({super.key, required this.keycode, required this.type});
@@ -24,8 +24,8 @@ class NewKidokButton extends StatelessWidget {
     return Stack(
       children: [
         GestureDetector(
-          onTap: () {
-            kidokMainService(
+          onTap: () async {
+            await kidokMainService(
               userData.userData!.year,
               keycode,
               isSibling,
@@ -50,7 +50,7 @@ class NewKidokButton extends StatelessWidget {
                           height: MediaQuery.of(context).size.height * 0.35,
                           decoration: BoxDecoration(
                             // color: Color(kidokThemeController.kidokThemeData!.boxColor),
-                            color: Colors.green,
+                            color: Colors.white,
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(50),
                               bottomRight: Radius.circular(50),
@@ -116,6 +116,7 @@ class NewKidokButton extends StatelessWidget {
                       right: 0,
                       child: Image.asset(
                         'assets/images/kido_logo_vertical.png',
+                        scale: 2,
                       ))
                 ],
               ),

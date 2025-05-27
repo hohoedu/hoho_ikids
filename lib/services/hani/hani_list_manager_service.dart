@@ -4,12 +4,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
-import 'package:hani_booki/_data/kidok/kidok_bookcase.data.dart';
-import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 이북 리스트
+// 하니 이북 리스트(관리자)
 Future<void> haniListManagerService(schoolId, year) async {
   String url = dotenv.get('M_HANI_EBOOK_LIST_URL');
   final userHaniController = Get.put(UserHaniDataController(),permanent: true);

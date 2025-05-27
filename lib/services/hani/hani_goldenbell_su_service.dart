@@ -3,14 +3,12 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
-import 'package:hani_booki/_data/hani/hani_goldenbell_data.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_su_data.dart';
-import 'package:hani_booki/screens/hani/hani_goldenbell/hani_goldenbell_screen.dart';
 import 'package:hani_booki/screens/hani/hani_goldenbell/hani_goldenbell_su_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
-// 하니 골든벨(수재)
+// 하니 골든벨(수재 5호)
 Future<void> haniGoldenbellSuService(id, keyCode, year) async {
   String url = dotenv.get('HANI_GOLDENBELL_G5_URL');
 

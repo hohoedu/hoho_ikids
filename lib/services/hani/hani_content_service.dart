@@ -8,7 +8,6 @@ import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_su.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_young.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen.dart';
 import 'package:hani_booki/services/total_star_service.dart';
-import 'package:hani_booki/utils/connectivityController.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
@@ -26,7 +25,6 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
 
-  Logger().d(requestData);
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
