@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
-import 'package:hani_booki/_data/hani/hani_make_card_data.dart';
-import 'package:hani_booki/services/hani/hani_make_card_service.dart';
+import 'package:hani_booki/_data/hani/hani_make_word_data.dart';
+import 'package:hani_booki/services/hani/hani_make_word_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:logger/logger.dart';
 
 class MakeWordScreen extends StatefulWidget {
   final String keyCode;
@@ -18,8 +19,11 @@ class MakeWordScreen extends StatefulWidget {
 }
 
 class _MakeWordScreenState extends State<MakeWordScreen> {
-  final makeWord = Get.find<HaniMakeCardDataController>();
+  final makeWord = Get.find<HaniMakeWordDataController>();
   final userData = Get.find<UserDataController>().userData;
+
+  final GlobalKey _imageKey = GlobalKey();
+
   int currentIndex = 0;
   late String firstUrl = '';
   late String secondUrl = '';
@@ -29,15 +33,20 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
 
   bool isAnswered = false;
 
+  double imageHeight = 0;
+
   @override
   void initState() {
     super.initState();
     loadCard();
     shuffleChoices();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
   }
 
   void shuffleChoices() {
-    final card = makeWord.makeCardDataList[currentIndex];
+    final card = makeWord.makeWordDataList[currentIndex];
     choices = [
       {'url': card.correct, 'type': 'correct'},
       {'url': card.wrong, 'type': 'wrong'},
@@ -46,7 +55,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
   }
 
   void loadCard() {
-    final card = makeWord.makeCardDataList[currentIndex];
+    final card = makeWord.makeWordDataList[currentIndex];
 
     firstUrl = card.first;
     secondUrl = card.second;
@@ -62,10 +71,10 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
       await SoundManager.playCorrect();
       setState(() {
         if (firstIsPic) {
-          firstUrl = makeWord.makeCardDataList[currentIndex].clear;
+          firstUrl = makeWord.makeWordDataList[currentIndex].clear;
         }
         if (secondIsPic) {
-          secondUrl = makeWord.makeCardDataList[currentIndex].clear;
+          secondUrl = makeWord.makeWordDataList[currentIndex].clear;
         }
         isAnswered = true;
       });
@@ -76,7 +85,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
 
   void _goNextCard() async {
     if (!isAnswered) return;
-    if (currentIndex < makeWord.makeCardDataList.length - 1) {
+    if (currentIndex < makeWord.makeWordDataList.length - 1) {
       setState(() {
         currentIndex++;
         loadCard();
@@ -98,8 +107,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
   }
 
   Future<void> resetCard() async {
-    await haniMakeCardService(userData!.id, widget.keyCode, userData!.year);
-
+    await haniMakeWordService(userData!.id, widget.keyCode, userData!.year);
     setState(() {
       currentIndex = 0;
       firstUrl = '';
@@ -156,7 +164,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                       color: Colors.white,
                                       child: Center(
                                           child: Text(
-                                        makeWord.makeCardDataList[currentIndex].title,
+                                        makeWord.makeWordDataList[currentIndex].title,
                                         style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                                       )),
                                     ),
@@ -167,71 +175,92 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                       children: [
                                         Row(
                                           children: [
-                                            firstIsPic
-                                                ? Expanded(
-                                                    child: DragTarget<String>(
+                                            // First Image
+                                            Expanded(
+                                              child: firstIsPic
+                                                  ? DragTarget<String>(
                                                       onAccept: nextWord,
                                                       builder: (ctx, candidate, rejected) => AnimatedSwitcher(
                                                         duration: const Duration(milliseconds: 300),
                                                         transitionBuilder: (child, animation) =>
                                                             FadeTransition(opacity: animation, child: child),
-                                                        child: Image.network(
-                                                          firstUrl,
-                                                          scale: 2,
-                                                          key: ValueKey(firstUrl),
-                                                          fit: BoxFit.contain,
+                                                        child: LayoutBuilder(
+                                                          builder: (context, constraints) {
+                                                            imageHeight = constraints.maxHeight;
+                                                            return Image.network(
+                                                              firstUrl,
+                                                              scale: 2,
+                                                              key: ValueKey(firstUrl),
+                                                              fit: BoxFit.contain,
+                                                            );
+                                                          },
                                                         ),
                                                       ),
-                                                    ),
-                                                  )
-                                                : Expanded(
-                                                    child: AnimatedSwitcher(
+                                                    )
+                                                  : AnimatedSwitcher(
                                                       duration: const Duration(milliseconds: 300),
                                                       transitionBuilder: (child, animation) =>
                                                           FadeTransition(opacity: animation, child: child),
-                                                      child: Image.network(
-                                                        firstUrl,
-                                                        key: ValueKey(firstUrl),
-                                                        fit: BoxFit.contain,
+                                                      child: LayoutBuilder(
+                                                        builder: (context, constraints) {
+                                                          imageHeight = constraints.maxHeight;
+                                                          return Image.network(
+                                                            firstUrl,
+                                                            key: ValueKey(firstUrl),
+                                                            fit: BoxFit.contain,
+                                                          );
+                                                        },
                                                       ),
                                                     ),
-                                                  ),
-                                            secondIsPic
-                                                ? Expanded(
-                                                    child: DragTarget<String>(
+                                            ),
+                                            // Second Image
+                                            Expanded(
+                                              child: secondIsPic
+                                                  ? DragTarget<String>(
                                                       onAccept: nextWord,
                                                       builder: (ctx, candidate, rejected) => AnimatedSwitcher(
                                                         duration: const Duration(milliseconds: 300),
                                                         transitionBuilder: (child, animation) =>
                                                             FadeTransition(opacity: animation, child: child),
-                                                        child: Image.network(
-                                                          secondUrl,
-                                                          scale: 2,
-                                                          key: ValueKey(secondUrl),
-                                                          fit: BoxFit.contain,
+                                                        child: LayoutBuilder(
+                                                          builder: (context, constraints) {
+                                                            return Image.network(
+                                                              secondUrl,
+                                                              scale: 2,
+                                                              key: ValueKey(secondUrl),
+                                                              fit: BoxFit.contain,
+                                                            );
+                                                          },
                                                         ),
                                                       ),
-                                                    ),
-                                                  )
-                                                : Expanded(
-                                                    child: AnimatedSwitcher(
+                                                    )
+                                                  : AnimatedSwitcher(
                                                       duration: const Duration(milliseconds: 300),
                                                       transitionBuilder: (child, animation) =>
                                                           FadeTransition(opacity: animation, child: child),
-                                                      child: Image.network(
-                                                        secondUrl,
-                                                        key: ValueKey(secondUrl),
-                                                        fit: BoxFit.contain,
+                                                      child: LayoutBuilder(
+                                                        builder: (context, constraints) {
+                                                          return Image.network(
+                                                            secondUrl,
+                                                            key: ValueKey(secondUrl),
+                                                            fit: BoxFit.contain,
+                                                          );
+                                                        },
                                                       ),
                                                     ),
-                                                  ),
+                                            ),
                                           ],
                                         ),
-                                        Align(
-                                          alignment: Alignment.center,
-                                          child: Image.asset(
-                                            'assets/images/icons/plus.png',
-                                            scale: 3,
+                                        Positioned(
+                                          top: (imageHeight) / 3,
+                                          left: 0,
+                                          right: 0,
+                                          child: Align(
+                                            alignment: Alignment.center,
+                                            child: Image.asset(
+                                              'assets/images/icons/plus.png',
+                                              scale: 3,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -244,41 +273,39 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                         ),
                         Expanded(
                           flex: 3,
-                          child: !isAnswered
-                              ? Column(
-                                  children: choices.map((choice) {
-                                    return Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Draggable<String>(
-                                          data: choice['type']!,
-                                          feedback: Material(
-                                            color: Colors.transparent,
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(25),
-                                              child: Image.network(
-                                                choice['url']!,
-                                                width: MediaQuery.of(context).size.width * 0.15,
-                                              ),
-                                            ),
-                                          ),
-                                          childWhenDragging: Opacity(
-                                            opacity: 0,
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(25),
-                                              child: Image.network(choice['url']!),
-                                            ),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(25),
-                                            child: Image.network(choice['url']!),
-                                          ),
+                          child: Column(
+                            children: choices.map((choice) {
+                              return Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Draggable<String>(
+                                    data: choice['type']!,
+                                    feedback: Material(
+                                      color: Colors.transparent,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(25),
+                                        child: Image.network(
+                                          choice['url']!,
+                                          width: MediaQuery.of(context).size.width * 0.15,
                                         ),
                                       ),
-                                    );
-                                  }).toList(),
-                                )
-                              : Icon(Icons.navigate_next),
+                                    ),
+                                    childWhenDragging: Opacity(
+                                      opacity: 0,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(25),
+                                        child: Image.network(choice['url']!),
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(25),
+                                      child: Image.network(choice['url']!),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ],
                     ),

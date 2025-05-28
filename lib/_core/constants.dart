@@ -110,6 +110,7 @@ final Map<String, String> noticeIcon = {
   '0': 'assets/images/icons/board_type4.png', // 공지사항
   '1': 'assets/images/icons/board_type3.png', // 교육정보
   '2': 'assets/images/icons/board_type2.png', // 한자성어
+  '3': 'assets/images/icons/board_type6.png', // 인물소개
   '7': 'assets/images/icons/board_type5.png', // 호호스타 발표
   '8': 'assets/images/icons/board_type1.png', // 호호스타 콘텐츠
 };

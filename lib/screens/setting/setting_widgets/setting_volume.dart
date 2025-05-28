@@ -144,20 +144,18 @@ class _SettingVolumeState extends State<SettingVolume> {
             style: TextStyle(color: fontSub, fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ),
-        Expanded(
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 6.0,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
-            ),
-            child: Slider(
-              value: value,
-              min: 0.0,
-              max: 10.0,
-              inactiveColor: const Color(0xFFEAE8E4),
-              activeColor: const Color(0xFFFFBA00),
-              onChanged: onChanged,
-            ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 6.0,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+          ),
+          child: Slider(
+            value: value,
+            min: 0.0,
+            max: 10.0,
+            inactiveColor: const Color(0xFFEAE8E4),
+            activeColor: const Color(0xFFFFBA00),
+            onChanged: onChanged,
           ),
         ),
       ],

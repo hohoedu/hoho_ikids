@@ -40,19 +40,28 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
     _audioPlayer = AudioPlayer();
     _initPuzzleSets();
     _prepareCurrentPuzzle();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = _imageKey.currentContext;
-      if (context != null) {
-        final renderBox = context.findRenderObject() as RenderBox;
-        final newSize = renderBox.size;
+      _updateBoardSize();
+    });
+  }
+
+  void _updateBoardSize() {
+    final context = _imageKey.currentContext;
+    if (context != null) {
+      final renderBox = context.findRenderObject() as RenderBox?;
+      if (renderBox != null && renderBox.size != Size(0, 0)) {
         if (mounted) {
           setState(() {
-            boardSize = newSize;
+            boardSize = renderBox.size; // Update the board size
           });
         }
+      } else {
+        // Retry if size is still 0x0
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _updateBoardSize();
+        });
       }
-    });
+    }
   }
 
   Future<void> _playSound(String url) async {
@@ -118,7 +127,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
     final set = _puzzleSets[currentIndex];
     final boardImage = set.boardImage;
     final questionImages = set.questionImages;
-
+    Logger().d(boardSize);
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Color(0xFFF3FcFF),
@@ -160,16 +169,13 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                       fit: BoxFit.cover,
                                     ),
                                   ),
-                                  if (boardSize != null)
+                                  if (boardSize != null && boardSize!.width > 0 && boardSize!.height > 0)
                                     ...List.generate(8, (index) {
                                       const double baseWidth = 307.08;
                                       const double baseHeight = 352.56;
 
                                       final scaleX = boardSize!.width / baseWidth;
                                       final scaleY = boardSize!.height / baseHeight;
-
-                                      final double puzzleWidth = 85 * scaleX;
-                                      final double puzzleHeight = 85 * scaleY;
 
                                       double left, top;
                                       if (index < 2) {

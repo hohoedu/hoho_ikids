@@ -10,7 +10,7 @@ import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_content
 import 'package:hani_booki/screens/hani/make_word/make_word_screen.dart';
 import 'package:hani_booki/screens/hani/quiz/quiz_screen.dart';
 import 'package:hani_booki/services/hani/hani_goldenbell_su_service.dart';
-import 'package:hani_booki/services/hani/hani_make_card_service.dart';
+import 'package:hani_booki/services/hani/hani_make_word_service.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
 import 'package:hani_booki/services/hani/hani_song_list_service.dart';
 import 'package:hani_booki/services/hani/hani_story_su_service.dart';
@@ -117,7 +117,7 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
                               HaniContents(
                                 path: '${haniData['workbook']}',
                                 onTap: () async {
-                                  await haniMakeCardService(id, widget.keyCode, year);
+                                  await haniMakeWordService(id, widget.keyCode, year);
                                   Get.to(() => MakeWordScreen(keyCode: widget.keyCode));
                                 },
                               ),

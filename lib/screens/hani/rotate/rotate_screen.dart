@@ -98,19 +98,27 @@ class _RotateScreenState extends State<RotateScreen> {
       appBar: MainAppBar(
         isContent: true,
         isPortraitMode: true,
-        title: '카드를 뒤집어\n한자를 맞혀보세요',
-        titleStyle: TextStyle(
-          fontSize: 22,
-        ),
+        title: Platform.isAndroid ? '' : '카드를 뒤집어\n한자를 맞혀보세요',
+        titleStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         onTapBackIcon: () => verticalBackDialog(true),
       ),
       body: Padding(
         padding: EdgeInsets.only(bottom: 32),
         child: Column(
           children: [
-            Spacer(),
+            Platform.isAndroid
+                ? Expanded(
+                    child: Center(
+                      child: Text(
+                        '카드를 뒤집어\n한자를 맞혀 보세요',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.2),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                : Spacer(),
             Expanded(
-              flex: 8,
+              flex: 6,
               child: RotateImages(
                 key: _rotateKey,
                 items: randomCards,

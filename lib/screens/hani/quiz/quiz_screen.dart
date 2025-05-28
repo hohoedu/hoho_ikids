@@ -90,7 +90,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Future<void> resetQuiz() async {
     await haniQuizService(userData!.id, widget.keyCode, userData!.year);
     setState(() {
-      currentIndex = 0; // 첫 번째 문제로 돌아감
+      currentIndex = 0;
       _setupAnswer();
     });
     Logger().d('퀴즈가 리셋되었습니다.');
@@ -117,7 +117,7 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
       body: Center(
         child: SizedBox(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.8 : double.infinity,
+          width: MediaQuery.of(context).size.width * 0.8,
           child: Column(
             children: [
               Spacer(flex: 1),
@@ -138,7 +138,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Widget _buildQuizContent(List<String> imagePaths, {required Key key}) {
     return Row(
-      key: key, // 문제 전환 감지용 key
+      key: key,
       children: [
         Expanded(
           flex: 2,

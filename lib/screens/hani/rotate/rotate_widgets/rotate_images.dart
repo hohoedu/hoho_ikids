@@ -44,9 +44,7 @@ class _RotateImagesState extends State<RotateImages> {
         enlargeCenterPage: true,
         enableInfiniteScroll: false,
         onPageChanged: (index, reason) {
-          setState(() {
-            widget.onPageChanged(index);
-          });
+          widget.onPageChanged(index);
         },
         viewportFraction: 0.65.sp,
       ),
@@ -58,24 +56,24 @@ class _RotateImagesState extends State<RotateImages> {
               child: FlipCard(
                 key: cardKeys[index],
                 flipOnTouch: false,
+                // isFlippedList[index] 가 true 면 뒤집힌(back) 채로 시작
+                side: isFlippedList[index] ? CardSide.BACK : CardSide.FRONT,
+                // flip 완료 시 호출 → isFlippedList 업데이트
+                onFlipDone: (isFront) {
+                  setState(() {
+                    isFlippedList[index] = !isFront;
+                    if (isFlippedList.every((v) => v)) widget.onComplete();
+                  });
+                },
                 front: GestureDetector(
                   onTap: () {
                     widget.onFirstTap(index);
                     cardKeys[index].currentState?.toggleCard();
-
-                    if (!isFlippedList[index]) {
-                      setState(() => isFlippedList[index] = true);
-                      if (isFlippedList.every((flipped) => flipped)) {
-                        widget.onComplete();
-                      }
-                    }
                   },
                   child: preImage(index),
                 ),
                 back: GestureDetector(
-                  onTap: () {
-                    cardKeys[index].currentState?.toggleCard();
-                  },
+                  onTap: () => cardKeys[index].currentState?.toggleCard(),
                   child: sufImage(index),
                 ),
               ),

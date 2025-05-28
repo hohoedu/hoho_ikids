@@ -16,8 +16,7 @@ class SettingNotification extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -51,8 +50,7 @@ class SettingNotification extends StatelessWidget {
                           () => NotificationCheckBox(
                             label: key,
                             value: controller.categories[key]!.value,
-                            onChanged: (value) =>
-                                controller.toggleCategory(key, value),
+                            onChanged: (value) => controller.toggleCategory(key, value),
                             leftPadding: 40,
                           ),
                         );
@@ -68,7 +66,6 @@ class SettingNotification extends StatelessWidget {
     );
   }
 }
-
 
 class NotificationCheckBox extends StatelessWidget {
   final String label;
@@ -87,7 +84,7 @@ class NotificationCheckBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child: Padding(
         padding: EdgeInsets.only(left: leftPadding),
         child: GestureDetector(
@@ -97,9 +94,7 @@ class NotificationCheckBox extends StatelessWidget {
           child: Row(
             children: [
               Image.asset(
-                value
-                    ? 'assets/images/icons/checkbox.png'
-                    : 'assets/images/icons/checkbox_blank.png',
+                value ? 'assets/images/icons/checkbox.png' : 'assets/images/icons/checkbox_blank.png',
                 width: 20,
                 height: 20,
               ),
@@ -108,10 +103,7 @@ class NotificationCheckBox extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     label,
-                    style: TextStyle(
-                        color: fontSub,
-                        fontSize: 6.5.sp,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(color: fontSub, fontSize: 6.5.sp, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
