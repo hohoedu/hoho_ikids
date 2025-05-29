@@ -10,14 +10,17 @@ class BgmController extends GetxController {
     'hani': 'assets/audio/bgm/hani_main.mp3',
     'puzzle': 'assets/audio/bgm/puzzle.mp3',
     'find_diff': 'assets/audio/bgm/find_diff.mp3',
-    'match':'assets/audio/bgm/match.mp3', 
+    'match': 'assets/audio/bgm/match.mp3',
     'flip': 'assets/audio/bgm/flip.mp3',
     'clean': 'assets/audio/bgm/clean.mp3',
+    'quiz': 'assets/audio/bgm/quiz.mp3',
+    'word': 'assets/audio/bgm/word.mp3',
     'jaram': 'assets/audio/bgm/booki_j_main.mp3',
     'kium': 'assets/audio/bgm/booki_k_main.mp3',
     'mannam': 'assets/audio/bgm/booki_d_main.mp3',
-    'kidok':'assets/audio/bgm/kidok.mp3',
+    'kidok': 'assets/audio/bgm/kidok.mp3',
   };
+
   String _currentTrack = '';
 
   @override
@@ -52,7 +55,6 @@ class BgmController extends GetxController {
     _player.pause();
     _player.seek(Duration.zero);
   }
-
 
   void pauseBgm() {
     _player.pause();

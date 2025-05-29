@@ -35,7 +35,7 @@ Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
       // 응답 결과가 있는 경우
       if (responseData['result'] == "0000") {
         if(responseData['han'] != null){
-          Get.off(
+          Get.to(
                 () => VideoScreen(
               content: 'han',
               videoId: responseData['han'],
@@ -44,7 +44,7 @@ Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
           );
         }
         if (responseData['song'] != null) {
-          Get.off(
+          Get.to(
             () => VideoScreen(
               content: 'Song',
               videoId: responseData['song'],

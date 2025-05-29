@@ -41,6 +41,7 @@ const Map<String, Color> noticeTitleColor = {
   '0': Color(0xFFF286AC),
   '1': Color(0xFF1AD0C1),
   '2': Color(0xFFA974C5),
+  '3': Color(0xFFFA7B72), // 인물소개
   '7': Color(0xFF84CB39), // 호호스타 발표
   '8': Color(0xFFFFC12C), // 호호스타 콘텐츠
 };
@@ -48,6 +49,7 @@ const Map<String, Color> noticeTitleActiveColor = {
   '0': Color(0xFFE73F7A),
   '1': Color(0xFF00AA9C),
   '2': Color(0xFF7D38A1),
+  '3': Color(0xFFE44c41), // 인물소개
   '7': Color(0xFF59A426), // 호호스타 발표
   '8': Color(0xFFFF9600), // 호호스타 콘텐츠
 };

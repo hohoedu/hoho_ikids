@@ -36,7 +36,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
   @override
   void initState() {
     super.initState();
-    bgmController.playBgm('puzzle');
+    bgmController.playBgm('match');
     _audioPlayer = AudioPlayer();
     _initPuzzleSets();
     _prepareCurrentPuzzle();
@@ -256,20 +256,26 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
 
                                     if (isSolved[realIndex]) return const SizedBox.shrink();
 
-                                    return Draggable<int>(
-                                      data: realIndex,
-                                      feedback: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          imageUrl,
-                                          width: 80,
-                                          height: 80,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      childWhenDragging: Opacity(
-                                        opacity: 0.0,
-                                        child: ClipRRect(
+                                    final RxSet<int> draggingIndices = <int>{}.obs;
+
+                                    return Obx(() {
+                                      final isDragging = draggingIndices.contains(realIndex);
+                                      final isSolvedNow = isSolved[realIndex];
+
+                                      if (isSolvedNow || isDragging) return SizedBox.shrink();
+
+                                      return Draggable<int>(
+                                        data: realIndex,
+                                        onDragStarted: () {
+                                          draggingIndices.add(realIndex);
+                                        },
+                                        onDraggableCanceled: (_, __) {
+                                          draggingIndices.remove(realIndex); // 실패 시 다시 보이게
+                                        },
+                                        onDragEnd: (_) {
+                                          draggingIndices.remove(realIndex); // 성공 또는 실패 시 제거
+                                        },
+                                        feedback: ClipRRect(
                                           borderRadius: BorderRadius.circular(8),
                                           child: Image.network(
                                             imageUrl,
@@ -278,17 +284,18 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                             fit: BoxFit.cover,
                                           ),
                                         ),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          imageUrl,
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
+                                        childWhenDragging: const SizedBox.shrink(),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.network(
+                                            imageUrl,
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    });
                                   }),
                                 ),
                               ),

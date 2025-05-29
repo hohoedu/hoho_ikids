@@ -85,15 +85,14 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
+            width: MediaQuery.of(context).size.width * 0.9,
             height: double.infinity,
             decoration: BoxDecoration(
               color: Color(0xFFFFDDE2),
             ),
             child: Row(
               children: [
-                Spacer(),
-                // booki Main
+                //hani Main
                 Expanded(
                   flex: 8,
                   child: Padding(
@@ -172,19 +171,23 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
                   ),
                 ),
                 Expanded(
-                  child: Column(
-                    children: [
-                      Spacer(flex: 6),
-                      NewKidokButton(
-                        type: 'hani',
-                        keycode: widget.keyCode,
-                      ),
-                      NewStarCount(
-                        keyCode: widget.keyCode,
-                        type: 'hani',
-                      ),
-                      Spacer(flex: 1,),
-                    ],
+                  child: Padding(
+                    padding: screenWidth >= 1000
+                        ? EdgeInsets.zero
+                        : EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        NewKidokButton(
+                          type: 'hani',
+                          keycode: widget.keyCode,
+                        ),
+                        NewStarCount(
+                          keyCode: widget.keyCode,
+                          type: 'hani',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

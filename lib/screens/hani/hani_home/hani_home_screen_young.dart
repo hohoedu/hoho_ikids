@@ -84,15 +84,14 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
       ),
       body: Center(
         child: Container(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
+            width: MediaQuery.of(context).size.width * 0.9,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFD2FFFE),
           ),
           child: Row(
             children: [
-              Spacer(),
-              // booki Main
+              // hani Main
               Expanded(
                 flex: 8,
                 child: Padding(
@@ -158,18 +157,23 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                 ),
               ),
               Expanded(
-                child: Column(
-                  children: [
-                    Spacer(),
-                    NewKidokButton(
-                      type: 'hani',
-                      keycode: widget.keyCode,
-                    ),
-                    NewStarCount(
-                      keyCode: widget.keyCode,
-                      type: 'hani',
-                    )
-                  ],
+                child: Padding(
+                  padding: screenWidth >= 1000
+                      ? EdgeInsets.zero
+                      : EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      NewKidokButton(
+                        type: 'hani',
+                        keycode: widget.keyCode,
+                      ),
+                      NewStarCount(
+                        keyCode: widget.keyCode,
+                        type: 'hani',
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

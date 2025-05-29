@@ -8,6 +8,7 @@ import 'package:hani_booki/_data/kidok/kidok_theme_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/kidok/kidok_main_service.dart';
 import 'package:hani_booki/utils/text_format.dart';
+import 'package:logger/logger.dart';
 
 class NewKidokButton extends StatelessWidget {
   final String keycode;
@@ -35,22 +36,22 @@ class NewKidokButton extends StatelessWidget {
             padding: const EdgeInsets.only(left: 8.0),
             child: Container(
               width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.4,
+              height: 185.h,
               decoration: BoxDecoration(color: Colors.transparent),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Padding(
-                    padding: screenWidth >= 1000 ? EdgeInsets.all(8.0) : EdgeInsets.symmetric(vertical: 16.0),
+                    padding: screenWidth >= 1000
+                        ? EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0)
+                        : EdgeInsets.symmetric(vertical: 16.0),
                     child: Align(
                       alignment: const Alignment(0.0, 0.5),
                       child: ClipPath(
                         clipper: KidokClipper(),
                         child: Container(
-                          height: MediaQuery.of(context).size.height * 0.35,
                           decoration: BoxDecoration(
-                            // color: Color(kidokThemeController.kidokThemeData!.boxColor),
-                            color: Colors.white,
+                            color: Color(kidokThemeController.kidokThemeData!.boxColor),
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(50),
                               bottomRight: Radius.circular(50),
@@ -59,30 +60,35 @@ class NewKidokButton extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              AspectRatio(
-                                aspectRatio: 1.0,
-                                child: RichText(
-                                  textAlign: TextAlign.center,
-                                  text: TextSpan(
-                                    style: TextStyle(
-                                      color: fontMain,
-                                      fontFamily: 'Cookie',
-                                      fontSize: 8.sp,
-                                      height: 1.4,
-                                    ),
-                                    children: [
-                                      TextSpan(
-                                          text: type == 'hani'
-                                              // ? '${kidokThemeController.kidokThemeData!.subject}'
-                                              ? '끈기'
-                                              : '지식확장'),
-                                      TextSpan(
+                              Padding(
+                                padding: type == 'hani' ? EdgeInsets.zero : EdgeInsets.only(bottom: 8.0),
+                                child: AspectRatio(
+                                  aspectRatio: 1.0,
+                                  child: RichText(
+                                    textAlign: TextAlign.center,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        color: fontMain,
+                                        fontFamily: 'Cookie',
+                                        fontSize: 20,
+                                        height: 1.4,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                            text: type == 'hani'
+                                                ? '${kidokThemeController.kidokThemeData!.subject}'
+                                                // ? '끈기'
+                                                : '지식\n확장',
+                                            style: TextStyle(color: Colors.black, height: 1.2)),
+                                        TextSpan(
                                           text: '\n독서활동',
                                           style: TextStyle(
-                                              // color: Color(kidokThemeController.kidokThemeData!.subjectColor),
-                                              color: Colors.red,
-                                              fontSize: 7.sp))
-                                    ],
+                                              color: Color(kidokThemeController.kidokThemeData!.subjectColor),
+                                              // color: Colors.red,
+                                              fontSize: 15),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -93,7 +99,7 @@ class NewKidokButton extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    bottom: MediaQuery.of(context).size.height * 0.4 - MediaQuery.of(context).size.height * 0.5 * 0.05,
+                    top: -50,
                     left: 0,
                     right: 0,
                     child: Column(
@@ -103,21 +109,21 @@ class NewKidokButton extends StatelessWidget {
                           transform: Matrix4.identity()..scale(-1.0, 1.0),
                           child: Image.asset(
                             'assets/images/kido.png',
-                            scale: 1,
+                            scale: 2,
                           ),
                         ),
                       ],
                     ),
                   ),
                   Positioned(
-                      bottom:
-                          MediaQuery.of(context).size.height * 0.4 - MediaQuery.of(context).size.height * 0.5 * 0.35,
-                      left: 0,
-                      right: 0,
-                      child: Image.asset(
-                        'assets/images/kido_logo_vertical.png',
-                        scale: 2,
-                      ))
+                    bottom: 100,
+                    left: 0,
+                    right: 0,
+                    child: Image.asset(
+                      'assets/images/kido_logo_vertical.png',
+                      scale: 2,
+                    ),
+                  ),
                 ],
               ),
             ),

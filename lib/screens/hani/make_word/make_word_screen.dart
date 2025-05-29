@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_make_word_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/hani/hani_make_word_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
+import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -19,6 +21,7 @@ class MakeWordScreen extends StatefulWidget {
 }
 
 class _MakeWordScreenState extends State<MakeWordScreen> {
+  final bgmController = Get.find<BgmController>();
   final makeWord = Get.find<HaniMakeWordDataController>();
   final userData = Get.find<UserDataController>().userData;
 
@@ -38,6 +41,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
   @override
   void initState() {
     super.initState();
+    bgmController.playBgm('word');
     loadCard();
     shuffleChoices();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -134,70 +138,52 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
         ),
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: GestureDetector(
-        onTap: () => _goNextCard(),
-        child: Center(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Spacer(flex: 1),
-                Expanded(
-                  flex: 12,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          flex: 8,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 24.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: Container(
-                                      color: Colors.white,
-                                      child: Center(
-                                          child: Text(
-                                        makeWord.makeWordDataList[currentIndex].title,
-                                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                                      )),
-                                    ),
+      body: Center(
+        child: SizedBox(
+          width:
+              screenWidth >= 1000 ? MediaQuery.of(context).size.width * 0.9 : MediaQuery.of(context).size.width * 0.8,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Spacer(flex: screenWidth >= 1000 ? 2 : 1),
+              Expanded(
+                flex: 12,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        flex: 9,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 24.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Container(
+                                    color: Colors.white,
+                                    child: Center(
+                                        child: Text(
+                                      makeWord.makeWordDataList[currentIndex].title,
+                                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                                    )),
                                   ),
-                                  Expanded(
-                                    flex: 10,
-                                    child: Stack(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            // First Image
-                                            Expanded(
-                                              child: firstIsPic
-                                                  ? DragTarget<String>(
-                                                      onAccept: nextWord,
-                                                      builder: (ctx, candidate, rejected) => AnimatedSwitcher(
-                                                        duration: const Duration(milliseconds: 300),
-                                                        transitionBuilder: (child, animation) =>
-                                                            FadeTransition(opacity: animation, child: child),
-                                                        child: LayoutBuilder(
-                                                          builder: (context, constraints) {
-                                                            imageHeight = constraints.maxHeight;
-                                                            return Image.network(
-                                                              firstUrl,
-                                                              scale: 2,
-                                                              key: ValueKey(firstUrl),
-                                                              fit: BoxFit.contain,
-                                                            );
-                                                          },
-                                                        ),
-                                                      ),
-                                                    )
-                                                  : AnimatedSwitcher(
+                                ),
+                                Expanded(
+                                  flex: 10,
+                                  child: Stack(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          // First Image
+                                          Expanded(
+                                            child: firstIsPic
+                                                ? DragTarget<String>(
+                                                    onAccept: nextWord,
+                                                    builder: (ctx, candidate, rejected) => AnimatedSwitcher(
                                                       duration: const Duration(milliseconds: 300),
                                                       transitionBuilder: (child, animation) =>
                                                           FadeTransition(opacity: animation, child: child),
@@ -206,35 +192,36 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                                           imageHeight = constraints.maxHeight;
                                                           return Image.network(
                                                             firstUrl,
+                                                            scale: 2,
                                                             key: ValueKey(firstUrl),
                                                             fit: BoxFit.contain,
                                                           );
                                                         },
                                                       ),
                                                     ),
-                                            ),
-                                            // Second Image
-                                            Expanded(
-                                              child: secondIsPic
-                                                  ? DragTarget<String>(
-                                                      onAccept: nextWord,
-                                                      builder: (ctx, candidate, rejected) => AnimatedSwitcher(
-                                                        duration: const Duration(milliseconds: 300),
-                                                        transitionBuilder: (child, animation) =>
-                                                            FadeTransition(opacity: animation, child: child),
-                                                        child: LayoutBuilder(
-                                                          builder: (context, constraints) {
-                                                            return Image.network(
-                                                              secondUrl,
-                                                              scale: 2,
-                                                              key: ValueKey(secondUrl),
-                                                              fit: BoxFit.contain,
-                                                            );
-                                                          },
-                                                        ),
-                                                      ),
-                                                    )
-                                                  : AnimatedSwitcher(
+                                                  )
+                                                : AnimatedSwitcher(
+                                                    duration: const Duration(milliseconds: 300),
+                                                    transitionBuilder: (child, animation) =>
+                                                        FadeTransition(opacity: animation, child: child),
+                                                    child: LayoutBuilder(
+                                                      builder: (context, constraints) {
+                                                        imageHeight = constraints.maxHeight;
+                                                        return Image.network(
+                                                          firstUrl,
+                                                          key: ValueKey(firstUrl),
+                                                          fit: BoxFit.contain,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                          ),
+                                          // Second Image
+                                          Expanded(
+                                            child: secondIsPic
+                                                ? DragTarget<String>(
+                                                    onAccept: nextWord,
+                                                    builder: (ctx, candidate, rejected) => AnimatedSwitcher(
                                                       duration: const Duration(milliseconds: 300),
                                                       transitionBuilder: (child, animation) =>
                                                           FadeTransition(opacity: animation, child: child),
@@ -242,77 +229,105 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                                         builder: (context, constraints) {
                                                           return Image.network(
                                                             secondUrl,
+                                                            scale: 2,
                                                             key: ValueKey(secondUrl),
                                                             fit: BoxFit.contain,
                                                           );
                                                         },
                                                       ),
                                                     ),
-                                            ),
-                                          ],
-                                        ),
-                                        Positioned(
-                                          top: (imageHeight) / 3,
-                                          left: 0,
-                                          right: 0,
-                                          child: Align(
-                                            alignment: Alignment.center,
-                                            child: Image.asset(
-                                              'assets/images/icons/plus.png',
-                                              scale: 3,
-                                            ),
+                                                  )
+                                                : AnimatedSwitcher(
+                                                    duration: const Duration(milliseconds: 300),
+                                                    transitionBuilder: (child, animation) =>
+                                                        FadeTransition(opacity: animation, child: child),
+                                                    child: LayoutBuilder(
+                                                      builder: (context, constraints) {
+                                                        return Image.network(
+                                                          secondUrl,
+                                                          key: ValueKey(secondUrl),
+                                                          fit: BoxFit.contain,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                          ),
+                                        ],
+                                      ),
+                                      Positioned(
+                                        top: (imageHeight) / 3,
+                                        left: 0,
+                                        right: 0,
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: Image.asset(
+                                            'assets/images/icons/plus.png',
+                                            scale: 3,
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            children: choices.map((choice) {
-                              return Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Draggable<String>(
-                                    data: choice['type']!,
-                                    feedback: Material(
-                                      color: Colors.transparent,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(25),
-                                        child: Image.network(
-                                          choice['url']!,
-                                          width: MediaQuery.of(context).size.width * 0.15,
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: isAnswered
+                            ? GestureDetector(
+                                onTap: () {
+                                  _goNextCard();
+                                },
+                                child: Image.asset(
+                                  'assets/images/icons/next.png',
+                                  scale: 0.5,
+                                  color: Color(0xFFFFFFFF),
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: choices.map((choice) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Draggable<String>(
+                                        data: choice['type']!,
+                                        feedback: Material(
+                                          color: Colors.transparent,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(25),
+                                            child: Image.network(
+                                              choice['url']!,
+                                              width: MediaQuery.of(context).size.width * 0.15,
+                                            ),
+                                          ),
+                                        ),
+                                        childWhenDragging: Opacity(
+                                          opacity: 0,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(25),
+                                            child: Image.network(choice['url']!),
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(25),
+                                          child: Image.network(choice['url']!),
                                         ),
                                       ),
-                                    ),
-                                    childWhenDragging: Opacity(
-                                      opacity: 0,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(25),
-                                        child: Image.network(choice['url']!),
-                                      ),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(25),
-                                      child: Image.network(choice['url']!),
-                                    ),
-                                  ),
+                                    );
+                                  }).toList(),
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
+                              ),
+                      ),
+                    ],
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
         ),
       ),

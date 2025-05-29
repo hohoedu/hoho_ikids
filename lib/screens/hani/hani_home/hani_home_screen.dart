@@ -21,6 +21,8 @@ import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/kidok_button.dart';
+import 'package:hani_booki/widgets/new_kidok_button.dart';
+import 'package:hani_booki/widgets/new_star_count.dart';
 import 'package:hani_booki/widgets/star_count.dart';
 import 'package:logger/logger.dart';
 
@@ -87,18 +89,14 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
       ),
       body: Center(
         child: Container(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
+          width: MediaQuery.of(context).size.width * 0.9,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFFFDDE2),
           ),
           child: Row(
             children: [
-              StarCount(
-                keyCode: widget.keyCode,
-                type: 'hani',
-              ),
-              // booki Main
+              // hani Main
               Expanded(
                 flex: 8,
                 child: Padding(
@@ -108,7 +106,7 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
                     height: double.infinity,
                     decoration: BoxDecoration(color: Colors.transparent),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // 윗줄 컨텐츠 3개
                         Row(
@@ -181,9 +179,25 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
                   ),
                 ),
               ),
-              KidokButton(
-                type: 'hani',
-                keycode: widget.keyCode,
+              Expanded(
+                child: Padding(
+                  padding: screenWidth >= 1000
+                      ? EdgeInsets.zero
+                      : EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      NewKidokButton(
+                        type: 'hani',
+                        keycode: widget.keyCode,
+                      ),
+                      NewStarCount(
+                        keyCode: widget.keyCode,
+                        type: 'hani',
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

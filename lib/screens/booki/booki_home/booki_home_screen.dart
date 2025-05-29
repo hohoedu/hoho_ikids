@@ -19,6 +19,8 @@ import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/kidok_button.dart';
+import 'package:hani_booki/widgets/new_kidok_button.dart';
+import 'package:hani_booki/widgets/new_star_count.dart';
 import 'package:hani_booki/widgets/star_count.dart';
 import 'package:logger/logger.dart';
 
@@ -31,8 +33,7 @@ class BookiHomeScreen extends StatefulWidget {
   State<BookiHomeScreen> createState() => _BookiHomeScreenState();
 }
 
-class _BookiHomeScreenState extends State<BookiHomeScreen>
-    with WidgetsBindingObserver,RouteAware {
+class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingObserver, RouteAware {
   final bgmController = Get.find<BgmController>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final bookiHomeData = Get.find<BookiHomeDataController>();
@@ -62,9 +63,9 @@ class _BookiHomeScreenState extends State<BookiHomeScreen>
     final ModalRoute? route = ModalRoute.of(context);
     if (route is PageRoute) {
       routeObserver.subscribe(this, route);
-
     }
   }
+
   @override
   void didPopNext() {
     super.didPopNext();
@@ -76,8 +77,7 @@ class _BookiHomeScreenState extends State<BookiHomeScreen>
     final bookiData = bookiHomeData.bookiHomeData;
     String id = userData.userData!.id;
     String year = userData.userData!.year;
-    final bool isSibling =
-        userData.userData!.siblingCount == '1' ? false : true;
+    final bool isSibling = userData.userData!.siblingCount == '1' ? false : true;
 
     return Scaffold(
       key: scaffoldKey,
@@ -97,19 +97,13 @@ class _BookiHomeScreenState extends State<BookiHomeScreen>
       ),
       body: Center(
         child: Container(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.90
-              : double.infinity,
+          width: MediaQuery.of(context).size.width * 0.9,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFFFFDF0),
           ),
           child: Row(
             children: [
-              StarCount(
-                keyCode: widget.keyCode,
-                type: 'booki',
-              ),
               // booki Main
               Expanded(
                 flex: 8,
@@ -120,20 +114,18 @@ class _BookiHomeScreenState extends State<BookiHomeScreen>
                     height: double.infinity,
                     decoration: BoxDecoration(color: Colors.transparent),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // 윗줄 컨텐츠 2개
                         Row(
                           children: [
                             BookiTopContents(
                               imagePath: '${bookiData['story']}',
-                              onTap: () =>
-                                  bookiStoryService(id, widget.keyCode, year),
+                              onTap: () => bookiStoryService(id, widget.keyCode, year),
                             ),
                             BookiTopContents(
                               imagePath: '${bookiData['song']}',
-                              onTap: () =>
-                                  bookiSongService(id, widget.keyCode, year),
+                              onTap: () => bookiSongService(id, widget.keyCode, year),
                             ),
                           ],
                         ),
@@ -145,21 +137,18 @@ class _BookiHomeScreenState extends State<BookiHomeScreen>
                               color: gold,
                               onTap: () {
                                 bgmController.stopBgm();
-                                bookiGoldenbellService(
-                                    id, widget.keyCode, year);
+                                bookiGoldenbellService(id, widget.keyCode, year);
                               },
                             ),
                             BookiBottomContents(
                               imagePath: '${bookiData['find']}',
                               color: amethyst,
-                              onTap: () => bookiFindDiffService(
-                                  id, widget.keyCode, year),
+                              onTap: () => bookiFindDiffService(id, widget.keyCode, year),
                             ),
                             BookiBottomContents(
                               imagePath: '${bookiData['img']}',
                               color: emerald,
-                              onTap: () =>
-                                  bookiMatchService(id, widget.keyCode, year),
+                              onTap: () => bookiMatchService(id, widget.keyCode, year),
                             ),
                           ],
                         ),
@@ -168,9 +157,25 @@ class _BookiHomeScreenState extends State<BookiHomeScreen>
                   ),
                 ),
               ),
-              KidokButton(
-                type: 'booki',
-                keycode: widget.keyCode,
+              Expanded(
+                child: Padding(
+                  padding: screenWidth >= 1000
+                      ? EdgeInsets.zero
+                      : EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      NewKidokButton(
+                        type: 'booki',
+                        keycode: widget.keyCode,
+                      ),
+                      NewStarCount(
+                        keyCode: widget.keyCode,
+                        type: 'booki',
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

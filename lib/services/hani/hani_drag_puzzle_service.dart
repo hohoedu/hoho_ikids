@@ -11,7 +11,6 @@ import 'package:logger/logger.dart';
 Future<void> haniDragPuzzleService(id, keyCode, year) async {
   final dragPuzzleData = Get.put(HaniDragPuzzleDataController());
   String url = dotenv.get('HANI_PUZZLE_Y5_URL');
-  Logger().d(url);
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,
@@ -20,8 +19,6 @@ Future<void> haniDragPuzzleService(id, keyCode, year) async {
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-  Logger().d(response);
-  print('어휘만들기 = ${response.data}');
   try {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.data);
@@ -33,8 +30,6 @@ Future<void> haniDragPuzzleService(id, keyCode, year) async {
             resultData.map((item) => HaniDragPuzzleData.fromJson(item)).toList();
 
         dragPuzzleData.setDragPuzzleDataList(dragPuzzleDataList);
-
-
       } else {
         oneButtonDialog(
           title: '불러오기 실패',

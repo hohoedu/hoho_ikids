@@ -22,7 +22,7 @@ class QuizScreen extends StatefulWidget {
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
+class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
   final userData = Get.find<UserDataController>().userData;
   late List<String> answer;
   final bgmController = Get.find<BgmController>();
@@ -30,12 +30,26 @@ class _QuizScreenState extends State<QuizScreen> {
   late AudioPlayer _audioPlayer;
   int currentIndex = 0;
 
+  late AnimationController _tapController;
+  late Animation<double> _tapAnim;
+  int _tappedIndex = -1;
+  bool _answeredCorrect = false;
+
   @override
   void initState() {
     super.initState();
-    bgmController.playBgm('puzzle');
+    bgmController.playBgm('quiz');
     _audioPlayer = AudioPlayer();
     _setupAnswer();
+
+    _tapController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    _tapAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _tapController, curve: Curves.easeInOut));
   }
 
   Future<void> _playSound(String url) async {
@@ -52,6 +66,8 @@ class _QuizScreenState extends State<QuizScreen> {
       quizData.haniQuizDataList[currentIndex].correct,
       quizData.haniQuizDataList[currentIndex].wrong,
     ]..shuffle();
+    _answeredCorrect = false;
+    _tappedIndex = -1;
   }
 
   Future<void> _onAnswerTap(int index) async {
@@ -59,36 +75,50 @@ class _QuizScreenState extends State<QuizScreen> {
     if (!isCorrect) {
       await SoundManager.playNo();
       return;
-    } else if (isCorrect) {
-      await _playSound(quizData.haniQuizDataList[currentIndex].voice);
-      await Future.delayed(
-        Duration(seconds: 1),
-        () {
-          if (currentIndex >= quizData.haniQuizDataList.length - 1) {
-            starUpdateService('quiz', widget.keyCode);
-            lottieDialog(
-              onMain: () {
-                Get.back();
-                Get.back();
-              },
-              onReset: () {
-                Get.back();
-                resetQuiz();
-              },
-            );
-            return;
-          }
-          setState(() {
-            currentIndex++;
-            _setupAnswer();
-          });
-        },
-      );
     }
+    _tappedIndex = index;
+    await SoundManager.playCorrect();
+
+    await _tapController.forward();
+    _tapController.reset();
+
+    await _playSound(quizData.haniQuizDataList[currentIndex].voice);
+
+    // 오답 숨기고 정답만 남김
+    setState(() {
+      _answeredCorrect = true;
+    });
+
+    Future.delayed(Duration(seconds: 1), () {
+      final lastIndex = quizData.haniQuizDataList.length - 1;
+
+      if (currentIndex >= lastIndex) {
+        starUpdateService('quiz', widget.keyCode);
+        lottieDialog(
+          onMain: () {
+            Get.back();
+            Get.back();
+          },
+          onReset: () {
+            Get.back();
+            resetQuiz();
+          },
+        );
+      } else {
+        // 아니면 다음 문제로
+        setState(() {
+          currentIndex++;
+          _answeredCorrect = false;
+          _tappedIndex = -1;
+          _setupAnswer();
+        });
+      }
+    });
   }
 
   Future<void> resetQuiz() async {
     await haniQuizService(userData!.id, widget.keyCode, userData!.year);
+    _tapController.reset();
     setState(() {
       currentIndex = 0;
       _setupAnswer();
@@ -166,24 +196,39 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         Expanded(
           flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: List.generate(2, (index) {
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: GestureDetector(
-                      onTap: () => _onAnswerTap(index),
-                      child: Image.network(answer[index], key: ValueKey('$currentIndex-$index')),
+          child: Column(
+            children: List.generate(2, (idx) {
+              // 정답 후 오답은 숨김
+              if (_answeredCorrect && answer[idx] != quizData.haniQuizDataList[currentIndex].correct) {
+                return Expanded(child: SizedBox.shrink());
+              }
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: GestureDetector(
+                    onTap: () => _onAnswerTap(idx),
+                    child: AnimatedBuilder(
+                      animation: _tapAnim,
+                      builder: (_, child) {
+                        final scale = (_tappedIndex == idx) ? _tapAnim.value : 1.0;
+                        return Transform.scale(scale: scale, child: child);
+                      },
+                      child: Image.network(answer[idx], key: ValueKey('$currentIndex-$idx')),
                     ),
                   ),
-                );
-              }),
-            ),
+                ),
+              );
+            }),
           ),
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _tapController.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
   }
 }

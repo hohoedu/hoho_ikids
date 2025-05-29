@@ -2,7 +2,7 @@ name: hani_booki
 description: "호호하니&호호부키"
 publish_to: 'none'
 # 현재 버전
-version: 1.0.16+23
+version: 1.0.17+24
 # 다음 버전 1.0.17+24
 
 environment:

@@ -67,6 +67,8 @@ class _RotateScreenState extends State<RotateScreen> {
   }
 
   void completeGame() async {
+    // TODO:별포인트 적립
+    // await starUpdateService('card', widget.keyCode);
     await starUpdateService('card', widget.keyCode);
     Future.delayed(
       Duration(seconds: 1),
@@ -98,27 +100,19 @@ class _RotateScreenState extends State<RotateScreen> {
       appBar: MainAppBar(
         isContent: true,
         isPortraitMode: true,
-        title: Platform.isAndroid ? '' : '카드를 뒤집어\n한자를 맞혀보세요',
-        titleStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        title: '카드를 뒤집어\n한자를 맞혀보세요',
+        titleStyle: TextStyle(
+          fontSize: 22,
+        ),
         onTapBackIcon: () => verticalBackDialog(true),
       ),
       body: Padding(
         padding: EdgeInsets.only(bottom: 32),
         child: Column(
           children: [
-            Platform.isAndroid
-                ? Expanded(
-                    child: Center(
-                      child: Text(
-                        '카드를 뒤집어\n한자를 맞혀 보세요',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.2),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )
-                : Spacer(),
+            Spacer(),
             Expanded(
-              flex: 6,
+              flex: 8,
               child: RotateImages(
                 key: _rotateKey,
                 items: randomCards,
