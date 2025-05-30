@@ -1,13 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/utils/notification_controller.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-class SettingNotification extends StatelessWidget {
-  SettingNotification({super.key});
+class SettingNotification extends StatefulWidget {
+  const SettingNotification({super.key});
 
-  final NotificationController controller = Get.put(NotificationController());
+  @override
+  _SettingNotificationState createState() => _SettingNotificationState();
+}
+
+class _SettingNotificationState extends State<SettingNotification> {
+  static const _boxName = 'notification_settings';
+
+  final NotificationController notiController = Get.put(NotificationController());
+
+  bool allChecked = true;
+  final Map<String, bool> categories = {
+    '신규 E-BOOK': true,
+    '언어분석 리포트': true,
+    '교육정보': true,
+    '공지사항': true,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final box = Hive.box(_boxName);
+    setState(() {
+      allChecked = box.get('allChecked', defaultValue: true) as bool;
+      categories.forEach((key, _) {
+        categories[key] = box.get('category_$key', defaultValue: true) as bool;
+      });
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    final box = Hive.box(_boxName);
+    await box.put('allChecked', allChecked);
+    for (var entry in categories.entries) {
+      await box.put('category_${entry.key}', entry.value);
+    }
+  }
+
+  void _onAllChanged(bool value) {
+    setState(() {
+      allChecked = value;
+      for (var key in categories.keys) {
+        categories[key] = value;
+      }
+    });
+    _saveSettings();
+    notiController.toggleBroadcast(value);
+  }
+
+  void _onCategoryChanged(String key, bool value) {
+    setState(() {
+      categories[key] = value;
+      allChecked = categories.values.every((v) => v);
+    });
+    _saveSettings();
+
+    if (key == '교육정보') {
+      notiController.toggleBroadcast(value);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,46 +77,42 @@ class SettingNotification extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 1,
-                child: Container(
-                  color: Colors.transparent,
-                  child: Center(
-                    child: Text(
-                      '알림 설정',
-                      style: TextStyle(color: fontSub, fontSize: 20),
-                    ),
+                child: Center(
+                  child: Text(
+                    '알림 설정',
+                    style: TextStyle(color: Color(0xFF606060), fontSize: 20),
                   ),
                 ),
               ),
+              // 체크박스 리스트
               Expanded(
                 flex: 4,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Obx(
-                      () => NotificationCheckBox(
-                        label: '전체',
-                        value: controller.allChecked.value,
-                        onChanged: (value) => controller.toggleAll(value),
-                        leftPadding: 20,
-                      ),
+                    // 전체
+                    NotificationCheckBox(
+                      label: '전체',
+                      value: allChecked,
+                      onChanged: _onAllChanged,
+                      leftPadding: 20,
                     ),
-                    Column(
-                      children: controller.categories.keys.map((key) {
-                        return Obx(
-                          () => NotificationCheckBox(
-                            label: key,
-                            value: controller.categories[key]!.value,
-                            onChanged: (value) => controller.toggleCategory(key, value),
-                            leftPadding: 40,
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                    ...categories.entries.map((entry) {
+                      return NotificationCheckBox(
+                        label: entry.key,
+                        value: entry.value,
+                        onChanged: (v) => _onCategoryChanged(entry.key, v),
+                        leftPadding: 40,
+                      );
+                    }).toList(),
                   ],
                 ),
               ),
@@ -88,9 +145,7 @@ class NotificationCheckBox extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.only(left: leftPadding),
         child: GestureDetector(
-          onTap: () {
-            onChanged(!value);
-          },
+          onTap: () => onChanged(!value),
           child: Row(
             children: [
               Image.asset(
@@ -103,7 +158,11 @@ class NotificationCheckBox extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     label,
-                    style: TextStyle(color: fontSub, fontSize: 6.5.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Color(0xFF606060),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

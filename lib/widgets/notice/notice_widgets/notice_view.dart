@@ -24,7 +24,7 @@ class NoticeView extends StatelessWidget {
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
-      throw '주소를 찾을 수 없음';
+      throw '주소를 찾을 수 없습니다.';
     }
   }
 
@@ -119,13 +119,11 @@ class NoticeView extends StatelessWidget {
                     }
 
                     EasyLoading.dismiss();
-                    return ListView(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: snapshot.data as Widget,
-                        ),
-                      ],
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: snapshot.data as Widget,
+                      ),
                     );
                   },
                 );
@@ -134,16 +132,14 @@ class NoticeView extends StatelessWidget {
               Widget buildTextContent() {
                 return Container(
                   color: const Color(0xFFFFF69D),
-                  child: ListView(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(data.note),
-                        ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(data.note),
                       ),
-                    ],
+                    ),
                   ),
                 );
               }

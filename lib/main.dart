@@ -10,14 +10,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/notification/setup_fcm.dart';
 import 'package:hani_booki/_core/theme.dart';
-import 'package:hani_booki/screens/auth/login_screen.dart';
-import 'package:hani_booki/utils/auto_login.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
-import 'package:hani_booki/utils/connectivityController.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/utils/version_check.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:logger/logger.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 final screenWidth = MediaQuery.of(Get.context!).size.width;
@@ -25,6 +21,9 @@ final screenWidth = MediaQuery.of(Get.context!).size.width;
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  await Hive.initFlutter();
+  await Hive.openBox('settings');
+  await Hive.openBox('notification_settings');
 
   await setupFcm();
 
@@ -33,10 +32,6 @@ Future<void> main() async {
 
   // SecureStorage 초기화
   Get.put(const FlutterSecureStorage());
-
-  //hive 초기화 및 settingBox생성
-  await Hive.initFlutter();
-  await Hive.openBox('settings');
 
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.immersiveSticky,

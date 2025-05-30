@@ -109,12 +109,7 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                             HaniContents(
                               path: '${haniData['card']}',
                               onTap: () async {
-                                await SystemChrome.setPreferredOrientations([
-                                  DeviceOrientation.portraitUp,
-                                  DeviceOrientation.portraitDown,
-                                ]);
-                                // (옵션) 화면 회전 애니메이션이 완료될 시간을 고려해 짧은 딜레이 추가
-                                await Future.delayed(const Duration(milliseconds: 300));
+
                                 haniRotateService(id, widget.keyCode, year);
                               },
                             ),

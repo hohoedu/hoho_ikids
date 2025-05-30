@@ -282,8 +282,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                   _goNextCard();
                                 },
                                 child: Image.asset(
-                                  'assets/images/icons/next.png',
-                                  scale: 0.5,
+                                  'assets/images/icons/next_button.png',
                                   color: Color(0xFFFFFFFF),
                                 ),
                               )

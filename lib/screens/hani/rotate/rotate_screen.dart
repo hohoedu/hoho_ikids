@@ -37,6 +37,10 @@ class _RotateScreenState extends State<RotateScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
     bgmController.playBgm('flip');
     _audioPlayer = AudioPlayer();
@@ -67,8 +71,6 @@ class _RotateScreenState extends State<RotateScreen> {
   }
 
   void completeGame() async {
-    // TODO:별포인트 적립
-    // await starUpdateService('card', widget.keyCode);
     await starUpdateService('card', widget.keyCode);
     Future.delayed(
       Duration(seconds: 1),
@@ -100,17 +102,22 @@ class _RotateScreenState extends State<RotateScreen> {
       appBar: MainAppBar(
         isContent: true,
         isPortraitMode: true,
-        title: '카드를 뒤집어\n한자를 맞혀보세요',
-        titleStyle: TextStyle(
-          fontSize: 22,
-        ),
+        title: Platform.isIOS ? '카드를 뒤집어\n한자를 맞혀보세요' : '',
+        titleStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         onTapBackIcon: () => verticalBackDialog(true),
       ),
       body: Padding(
         padding: EdgeInsets.only(bottom: 32),
         child: Column(
           children: [
-            Spacer(),
+            Platform.isIOS
+                ? Spacer()
+                : Expanded(
+                    child: Text(
+                    '카드를 뒤집어\n한자를 맞혀보세요.',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  )),
             Expanded(
               flex: 8,
               child: RotateImages(
@@ -122,7 +129,7 @@ class _RotateScreenState extends State<RotateScreen> {
                 },
                 onComplete: () {
                   Future.delayed(
-                    Duration(seconds: 1),
+                    Duration(milliseconds: 500),
                     () => completeGame(),
                   );
                 },

@@ -270,10 +270,10 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                           draggingIndices.add(realIndex);
                                         },
                                         onDraggableCanceled: (_, __) {
-                                          draggingIndices.remove(realIndex); // 실패 시 다시 보이게
+                                          draggingIndices.remove(realIndex);
                                         },
                                         onDragEnd: (_) {
-                                          draggingIndices.remove(realIndex); // 성공 또는 실패 시 제거
+                                          draggingIndices.remove(realIndex);
                                         },
                                         feedback: ClipRRect(
                                           borderRadius: BorderRadius.circular(8),
