@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_quiz_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -171,7 +172,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       key: key,
       children: [
         Expanded(
-          flex: 2,
+          flex: screenWidth >= 1000 ? 3 : 2,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Column(
@@ -184,7 +185,12 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                       children: List.generate(2, (colIndex) {
                         final index = rowIndex * 2 + colIndex;
                         return Expanded(
-                          child: Image.network(imagePaths[index]),
+                          child: screenWidth >= 1000
+                              ? Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                                  child: Image.network(imagePaths[index]),
+                                )
+                              : Image.network(imagePaths[index]),
                         );
                       }),
                     ),
@@ -198,7 +204,6 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           flex: 1,
           child: Column(
             children: List.generate(2, (idx) {
-              // 정답 후 오답은 숨김
               if (_answeredCorrect && answer[idx] != quizData.haniQuizDataList[currentIndex].correct) {
                 return Expanded(child: SizedBox.shrink());
               }
