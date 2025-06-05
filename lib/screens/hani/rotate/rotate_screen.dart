@@ -102,7 +102,7 @@ class _RotateScreenState extends State<RotateScreen> {
       appBar: MainAppBar(
         isContent: true,
         isPortraitMode: true,
-        title: Platform.isIOS ? '카드를 뒤집어\n한자를 맞혀보세요' : '',
+        title: Platform.isIOS ? '뜻소리를 외친 후\n한자를 뒤집어 보세요' : '',
         titleStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         onTapBackIcon: () => verticalBackDialog(true),
       ),
@@ -111,10 +111,10 @@ class _RotateScreenState extends State<RotateScreen> {
         child: Column(
           children: [
             Platform.isIOS
-                ? Spacer()
-                : Expanded(
+                ? const Spacer()
+                : const Expanded(
                     child: Text(
-                    '카드를 뒤집어\n한자를 맞혀보세요.',
+                    '뜻소리를 외친 후\n한자를 뒤집어 보세요',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   )),
@@ -129,7 +129,7 @@ class _RotateScreenState extends State<RotateScreen> {
                 },
                 onComplete: () {
                   Future.delayed(
-                    Duration(milliseconds: 500),
+                    const Duration(milliseconds: 500),
                     () => completeGame(),
                   );
                 },
@@ -138,6 +138,7 @@ class _RotateScreenState extends State<RotateScreen> {
                     currentIndex = index;
                   });
                 },
+                currentIndex: currentIndex,
               ),
             ),
             Expanded(

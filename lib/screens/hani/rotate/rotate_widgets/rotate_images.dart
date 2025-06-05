@@ -1,11 +1,8 @@
+import 'dart:math';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:hani_booki/_data/hani/hani_rotate_data.dart';
-import 'package:hani_booki/main.dart';
-import 'package:logger/logger.dart';
 
 class RotateImages extends StatefulWidget {
   final List<dynamic> items;
@@ -13,6 +10,7 @@ class RotateImages extends StatefulWidget {
   final Function(int) onPageChanged;
   final Function(int) onFirstTap;
   final VoidCallback onComplete;
+  final int currentIndex;
 
   const RotateImages({
     super.key,
@@ -21,21 +19,52 @@ class RotateImages extends StatefulWidget {
     required this.onPageChanged,
     required this.onFirstTap,
     required this.onComplete,
+    required this.currentIndex,
   });
 
   @override
   State<RotateImages> createState() => _RotateImagesState();
 }
 
-class _RotateImagesState extends State<RotateImages> {
+class _RotateImagesState extends State<RotateImages> with SingleTickerProviderStateMixin {
   late List<bool> isFlippedList;
   late List<GlobalKey<FlipCardState>> cardKeys = [];
+
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  bool _isInitialAnimationDone = false;
 
   @override
   void initState() {
     super.initState();
     cardKeys = List.generate(widget.items.length, (_) => GlobalKey<FlipCardState>());
     isFlippedList = List<bool>.filled(widget.items.length, false);
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
+
+    _animation = Tween<double>(begin: 0, end: pi / 10).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _startCardWobble();
+  }
+
+  void _startCardWobble() async {
+    await Future.delayed(Duration(milliseconds: 500));
+
+    for (int i = 0; i < 2; i++) {
+      await _controller.forward();
+      await Future.delayed(Duration(milliseconds: 100));
+      await _controller.reverse();
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+
+    setState(() {
+      _isInitialAnimationDone = true;
+    });
   }
 
   void _onFrontTap(int index) {
@@ -57,13 +86,26 @@ class _RotateImagesState extends State<RotateImages> {
       itemCount: widget.items.length,
       carouselController: widget.carouselController,
       itemBuilder: (context, index, realIndex) {
-        return _KeepAliveCard(
-          key: ValueKey(index),
-          cardKey: cardKeys[index],
-          front: preImage(index),
-          back: sufImage(index),
-          onFrontTap: () => _onFrontTap(index),
-        );
+        return !_isInitialAnimationDone && index == 0
+            ? AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(_animation.value),
+                    child: preImage(index),
+                  );
+                },
+              )
+            : _KeepAliveCard(
+                key: ValueKey(index),
+                cardKey: cardKeys[index],
+                front: preImage(index),
+                back: sufImage(index),
+                onFrontTap: () => _onFrontTap(index),
+              );
       },
       options: CarouselOptions(
         height: screenH,

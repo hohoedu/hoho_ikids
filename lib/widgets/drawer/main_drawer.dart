@@ -137,112 +137,17 @@ class _MainDrawerState extends State<MainDrawer> {
             Divider(),
             Expanded(
               flex: 7,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // 학습 기록
-                  GestureDetector(
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await getRecordList(keyCode, widget.type);
-                      await contentStarService(keyCode, widget.type);
-                      Get.to(() => RecordScreen(keyCode: keyCode, type: widget.type));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Image.asset('assets/images/icons/learning_record.png'),
-                          ),
-                          const SizedBox(width: 16),
-                          const Expanded(child: Text('학습 기록')),
-                          const Icon(Icons.navigate_next),
-                        ],
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      Navigator.pop(context);
-                      showNoticeDialog(Get.context!);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Image.asset('assets/images/icons/notification.png'),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                const Text('공지 사항'),
-                                Positioned(
-                                  left: 60,
-                                  top: -10,
-                                  child: Obx(() {
-                                    return badgeController.isBadgeVisible.value
-                                        ? Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Text(
-                                              ' ',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          )
-                                        : const SizedBox.shrink();
-                                  }),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.navigate_next),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // 내 정보
-                  GestureDetector(
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await getUserCode();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Image.asset('assets/images/icons/my_info.png'),
-                          ),
-                          const SizedBox(width: 16),
-                          const Expanded(child: Text('내 정보')),
-                          const Icon(Icons.navigate_next),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // 형제 변경
-                  Visibility(
-                    visible: widget.isSibling && !isManager,
-                    child: GestureDetector(
-                      onTap: () {
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    // 학습 기록
+                    GestureDetector(
+                      onTap: () async {
                         Navigator.pop(context);
-                        Get.offAll(() => SiblingScreen());
+                        await getRecordList(keyCode, widget.type);
+                        await contentStarService(keyCode, widget.type);
+                        Get.to(() => RecordScreen(keyCode: keyCode, type: widget.type));
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -251,60 +156,157 @@ class _MainDrawerState extends State<MainDrawer> {
                             SizedBox(
                               width: 20,
                               height: 20,
-                              child: Image.asset('assets/images/icons/change_sibling.png'),
+                              child: Image.asset('assets/images/icons/learning_record.png'),
                             ),
                             const SizedBox(width: 16),
-                            const Expanded(child: Text('형제 변경')),
+                            const Expanded(child: Text('학습 기록')),
                             const Icon(Icons.navigate_next),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                  // 설정
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      Get.to(() => SettingScreen());
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Image.asset('assets/images/icons/setting.png'),
-                          ),
-                          const SizedBox(width: 16),
-                          const Expanded(child: Text('설정')),
-                          const Icon(Icons.navigate_next),
-                        ],
+                    // 공지사항
+                    GestureDetector(
+                      onTap: () async {
+                        Navigator.pop(context);
+                        showNoticeDialog(Get.context!);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: Image.asset('assets/images/icons/notification.png'),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  const Text('공지 사항'),
+                                  Positioned(
+                                    left: 60,
+                                    top: -10,
+                                    child: Obx(() {
+                                      return badgeController.isBadgeVisible.value
+                                          ? Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Text(
+                                                ' ',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            )
+                                          : const SizedBox.shrink();
+                                    }),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.navigate_next),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-
-                  // 로그아웃
-                  GestureDetector(
-                    onTap: () {
-                      logout();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Image.asset('assets/images/icons/logout.png'),
-                          ),
-                          const SizedBox(width: 16),
-                          const Expanded(child: Text('로그아웃')),
-                        ],
+                    // 내 정보
+                    GestureDetector(
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await getUserCode();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: Image.asset('assets/images/icons/my_info.png'),
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(child: Text('내 정보')),
+                            const Icon(Icons.navigate_next),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    // 형제 변경
+                    Visibility(
+                      visible: widget.isSibling && !isManager,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Get.offAll(() => SiblingScreen());
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Image.asset('assets/images/icons/change_sibling.png'),
+                              ),
+                              const SizedBox(width: 16),
+                              const Expanded(child: Text('형제 변경')),
+                              const Icon(Icons.navigate_next),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 설정
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.to(() => SettingScreen());
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: Image.asset('assets/images/icons/setting.png'),
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(child: Text('설정')),
+                            const Icon(Icons.navigate_next),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // 로그아웃
+                    GestureDetector(
+                      onTap: () {
+                        logout();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: Image.asset('assets/images/icons/logout.png'),
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(child: Text('로그아웃')),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Divider(),

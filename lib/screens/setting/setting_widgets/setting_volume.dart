@@ -75,70 +75,62 @@ class _SettingVolumeState extends State<SettingVolume> {
       flex: 1,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Text(
-                    '사운드 설정',
-                    style: TextStyle(color: fontSub, fontSize: 20),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Container(
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '사운드 설정',
+                        style: TextStyle(color: fontSub, fontSize: 20),
+                      ),
+                    ),
                   ),
-                ),
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildSlider('시스템', _systemVolume * 10, (value) {
+                          _setSystemVolume(value / 10);
+                        }, constraints),
+                        _buildSlider('배경음', _bgmValue, (value) {
+                          setState(() {
+                            _bgmValue = value;
+                          });
+                          _applyVolumeSettings();
+                          _saveVolumeSettings();
+                        }, constraints),
+                        _buildSlider('효과음', _effectValue, (value) {
+                          setState(() {
+                            _effectValue = value;
+                          });
+                          _applyVolumeSettings();
+                          _saveVolumeSettings();
+                        }, constraints),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildSlider(
-                      '시스템',
-                      _systemVolume * 10,
-                      (value) {
-                        _setSystemVolume(value / 10);
-                      },
-                    ),
-                    _buildSlider(
-                      '배경음',
-                      _bgmValue,
-                      (value) {
-                        setState(() {
-                          _bgmValue = value;
-                        });
-                        _applyVolumeSettings();
-                        _saveVolumeSettings();
-                      },
-                    ),
-                    _buildSlider(
-                      '효과음',
-                      _effectValue,
-                      (value) {
-                        setState(() {
-                          _effectValue = value;
-                        });
-                        _applyVolumeSettings();
-                        _saveVolumeSettings();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildSlider(String label, double value, ValueChanged<double> onChanged) {
+  Widget _buildSlider(String label, double value, ValueChanged<double> onChanged, BoxConstraints constraints) {
     return Row(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.only(left: 12.0),
           child: Text(
             label,
             style: TextStyle(color: fontSub, fontSize: 14, fontWeight: FontWeight.bold),
@@ -149,13 +141,16 @@ class _SettingVolumeState extends State<SettingVolume> {
             trackHeight: 6.0,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
           ),
-          child: Slider(
-            value: value,
-            min: 0.0,
-            max: 10.0,
-            inactiveColor: const Color(0xFFEAE8E4),
-            activeColor: const Color(0xFFFFBA00),
-            onChanged: onChanged,
+          child: SizedBox(
+            width: constraints.maxWidth * 0.75,
+            child: Slider(
+              value: value,
+              min: 0.0,
+              max: 10.0,
+              inactiveColor: const Color(0xFFEAE8E4),
+              activeColor: const Color(0xFFFFBA00),
+              onChanged: onChanged,
+            ),
           ),
         ),
       ],

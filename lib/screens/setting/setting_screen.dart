@@ -71,7 +71,7 @@ class _SettingScreenState extends State<SettingScreen> {
             children: [
               SettingTitle(),
               Expanded(
-                flex: 8,
+                flex: 11,
                 child: Center(
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.75,

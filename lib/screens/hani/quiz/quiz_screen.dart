@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -9,7 +7,7 @@ import 'package:hani_booki/services/hani/hani_quiz_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
-import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
@@ -31,10 +29,19 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   late AudioPlayer _audioPlayer;
   int currentIndex = 0;
 
-  late AnimationController _tapController;
-  late Animation<double> _tapAnim;
+  late AnimationController _moveController;
+  late Animation<Offset> _moveAnimation;
+
   int _tappedIndex = -1;
   bool _answeredCorrect = false;
+  bool _arrivedImage = false;
+
+  final List<GlobalKey> _answerKeys = [GlobalKey(), GlobalKey()];
+
+  final GlobalKey _targetKey = GlobalKey();
+
+  OverlayEntry? _overlayEntry;
+  bool _isAnimating = false;
 
   @override
   void initState() {
@@ -43,14 +50,12 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     _audioPlayer = AudioPlayer();
     _setupAnswer();
 
-    _tapController = AnimationController(
+    _moveController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 500),
     );
-    _tapAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 50),
-    ]).animate(CurvedAnimation(parent: _tapController, curve: Curves.easeInOut));
+
+
   }
 
   Future<void> _playSound(String url) async {
@@ -72,22 +77,27 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _onAnswerTap(int index) async {
+    if (_isAnimating) return;
+
     final isCorrect = answer[index] == quizData.haniQuizDataList[currentIndex].correct;
+
     if (!isCorrect) {
       await SoundManager.playNo();
       return;
     }
+
     _tappedIndex = index;
     await SoundManager.playCorrect();
-
-    await _tapController.forward();
-    _tapController.reset();
-
     await _playSound(quizData.haniQuizDataList[currentIndex].voice);
 
-    // 오답 숨기고 정답만 남김
     setState(() {
       _answeredCorrect = true;
+    });
+
+    await animateMovingImage(fromKey: _answerKeys[index], toKey: _targetKey);
+
+    setState(() {
+      _arrivedImage = true;
     });
 
     Future.delayed(Duration(seconds: 1), () {
@@ -106,10 +116,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
           },
         );
       } else {
-        // 아니면 다음 문제로
         setState(() {
           currentIndex++;
           _answeredCorrect = false;
+          _arrivedImage = false;
           _tappedIndex = -1;
           _setupAnswer();
         });
@@ -117,9 +127,76 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     });
   }
 
+  void _precacheCurrentQuestionImages() {
+    final quizItem = quizData.haniQuizDataList[currentIndex];
+    final imagePaths = [
+      quizItem.first,
+      quizItem.second,
+      quizItem.third,
+      quizItem.question,
+    ];
+
+    for (final url in imagePaths) {
+      precacheImage(NetworkImage(url), context);
+    }
+
+    for (final url in answer) {
+      precacheImage(NetworkImage(url), context);
+    }
+  }
+
+  // 정답 시 애니메이션
+  Future<void> animateMovingImage({required GlobalKey fromKey, required GlobalKey toKey}) async {
+    _isAnimating = true;
+
+    final renderFrom = fromKey.currentContext!.findRenderObject() as RenderBox;
+    final startOffset = renderFrom.localToGlobal(Offset.zero);
+    final sizeFrom = renderFrom.size;
+
+    final renderTo = toKey.currentContext!.findRenderObject() as RenderBox;
+    final endOffset = renderTo.localToGlobal(Offset.zero);
+    final sizeTo = renderTo.size;
+
+    final overlay = Overlay.of(context)!;
+
+    final animationListener = () {
+      _overlayEntry!.markNeedsBuild();
+    };
+
+    _moveAnimation = Tween<Offset>(
+      begin: Offset(startOffset.dx, startOffset.dy),
+      end: Offset(
+          endOffset.dx + (sizeTo.width - sizeFrom.width) / 2, endOffset.dy + (sizeTo.height - sizeFrom.height) / 2),
+    ).animate(CurvedAnimation(parent: _moveController, curve: Curves.easeInOut))
+      ..addListener(animationListener);
+
+    _overlayEntry = OverlayEntry(builder: (_) {
+      final current = _moveAnimation.value;
+      return Positioned(
+        left: current.dx,
+        top: current.dy,
+        width: sizeFrom.width,
+        height: sizeFrom.height,
+        child: Image.network(
+          answer[_tappedIndex],
+          fit: BoxFit.contain,
+        ),
+      );
+    });
+
+    overlay.insert(_overlayEntry!);
+
+    await _moveController.forward();
+
+    _overlayEntry?.remove();
+    _moveController.reset();
+    _moveAnimation.removeListener(animationListener);
+    _overlayEntry = null;
+    _isAnimating = false;
+  }
+
   Future<void> resetQuiz() async {
     await haniQuizService(userData!.id, widget.keyCode, userData!.year);
-    _tapController.reset();
     setState(() {
       currentIndex = 0;
       _setupAnswer();
@@ -137,13 +214,42 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       quizItem.question,
     ];
 
+    Widget _buildLeftGridCell(int cellIndex) {
+      if (cellIndex == 3 && _arrivedImage) {
+        return Image.network(
+          quizData.haniQuizDataList[currentIndex].correct,
+          fit: BoxFit.contain,
+        );
+      } else {
+        return Image.network(imagePaths[cellIndex], fit: BoxFit.contain);
+      }
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Color(0xFFFFFDE5),
-      appBar: MainAppBar(
+      appBar: ContentsAppBar(
         isContent: true,
-        title: '공통으로 들어가는 한자를 찾아보세요!',
-        titleStyle: TextStyle(fontSize: 22),
+        title: RichText(
+          text: TextSpan(
+            style: TextStyle(color: Colors.black, fontSize: 22),
+            children: [
+              TextSpan(text: '세 개의 그림을 보고 공통되는 한자를 찾아보세요!  '),
+              TextSpan(
+                text: '( ',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(
+                text: '${currentIndex + 1}',
+                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+              ),
+              TextSpan(
+                text: ' / ${quizData.haniQuizDataList.length} )',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+        ),
         onTapBackIcon: () => showBackDialog(false),
       ),
       body: Center(
@@ -157,7 +263,72 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
                 child: AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),
                   transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                  child: _buildQuizContent(imagePaths, key: ValueKey(currentIndex)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Row(
+                      key: ValueKey(currentIndex),
+                      children: [
+                        Expanded(
+                          flex: screenWidth >= 1000 ? 3 : 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFCD55),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(2, (rowIndex) {
+                                  return Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                      child: Row(
+                                        children: List.generate(2, (colIndex) {
+                                          final idx = rowIndex * 2 + colIndex;
+                                          return Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                              child: (idx == 3)
+                                                  ? Container(key: _targetKey, child: _buildLeftGridCell(idx))
+                                                  : _buildLeftGridCell(idx),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            children: List.generate(2, (idx) {
+                              if (_answeredCorrect) {
+                                return const Expanded(child: SizedBox.shrink());
+                              }
+                              return Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: GestureDetector(
+                                    onTap: () => _onAnswerTap(idx),
+                                    child: Image.network(
+                                      answer[idx],
+                                      key: _answerKeys[idx],
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               )
             ],
@@ -167,72 +338,9 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildQuizContent(List<String> imagePaths, {required Key key}) {
-    return Row(
-      key: key,
-      children: [
-        Expanded(
-          flex: screenWidth >= 1000 ? 3 : 2,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(2, (rowIndex) {
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Row(
-                      children: List.generate(2, (colIndex) {
-                        final index = rowIndex * 2 + colIndex;
-                        return Expanded(
-                          child: screenWidth >= 1000
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                                  child: Image.network(imagePaths[index]),
-                                )
-                              : Image.network(imagePaths[index]),
-                        );
-                      }),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Column(
-            children: List.generate(2, (idx) {
-              if (_answeredCorrect && answer[idx] != quizData.haniQuizDataList[currentIndex].correct) {
-                return Expanded(child: SizedBox.shrink());
-              }
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: GestureDetector(
-                    onTap: () => _onAnswerTap(idx),
-                    child: AnimatedBuilder(
-                      animation: _tapAnim,
-                      builder: (_, child) {
-                        final scale = (_tappedIndex == idx) ? _tapAnim.value : 1.0;
-                        return Transform.scale(scale: scale, child: child);
-                      },
-                      child: Image.network(answer[idx], key: ValueKey('$currentIndex-$idx')),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   void dispose() {
-    _tapController.dispose();
+    _moveController.dispose();
     _audioPlayer.dispose();
     super.dispose();
   }

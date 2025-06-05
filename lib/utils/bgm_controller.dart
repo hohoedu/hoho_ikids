@@ -1,8 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 
-class BgmController extends GetxController {
+class BgmController extends GetxController with WidgetsBindingObserver {
   final AudioPlayer _player = AudioPlayer();
   final Map<String, String> _bgmTracks = {
     'write': 'assets/audio/bgm/write.mp3',
@@ -26,7 +27,22 @@ class BgmController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     preloadBgm();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      pauseBgm();
+    }
+    else if (state == AppLifecycleState.resumed) {
+      if (_currentTrack.isNotEmpty) {
+        resumeBgm();
+      }
+    }
   }
 
   Future<void> preloadBgm() async {
@@ -54,6 +70,7 @@ class BgmController extends GetxController {
   void stopBgm() {
     _player.pause();
     _player.seek(Duration.zero);
+    _currentTrack = '';
   }
 
   void pauseBgm() {
@@ -66,5 +83,12 @@ class BgmController extends GetxController {
 
   void setBgmVolume(double volume) {
     _player.setVolume(volume);
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _player.dispose();
+    super.onClose();
   }
 }

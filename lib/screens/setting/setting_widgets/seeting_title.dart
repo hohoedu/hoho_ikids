@@ -18,14 +18,16 @@ class SettingTitle extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
                 'assets/images/icons/setting.png',
-                scale: 2,
+                scale: 3,
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(
-                '설정',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              child: FittedBox(
+                child: Text(
+                  '설정',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],

@@ -84,7 +84,7 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
       ),
       body: Center(
         child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
+          width: MediaQuery.of(context).size.width * 0.9,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFD2FFFE),
@@ -109,7 +109,6 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                             HaniContents(
                               path: '${haniData['card']}',
                               onTap: () async {
-
                                 haniRotateService(id, widget.keyCode, year);
                               },
                             ),
@@ -153,21 +152,25 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
               ),
               Expanded(
                 child: Padding(
-                  padding: screenWidth >= 1000
-                      ? EdgeInsets.zero
-                      : EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      NewKidokButton(
-                        type: 'hani',
-                        keycode: widget.keyCode,
-                      ),
-                      NewStarCount(
-                        keyCode: widget.keyCode,
-                        type: 'hani',
-                      ),
-                    ],
+                  padding: screenWidth >= 1000 ? EdgeInsets.zero : EdgeInsets.only(bottom: 8),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          NewKidokButton(
+                            type: 'hani',
+                            keycode: widget.keyCode,
+                            constraints: constraints,
+                          ),
+                          NewStarCount(
+                            keyCode: widget.keyCode,
+                            type: 'hani',
+                            constraints: constraints,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

@@ -184,18 +184,24 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
                   padding: screenWidth >= 1000
                       ? EdgeInsets.zero
                       : EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      NewKidokButton(
-                        type: 'hani',
-                        keycode: widget.keyCode,
-                      ),
-                      NewStarCount(
-                        keyCode: widget.keyCode,
-                        type: 'hani',
-                      ),
-                    ],
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          NewKidokButton(
+                            type: 'hani',
+                            keycode: widget.keyCode,
+                            constraints: constraints,
+                          ),
+                          NewStarCount(
+                            keyCode: widget.keyCode,
+                            type: 'hani',
+                            constraints: constraints,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

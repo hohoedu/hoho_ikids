@@ -7,6 +7,7 @@ import 'package:hani_booki/services/hani/hani_make_word_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
@@ -125,19 +126,46 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
     });
   }
 
+  bool isDebug = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Color(0xFFDFD7FE),
-      appBar: MainAppBar(
-        isContent: true,
-        title: '알맞은 한자카드를 그림에 넣어 단어를 완성하세요!',
-        titleStyle: TextStyle(
-          fontSize: 22,
-        ),
-        onTapBackIcon: () => showBackDialog(false),
-      ),
+      appBar: !isDebug
+          ? ContentsAppBar(
+              isContent: true,
+              title: RichText(
+                text: TextSpan(
+                  style: TextStyle(color: Colors.black, fontSize: 22),
+                  children: [
+                    TextSpan(text: '알맞은 한자카드를 그림에 넣어 단어를 완성하세요!  '),
+                    TextSpan(
+                      text: '( ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: '${currentIndex + 1}',
+                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: ' / ${makeWord.makeWordDataList.length} )',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
+              ),
+              onTapBackIcon: () => showBackDialog(false),
+            )
+          : MainAppBar(
+              isContent: true,
+              title: '알맞은 한자카드를 그림에 넣어 단어를 완성하세요!',
+              titleStyle: TextStyle(
+                fontSize: 22,
+              ),
+              onTapBackIcon: () => showBackDialog(false),
+            ),
       body: Center(
         child: SizedBox(
           width:

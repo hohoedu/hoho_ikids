@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/notification/setup_fcm.dart';
 import 'package:hani_booki/_core/theme.dart';
+import 'package:hani_booki/utils/app_lifecycle_handler.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/utils/version_check.dart';
@@ -17,6 +18,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 final screenWidth = MediaQuery.of(Get.context!).size.width;
+final screenHeight = MediaQuery.of(Get.context!).size.height;
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -37,8 +39,6 @@ Future<void> main() async {
     SystemUiMode.immersiveSticky,
     overlays: [SystemUiOverlay.bottom],
   );
-
-  // Get.put(ConnectivityController);
 
   // 배경음 셋업
   Get.put(BgmController());
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
               return EasyLoading.init()(
                 context,
                 MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling, devicePixelRatio: 1.0),
                   child: child!,
                 ),
               );

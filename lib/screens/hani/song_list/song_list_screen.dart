@@ -5,10 +5,8 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_song_list_data.dart';
 import 'package:hani_booki/services/hani/hani_song_five_service.dart';
-import 'package:hani_booki/services/hani/hani_song_service.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
-import 'package:logger/logger.dart';
 
 class SongListScreen extends StatefulWidget {
   final String keyCode;
@@ -35,7 +33,7 @@ class _SongListScreenState extends State<SongListScreen> {
       ),
       body: Center(
         child: SizedBox(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.8 : double.infinity,
+          width: MediaQuery.of(context).size.width * 0.8,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
