@@ -4,7 +4,9 @@ class HaniMakeWordData {
   final String first;
   final String second;
   final String correct;
-  final String wrong;
+  final String wrong1;
+  final String wrong2;
+  final String wrong3;
   final String clear;
   final String title;
 
@@ -12,7 +14,9 @@ class HaniMakeWordData {
     required this.first,
     required this.second,
     required this.correct,
-    required this.wrong,
+    required this.wrong1,
+    required this.wrong2,
+    required this.wrong3,
     required this.clear,
     required this.title,
   });
@@ -21,7 +25,9 @@ class HaniMakeWordData {
       : first = json["first"],
         second = json["second"],
         correct = json["correct"],
-        wrong = json["wrong"],
+        wrong1 = json["wrong1"],
+        wrong2 = json["wrong2"],
+        wrong3 = json["wrong3"],
         clear = json["over"],
         title = json["title"];
 }

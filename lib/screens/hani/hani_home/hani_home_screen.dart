@@ -181,9 +181,7 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
               ),
               Expanded(
                 child: Padding(
-                  padding: screenWidth >= 1000
-                      ? EdgeInsets.zero
-                      : EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.2),
+                  padding: screenWidth >= 1000 ? EdgeInsets.zero : EdgeInsets.only(bottom: 8),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return Column(

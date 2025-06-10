@@ -1,16 +1,20 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_make_word_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/hani/hani_make_word_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/loading_screen.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
+import 'package:lottie/lottie.dart';
 
 class MakeWordScreen extends StatefulWidget {
   final String keyCode;
@@ -28,14 +32,16 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
 
   final GlobalKey _imageKey = GlobalKey();
 
+  bool _isPressed = false;
+  bool _imagesPreloaded = false;
+  bool _isInteractionDisabled = false;
+
   int currentIndex = 0;
   late String firstUrl = '';
   late String secondUrl = '';
   late bool firstIsPic;
   late bool secondIsPic;
   List<Map<String, String>> choices = [];
-
-  bool isAnswered = false;
 
   double imageHeight = 0;
 
@@ -46,15 +52,35 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
     loadCard();
     shuffleChoices();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {});
+      _preloadAllImages();
     });
+  }
+
+  Future<void> _preloadAllImages() async {
+    final urls = <String>{
+      for (var card in makeWord.makeWordDataList) ...[
+        card.first,
+        card.second,
+        card.correct,
+        card.wrong1,
+        card.wrong2,
+        card.wrong3,
+        card.clear,
+      ]
+    }.toList();
+
+    await Future.wait(urls.map((url) => precacheImage(NetworkImage(url), context)));
+
+    setState(() => _imagesPreloaded = true);
   }
 
   void shuffleChoices() {
     final card = makeWord.makeWordDataList[currentIndex];
     choices = [
       {'url': card.correct, 'type': 'correct'},
-      {'url': card.wrong, 'type': 'wrong'},
+      {'url': card.wrong1, 'type': 'wrong'},
+      {'url': card.wrong2, 'type': 'wrong'},
+      {'url': card.wrong3, 'type': 'wrong'},
     ]..shuffle();
     setState(() {});
   }
@@ -67,29 +93,32 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
 
     firstIsPic = !firstUrl.endsWith('word.png');
     secondIsPic = !secondUrl.endsWith('word.png');
-
-    isAnswered = false;
   }
 
   void nextWord(String data) async {
     if (data == 'correct') {
-      await SoundManager.playCorrect();
+      setState(() => _isInteractionDisabled = true);
+      SoundManager.playCorrect();
       setState(() {
         if (firstIsPic) {
           firstUrl = makeWord.makeWordDataList[currentIndex].clear;
+          firstIsPic = false;
         }
         if (secondIsPic) {
           secondUrl = makeWord.makeWordDataList[currentIndex].clear;
+          secondIsPic = false;
         }
-        isAnswered = true;
       });
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      _goNextCard();
+      setState(() => _isInteractionDisabled = false);
     } else {
       await SoundManager.playNo();
     }
   }
 
   void _goNextCard() async {
-    if (!isAnswered) return;
     if (currentIndex < makeWord.makeWordDataList.length - 1) {
       setState(() {
         currentIndex++;
@@ -119,245 +148,258 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
       secondUrl = '';
       firstIsPic = false;
       secondIsPic = false;
-      isAnswered = false;
 
       loadCard();
       shuffleChoices();
+      _imagesPreloaded = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _preloadAllImages();
     });
   }
 
-  bool isDebug = false;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Color(0xFFDFD7FE),
-      appBar: !isDebug
-          ? ContentsAppBar(
-              isContent: true,
-              title: RichText(
-                text: TextSpan(
-                  style: TextStyle(color: Colors.black, fontSize: 22),
-                  children: [
-                    TextSpan(text: '알맞은 한자카드를 그림에 넣어 단어를 완성하세요!  '),
-                    TextSpan(
-                      text: '( ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: '${currentIndex + 1}',
-                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: ' / ${makeWord.makeWordDataList.length} )',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  ],
+    if (!_imagesPreloaded) {
+      return LoadingScreen();
+    }
+
+    return AbsorbPointer(
+      absorbing: _isInteractionDisabled,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.white,
+        appBar: ContentsAppBar(
+          backgroundColor: Color(0xFFDFD7FE),
+          isContent: true,
+          title: RichText(
+            text: TextSpan(
+              style: TextStyle(color: Colors.black, fontSize: 22),
+              children: [
+                TextSpan(text: '설명에 알맞은 한자 카드를 찾아 단어를 완성하세요!  '),
+                TextSpan(
+                  text: '( ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ),
-              onTapBackIcon: () => showBackDialog(false),
-            )
-          : MainAppBar(
-              isContent: true,
-              title: '알맞은 한자카드를 그림에 넣어 단어를 완성하세요!',
-              titleStyle: TextStyle(
-                fontSize: 22,
-              ),
-              onTapBackIcon: () => showBackDialog(false),
+                TextSpan(
+                  text: '${currentIndex + 1}',
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                ),
+                TextSpan(
+                  text: ' / ${makeWord.makeWordDataList.length} )',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                )
+              ],
             ),
-      body: Center(
-        child: SizedBox(
-          width:
-              screenWidth >= 1000 ? MediaQuery.of(context).size.width * 0.9 : MediaQuery.of(context).size.width * 0.8,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Spacer(flex: screenWidth >= 1000 ? 2 : 1),
-              Expanded(
-                flex: 12,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+          ),
+          onTapBackIcon: () => showBackDialog(false),
+        ),
+        body: Center(
+          child: SizedBox(
+            width: screenWidth >= 1000
+                ? MediaQuery.of(context).size.width * 0.9
+                : MediaQuery.of(context).size.width * 0.85,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Spacer(flex: screenWidth >= 1000 ? 2 : 1),
+                Expanded(
+                  flex: 8,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        flex: 9,
+                        flex: 10,
                         child: Padding(
                           padding: const EdgeInsets.only(top: 24.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: Container(
-                                    color: Colors.white,
-                                    child: Center(
-                                        child: Text(
-                                      makeWord.makeWordDataList[currentIndex].title,
-                                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                                    )),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 10,
-                                  child: Stack(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          // First Image
-                                          Expanded(
-                                            child: firstIsPic
-                                                ? DragTarget<String>(
-                                                    onAccept: nextWord,
-                                                    builder: (ctx, candidate, rejected) => AnimatedSwitcher(
-                                                      duration: const Duration(milliseconds: 300),
-                                                      transitionBuilder: (child, animation) =>
-                                                          FadeTransition(opacity: animation, child: child),
-                                                      child: LayoutBuilder(
-                                                        builder: (context, constraints) {
-                                                          imageHeight = constraints.maxHeight;
-                                                          return Image.network(
-                                                            firstUrl,
-                                                            scale: 2,
-                                                            key: ValueKey(firstUrl),
-                                                            fit: BoxFit.contain,
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  )
-                                                : AnimatedSwitcher(
-                                                    duration: const Duration(milliseconds: 300),
-                                                    transitionBuilder: (child, animation) =>
-                                                        FadeTransition(opacity: animation, child: child),
-                                                    child: LayoutBuilder(
-                                                      builder: (context, constraints) {
-                                                        imageHeight = constraints.maxHeight;
-                                                        return Image.network(
-                                                          firstUrl,
-                                                          key: ValueKey(firstUrl),
-                                                          fit: BoxFit.contain,
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                          ),
-                                          // Second Image
-                                          Expanded(
-                                            child: secondIsPic
-                                                ? DragTarget<String>(
-                                                    onAccept: nextWord,
-                                                    builder: (ctx, candidate, rejected) => AnimatedSwitcher(
-                                                      duration: const Duration(milliseconds: 300),
-                                                      transitionBuilder: (child, animation) =>
-                                                          FadeTransition(opacity: animation, child: child),
-                                                      child: LayoutBuilder(
-                                                        builder: (context, constraints) {
-                                                          return Image.network(
-                                                            secondUrl,
-                                                            scale: 2,
-                                                            key: ValueKey(secondUrl),
-                                                            fit: BoxFit.contain,
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  )
-                                                : AnimatedSwitcher(
-                                                    duration: const Duration(milliseconds: 300),
-                                                    transitionBuilder: (child, animation) =>
-                                                        FadeTransition(opacity: animation, child: child),
-                                                    child: LayoutBuilder(
-                                                      builder: (context, constraints) {
-                                                        return Image.network(
-                                                          secondUrl,
-                                                          key: ValueKey(secondUrl),
-                                                          fit: BoxFit.contain,
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                          ),
-                                        ],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 24.0, left: 16.0, right: 16.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: GestureDetector(
+                                        behavior: HitTestBehavior.translucent,
+                                        onTapDown: (details) {
+                                          setState(() {
+                                            _isPressed = true;
+                                          });
+                                        },
+                                        onTapUp: (details) {
+                                          setState(() {
+                                            _isPressed = false;
+                                          });
+                                        },
+                                        onTapCancel: () {
+                                          setState(() {
+                                            _isPressed = false;
+                                          });
+                                        },
+                                        onTap: () {
+                                          Logger().d('사운드 재생!');
+                                        },
+                                        child: AnimatedScale(
+                                          scale: _isPressed ? 0.9 : 1.0,
+                                          duration: const Duration(milliseconds: 100),
+                                          curve: Curves.easeOut,
+                                          child: Image.asset('assets/images/icons/sound.png'),
+                                        ),
                                       ),
-                                      Positioned(
-                                        top: (imageHeight) / 3,
-                                        left: 0,
-                                        right: 0,
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: Image.asset(
-                                            'assets/images/icons/plus.png',
-                                            scale: 3,
+                                    ),
+                                    Expanded(
+                                      flex: 10,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 16.0),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(25),
+                                          child: Container(
+                                            color: Color(0xFFFEFACD),
+                                            child: Center(
+                                              child: Text(
+                                                makeWord.makeWordDataList[currentIndex].title,
+                                                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              Stack(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        return Row(
+                                          children: [
+                                            Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(16.0),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(15),
+                                                  child: firstIsPic
+                                                      ? Container(
+                                                          decoration: BoxDecoration(
+                                                            color: Color(0xFFDFD7FE),
+                                                          ),
+                                                          child: Center(
+                                                            child: Text(
+                                                              '?',
+                                                              style: TextStyle(
+                                                                  color: Colors.white,
+                                                                  fontSize: 125,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  fontFamily: 'BMJUA'),
+                                                            ),
+                                                          ),
+                                                        )
+                                                      : Image.network(
+                                                          firstUrl,
+                                                          fit: BoxFit.contain,
+                                                        ),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(16.0),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(15),
+                                                  child: secondIsPic
+                                                      ? Container(
+                                                          decoration: BoxDecoration(
+                                                            color: Color(0xFFDFD7FE),
+                                                          ),
+                                                          child: Center(
+                                                            child: Text(
+                                                              '?',
+                                                              style: TextStyle(
+                                                                  color: Colors.white,
+                                                                  fontSize: 125,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  fontFamily: 'BMJUA'),
+                                                            ),
+                                                          ),
+                                                        )
+                                                      : Image.network(
+                                                          secondUrl,
+                                                          fit: BoxFit.contain,
+                                                        ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Image.asset(
+                                      'assets/images/icons/plus.png',
+                                      scale: 3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
                       Expanded(
-                        flex: 3,
-                        child: isAnswered
-                            ? GestureDetector(
-                                onTap: () {
-                                  _goNextCard();
-                                },
-                                child: Image.asset(
-                                  'assets/images/icons/next_button.png',
-                                  color: Color(0xFFFFFFFF),
-                                ),
-                              )
-                            : Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: choices.map((choice) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Draggable<String>(
-                                        data: choice['type']!,
-                                        feedback: Material(
-                                          color: Colors.transparent,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(25),
-                                            child: Image.network(
-                                              choice['url']!,
-                                              width: MediaQuery.of(context).size.width * 0.15,
-                                            ),
-                                          ),
-                                        ),
-                                        childWhenDragging: Opacity(
-                                          opacity: 0,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(25),
-                                            child: Image.network(choice['url']!),
-                                          ),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(25),
-                                          child: Image.network(choice['url']!),
-                                        ),
+                        flex: 6,
+                        child: Center(
+                          child: GridView.count(
+                            shrinkWrap: true,
+                            crossAxisCount: 2,
+                            childAspectRatio: 1,
+                            padding: EdgeInsets.zero,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: choices.map((choice) {
+                              return GestureDetector(
+                                onTap: () => nextWord(choice['type']!),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Center(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(25),
+                                      child: Image.network(
+                                        choice['url']!,
+                                        fit: BoxFit.cover,
                                       ),
-                                    );
-                                  }).toList(),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    super.dispose();
   }
 }

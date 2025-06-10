@@ -69,36 +69,40 @@ class NewKidokButton extends StatelessWidget {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Spacer(),
-                                Spacer(),
+                                type == 'hani' ? SizedBox.shrink() : Spacer(),
                                 Expanded(
                                   flex: 4,
-                                  child: RichText(
-                                    textAlign: TextAlign.center,
-                                    text: TextSpan(
-                                      style: TextStyle(
-                                        color: fontMain,
-                                        fontFamily: 'Cookie',
-                                        fontSize: 20,
-                                        height: 1.2,
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        style: TextStyle(
+                                          color: fontMain,
+                                          fontFamily: 'Cookie',
+                                          fontSize: 20,
+                                          height: 1.2,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                              text: type == 'hani'
+                                                  ? '${kidokThemeController.kidokThemeData!.subject}'
+                                                  : '지식\n확장',
+                                              style: TextStyle(color: Colors.black)),
+                                          TextSpan(
+                                            text: '\n독서활동',
+                                            style: TextStyle(
+                                                color: Color(kidokThemeController.kidokThemeData!.subjectColor),
+                                                // color: Colors.red,
+                                                fontSize: 15,
+                                                height: 1.4),
+                                          )
+                                        ],
                                       ),
-                                      children: [
-                                        TextSpan(
-                                            text: type == 'hani'
-                                                ? '${kidokThemeController.kidokThemeData!.subject}'
-                                                : '지식\n확장',
-                                            style: TextStyle(color: Colors.black, height: 1)),
-                                        TextSpan(
-                                          text: '\n독서활동',
-                                          style: TextStyle(
-                                              color: Color(kidokThemeController.kidokThemeData!.subjectColor),
-                                              // color: Colors.red,
-                                              fontSize: 15),
-                                        )
-                                      ],
                                     ),
                                   ),
                                 ),
+                                Spacer()
                               ],
                             ),
                           ),
@@ -107,7 +111,7 @@ class NewKidokButton extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    bottom: MediaQuery.of(context).size.height * 0.3,
+                    bottom: MediaQuery.of(context).size.height * 0.27,
                     left: 0,
                     right: 0,
                     child: Image.asset(

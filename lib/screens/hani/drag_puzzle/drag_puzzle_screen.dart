@@ -6,6 +6,7 @@ import 'package:hani_booki/_data/hani/hani_drag_puzzle_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/loading_screen.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
@@ -27,6 +28,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
   final dragPuzzleData = Get.find<HaniDragPuzzleDataController>();
   final bgmController = Get.find<BgmController>();
 
+  bool _imagesPreloaded = false;
+
   late List<HaniDragPuzzleData> _puzzleSets;
   late AudioPlayer _audioPlayer;
   List<bool> isSolved = [];
@@ -40,11 +43,26 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
     bgmController.playBgm('match');
     _audioPlayer = AudioPlayer();
     _initPuzzleSets();
-    _prepareCurrentPuzzle();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _preloadAllImages();
+    });
+  }
+
+  Future<void> _preloadAllImages() async {
+    final urls = <String>{};
+    for (var set in _puzzleSets) {
+      urls.add(set.boardImage);
+      urls.addAll(set.questionImages);
+      urls.addAll(set.cardImages);
+    }
+    await Future.wait(urls.map((url) => precacheImage(NetworkImage(url), context)));
+    setState(() => _imagesPreloaded = true);
   }
 
   void _initPuzzleSets() {
     _puzzleSets = List.of(dragPuzzleData.dragPuzzleDataList)..shuffle();
+    _prepareCurrentPuzzle();
   }
 
   void _prepareCurrentPuzzle() {
@@ -75,6 +93,10 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_imagesPreloaded) {
+      return LoadingScreen();
+    }
+
     final set = _puzzleSets[currentIndex];
     final boardImage = set.boardImage;
     final questionImages = set.questionImages;
@@ -328,5 +350,14 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    bgmController.stopBgm();
+    _audioPlayer.dispose();
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    super.dispose();
   }
 }

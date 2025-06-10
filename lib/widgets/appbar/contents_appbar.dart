@@ -20,6 +20,7 @@ class ContentsAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isInfo;
   final bool isMain;
   final bool isKidok;
+  final Color? backgroundColor;
   final VoidCallback? onTap;
   final VoidCallback? onTapBackIcon;
 
@@ -34,6 +35,7 @@ class ContentsAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onTap,
     this.isVisibleLeading = true,
     this.onTapBackIcon,
+    this.backgroundColor = Colors.transparent,
   });
 
   @override
@@ -57,7 +59,7 @@ class _ContentsAppBarState extends State<ContentsAppBar> {
       elevation: 0.0,
       automaticallyImplyLeading: false,
       scrolledUnderElevation: 0,
-      backgroundColor: Colors.transparent,
+      backgroundColor: widget.backgroundColor ?? Colors.transparent,
       leading: Visibility(
         visible: widget.isVisibleLeading ?? true,
         child: GestureDetector(

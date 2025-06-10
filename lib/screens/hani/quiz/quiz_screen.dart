@@ -6,6 +6,7 @@ import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/loading_screen.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -27,6 +28,8 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   final bgmController = Get.find<BgmController>();
   final quizData = Get.find<HaniQuizDataController>();
   late AudioPlayer _audioPlayer;
+
+  bool _imagesPreloaded = false;
   int currentIndex = 0;
 
   late AnimationController _moveController;
@@ -55,7 +58,27 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 500),
     );
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _preloadAllImages();
+    });
+  }
 
+  Future<void> _preloadAllImages() async {
+    final urls = <String>{};
+    for (var item in quizData.haniQuizDataList) {
+      urls.addAll([
+        item.first,
+        item.second,
+        item.third,
+        item.question,
+        item.correct,
+        item.wrong,
+      ]);
+    }
+
+    await Future.wait(urls.map((u) => precacheImage(NetworkImage(u), context)));
+
+    setState(() => _imagesPreloaded = true);
   }
 
   Future<void> _playSound(String url) async {
@@ -88,7 +111,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
 
     _tappedIndex = index;
     await SoundManager.playCorrect();
-    await _playSound(quizData.haniQuizDataList[currentIndex].voice);
+    _playSound(quizData.haniQuizDataList[currentIndex].voice);
 
     setState(() {
       _answeredCorrect = true;
@@ -125,24 +148,6 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         });
       }
     });
-  }
-
-  void _precacheCurrentQuestionImages() {
-    final quizItem = quizData.haniQuizDataList[currentIndex];
-    final imagePaths = [
-      quizItem.first,
-      quizItem.second,
-      quizItem.third,
-      quizItem.question,
-    ];
-
-    for (final url in imagePaths) {
-      precacheImage(NetworkImage(url), context);
-    }
-
-    for (final url in answer) {
-      precacheImage(NetworkImage(url), context);
-    }
   }
 
   // 정답 시 애니메이션
@@ -201,7 +206,6 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       currentIndex = 0;
       _setupAnswer();
     });
-    Logger().d('퀴즈가 리셋되었습니다.');
   }
 
   @override
@@ -223,6 +227,10 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       } else {
         return Image.network(imagePaths[cellIndex], fit: BoxFit.contain);
       }
+    }
+
+    if (!_imagesPreloaded) {
+      return LoadingScreen();
     }
 
     return Scaffold(
@@ -342,6 +350,8 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   void dispose() {
     _moveController.dispose();
     _audioPlayer.dispose();
+    imageCache.clear();
+    imageCache.clearLiveImages();
     super.dispose();
   }
 }
