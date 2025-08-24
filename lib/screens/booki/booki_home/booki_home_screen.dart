@@ -14,6 +14,7 @@ import 'package:hani_booki/services/booki/booki_goldenbell_service.dart';
 import 'package:hani_booki/services/booki/booki_match_service.dart';
 import 'package:hani_booki/services/booki/booki_song_service.dart';
 import 'package:hani_booki/services/booki/booki_story_service.dart';
+import 'package:hani_booki/services/booki/booki_stroke_service.dart';
 import 'package:hani_booki/services/total_star_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
@@ -113,47 +114,93 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
                     width: double.infinity,
                     height: double.infinity,
                     decoration: BoxDecoration(color: Colors.transparent),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // 윗줄 컨텐츠 2개
-                        Row(
-                          children: [
-                            BookiTopContents(
-                              imagePath: '${bookiData['story']}',
-                              onTap: () => bookiStoryService(id, widget.keyCode, year),
-                            ),
-                            BookiTopContents(
-                              imagePath: '${bookiData['song']}',
-                              onTap: () => bookiSongService(id, widget.keyCode, year),
-                            ),
-                          ],
-                        ),
-                        // 아랫줄 컨텐츠 3개
-                        Row(
-                          children: [
-                            BookiBottomContents(
-                              imagePath: '${bookiData['bell']}',
-                              color: gold,
-                              onTap: () {
-                                bgmController.stopBgm();
-                                bookiGoldenbellService(id, widget.keyCode, year);
-                              },
-                            ),
-                            BookiBottomContents(
-                              imagePath: '${bookiData['find']}',
-                              color: amethyst,
-                              onTap: () => bookiFindDiffService(id, widget.keyCode, year),
-                            ),
-                            BookiBottomContents(
-                              imagePath: '${bookiData['img']}',
-                              color: emerald,
-                              onTap: () => bookiMatchService(id, widget.keyCode, year),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                    child: bookiData.length >= 6
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // 윗줄 컨텐츠 3개
+                              Row(
+                                children: [
+                                  BookiTopContents(
+                                    imagePath: '${bookiData['song']}',
+                                    onTap: () => bookiStoryService(id, widget.keyCode, year),
+                                  ),
+                                  BookiTopContents(
+                                    imagePath: '${bookiData['story']}',
+                                    onTap: () => bookiSongService(id, widget.keyCode, year),
+                                  ),
+                                  BookiTopContents(
+                                    imagePath: '${bookiData['write']}',
+                                    onTap: () => bookiStrokeService(id, widget.keyCode, year),
+                                  ),
+                                ],
+                              ),
+                              // 아랫줄 컨텐츠 3개
+                              Row(
+                                children: [
+                                  BookiBottomContents(
+                                    imagePath: '${bookiData['bell']}',
+                                    color: gold,
+                                    onTap: () {
+                                      bgmController.stopBgm();
+                                      bookiGoldenbellService(id, widget.keyCode, year);
+                                    },
+                                  ),
+                                  BookiBottomContents(
+                                    imagePath: '${bookiData['find']}',
+                                    color: amethyst,
+                                    onTap: () => bookiFindDiffService(id, widget.keyCode, year),
+                                  ),
+                                  BookiBottomContents(
+                                    imagePath: '${bookiData['img']}',
+                                    color: emerald,
+                                    onTap: () => bookiMatchService(id, widget.keyCode, year),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // 윗줄 컨텐츠 2개
+                              Row(
+                                children: [
+                                  BookiTopContents(
+                                    imagePath: '${bookiData['story']}',
+                                    onTap: () => bookiStoryService(id, widget.keyCode, year),
+                                  ),
+                                  BookiTopContents(
+                                    imagePath: '${bookiData['song']}',
+                                    onTap: () => bookiSongService(id, widget.keyCode, year),
+                                  ),
+                                ],
+                              ),
+                              // 아랫줄 컨텐츠 3개
+                              Row(
+                                children: [
+                                  BookiBottomContents(
+                                    imagePath: '${bookiData['bell']}',
+                                    color: gold,
+                                    onTap: () {
+                                      bgmController.stopBgm();
+                                      bookiGoldenbellService(id, widget.keyCode, year);
+                                    },
+                                  ),
+                                  BookiBottomContents(
+                                    imagePath: '${bookiData['find']}',
+                                    color: amethyst,
+                                    onTap: () => bookiFindDiffService(id, widget.keyCode, year),
+                                  ),
+                                  BookiBottomContents(
+                                    imagePath: '${bookiData['img']}',
+                                    color: emerald,
+                                    onTap: () => bookiMatchService(id, widget.keyCode, year),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                   ),
                 ),
               ),

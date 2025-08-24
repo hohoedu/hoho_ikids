@@ -32,126 +32,140 @@ class NoticeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       flex: 10,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 4.0, right: 8.0, bottom: 8.0),
-        child: Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            color: Colors.white,
-          ),
-          child: GestureDetector(
-            onTap: () => EasyLoading.dismiss(),
-            child: Obx(() {
-              final data = noticeViewData.noticeViewData;
-              if (data == null) return const SizedBox.shrink();
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: GestureDetector(
+          onTap: () => EasyLoading.dismiss(),
+          child: Obx(() {
+            final data = noticeViewData.noticeViewData;
+            if (data == null) return const SizedBox.shrink();
 
-              final imagePath = data.imagePath;
-              final linkUrl = data.linkUrl;
-              final type = data.type;
+            final imagePath = data.imagePath;
+            final linkUrl = data.linkUrl;
+            final type = data.type;
 
-              Widget buildActionButton() {
-                if (type == '1') {
-                  return Image.asset('assets/images/icons/kakao.png', scale: 2, fit: BoxFit.cover);
-                } else if (type == '2') {
-                  return Image.asset('assets/images/icons/youtube.png', scale: 2, fit: BoxFit.cover);
-                } else {
-                  return Padding(
+            Widget buildActionButton() {
+              if (type == '1') {
+                // 카카오톡
+                return ClipRRect(
+                    borderRadius: BorderRadiusGeometry.circular(25),
+                    child: Image.asset(
+                      'assets/images/icons/kakao.png',
+                      fit: BoxFit.cover,
+                    ));
+              } else if (type == '2' || type == '3') {
+                //유튜브
+                return ClipRRect(
+                  borderRadius: BorderRadiusGeometry.circular(25),
+                  child: Image.asset(
+                    'assets/images/icons/youtube.png',
+                    fit: BoxFit.cover,
+                  ),
+                );
+              } else {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                        offset: const Offset(2, 4),
+                      )
+                    ],
+                  ),
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Text('자세히 보기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(
+                          '자세히 보기',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                         const Icon(Icons.navigate_next_outlined),
                       ],
                     ),
-                  );
-                }
-              }
-
-              Widget buildLinkButton() {
-                return Visibility(
-                  visible: linkUrl.isNotEmpty,
-                  child: Positioned(
-                    right: 20,
-                    bottom: 20,
-                    child: GestureDetector(
-                      onTap: () {
-                        if (Platform.isIOS) {
-                          showParentGateDialog(context, linkUrl);
-                        } else {
-                          moveToUrl(linkUrl);
-                        }
-                      },
-                      child: Container(
-                        width: 60.w,
-                        height: 40.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
-                              spreadRadius: 1,
-                              offset: const Offset(2, 4),
-                            )
-                          ],
-                        ),
-                        child: buildActionButton(),
-                      ),
-                    ),
                   ),
                 );
               }
+            }
 
-              Widget buildImageContent() {
-                return FutureBuilder(
-                  future: _loadImageWithDelay(imagePath),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox.shrink();
-                    }
-
-                    if (snapshot.hasError) {
-                      EasyLoading.dismiss();
-                      return const Center(child: Text('이미지 로드 오류'));
-                    }
-
-                    EasyLoading.dismiss();
-                    return SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: snapshot.data as Widget,
-                      ),
-                    );
-                  },
-                );
-              }
-
-              Widget buildTextContent() {
-                return Container(
-                  color: const Color(0xFFFFF69D),
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text(data.note),
-                      ),
+            Widget buildLinkButton() {
+              return Visibility(
+                visible: linkUrl.isNotEmpty,
+                child: Positioned(
+                  right: 20,
+                  bottom: 20,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (Platform.isIOS) {
+                        showParentGateDialog(context, linkUrl);
+                      } else {
+                        moveToUrl(linkUrl);
+                      }
+                    },
+                    child: Container(
+                      width: 60.w,
+                      height: 40.h,
+                      child: buildActionButton(),
                     ),
                   ),
-                );
-              }
-
-              return Stack(
-                children: [
-                  imagePath.isNotEmpty ? buildImageContent() : buildTextContent(),
-                  buildLinkButton(),
-                ],
+                ),
               );
-            }),
-          ),
+            }
+
+            Widget buildImageContent() {
+              return FutureBuilder(
+                future: _loadImageWithDelay(imagePath),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox.shrink();
+                  }
+
+                  if (snapshot.hasError) {
+                    EasyLoading.dismiss();
+                    return const Center(child: Text('이미지 로드 오류'));
+                  }
+
+                  EasyLoading.dismiss();
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: snapshot.data as Widget,
+                    ),
+                  );
+                },
+              );
+            }
+
+            Widget buildTextContent() {
+              return Container(
+                color: const Color(0xFFFFF69D),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(data.note),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Stack(
+              children: [
+                imagePath.isNotEmpty ? buildImageContent() : buildTextContent(),
+                buildLinkButton(),
+              ],
+            );
+          }),
         ),
       ),
     );

@@ -71,15 +71,40 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
     isSolved = List<bool>.filled(8, false);
   }
 
-  void goToNextPuzzle() {
+  void goToNextPuzzle() async {
     if (currentIndex < _puzzleSets.length - 1) {
       setState(() {
         currentIndex++;
         _prepareCurrentPuzzle();
       });
     } else {
-      // 게임 완료 로직
+      await starUpdateService('workbook', widget.keyCode);
+      lottieDialog(
+        onMain: () {
+          Get.back();
+          Get.back();
+        },
+        onReset: () {
+          Get.back();
+          resetPuzzle();
+        },
+      );
     }
+  }
+
+  Future<void> resetPuzzle() async {
+    setState(() {
+      _imagesPreloaded = false;
+    });
+
+    _puzzleSets = List.of(dragPuzzleData.dragPuzzleDataList)..shuffle();
+    currentIndex = 0;
+
+    await _preloadAllImages();
+
+    setState(() {
+      _prepareCurrentPuzzle();
+    });
   }
 
   Future<void> _playSound(String url) async {
@@ -101,9 +126,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
     final boardImage = set.boardImage;
     final questionImages = set.questionImages;
 
-    // 기준이 되는 원래 이미지의 가로/세로 비율
-    const double baseWidth = 307.08;
-    const double baseHeight = 352.56;
+    final double baseWidth = screenWidth >= 1000 ? 307.08 : 307.08;
+    final double baseHeight = screenWidth >= 1000 ? 352.56 : 352.56;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -152,7 +176,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                           builder: (context, constraints) {
                             // 실제 영역의 크기를 constraints로 받아옴
                             final boardWidth = constraints.maxWidth;
-                            final boardHeight = constraints.maxHeight;
+                            final boardHeight =
+                                screenWidth > 1000 ? boardWidth / (baseWidth / baseHeight) : constraints.maxHeight;
 
                             // 기준 크기 대비 스케일 계산
                             final scaleX = boardWidth / baseWidth;
@@ -188,39 +213,39 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                     //   top = 230;
                                     //   left = 20.0 + (index - 5) * 95.0;
                                     // }
-
+                                    final bool tablet = screenWidth >= 1000;
                                     if (index == 0) {
                                       // index 0 위치
-                                      top = 40;
-                                      left = 70;
+                                      top = tablet ? 62.5 : 40;
+                                      left = tablet ? 72 : 70;
                                     } else if (index == 1) {
                                       // index 1 위치
-                                      top = 40;
-                                      left = 161;
+                                      top = tablet ? 62 : 40;
+                                      left = tablet ? 165 : 161;
                                     } else if (index == 2) {
                                       // index 2 위치
-                                      top = 140;
-                                      left = 20;
+                                      top = tablet ? 144.6 : 140;
+                                      left = tablet ? 25.3 : 20;
                                     } else if (index == 3) {
                                       // index 3 위치
-                                      top = 140;
-                                      left = 115;
+                                      top = tablet ? 144.6 : 140;
+                                      left = tablet ? 118.8 : 115;
                                     } else if (index == 4) {
                                       // index 4 위치
-                                      top = 138;
-                                      left = 205;
+                                      top = tablet ? 141.5 : 138;
+                                      left = tablet ? 210 : 205;
                                     } else if (index == 5) {
                                       // index 5 위치
-                                      top = 230;
-                                      left = 23;
+                                      top = tablet ? 222 : 230;
+                                      left = tablet ? 27 : 23;
                                     } else if (index == 6) {
                                       // index 6 위치
-                                      top = 230;
-                                      left = 115;
+                                      top = tablet ? 223 : 230;
+                                      left = tablet ? 120 : 115;
                                     } else if (index == 7) {
                                       // index 7 위치
-                                      top = 235;
-                                      left = 205;
+                                      top = tablet ? 225 : 235;
+                                      left = tablet ? 210 : 205;
                                     }
 
                                     return Positioned(
@@ -245,13 +270,14 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                                 }
                                               });
                                             } else {
+                                              setState(() {});
                                               SoundManager.playNo();
                                             }
                                           },
                                           builder: (context, candidateData, rejectedData) {
                                             return SizedBox(
-                                              width: 80 * scaleX,
-                                              height: 80 * scaleY,
+                                              width: screenWidth >= 1000 ? 70 * scaleX : 80 * scaleX,
+                                              height: screenWidth >= 1000 ? 70 * scaleY : 80 * scaleY,
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(8),
                                                 child: Image.network(
@@ -320,8 +346,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.network(
                                       imageUrl,
-                                      width: 80 * scaleSize.width,
-                                      height: 80 * scaleSize.height,
+                                      width: screenWidth >= 1000 ? 70 * scaleSize.width : 80 * scaleSize.width,
+                                      height: screenWidth >= 1000 ? 70 * scaleSize.height : 80 * scaleSize.height,
                                       fit: BoxFit.contain,
                                     ),
                                   ),
@@ -330,8 +356,8 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.network(
                                       imageUrl,
-                                      width: 80 * scaleSize.width,
-                                      height: 80 * scaleSize.height,
+                                      width: screenWidth >= 1000 ? 70 * scaleSize.width : 80 * scaleSize.width,
+                                      height: screenWidth >= 1000 ? 70 * scaleSize.height : 80 * scaleSize.height,
                                       fit: BoxFit.contain,
                                     ),
                                   ),

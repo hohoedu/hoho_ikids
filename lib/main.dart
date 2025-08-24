@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
           padding: EdgeInsets.only(top: statusBar),
           child: GetMaterialApp(
             navigatorObservers: [routeObserver],
-            debugShowCheckedModeBanner: true,
+            debugShowCheckedModeBanner: false,
             theme: theme(),
             initialBinding: BindingsBuilder(
               () async {},

@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_stroke_data.dart';
-import 'package:hani_booki/screens/hani/stroke/stroke_screen.dart';
+import 'package:hani_booki/screens/hani/hani_stroke/hani_stroke_screen.dart';
 import 'package:hani_booki/screens/video_player/video_screen.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
@@ -42,7 +42,7 @@ Future<void> haniStrokeService(id, keyCode, year) async {
         // (옵션) 화면 회전 애니메이션이 완료될 시간을 고려해 짧은 딜레이 추가
         await Future.delayed(const Duration(milliseconds: 300));
 
-        Get.to(() => StrokeScreen(keyCode: keyCode));
+        Get.to(() => HaniStrokeScreen(keyCode: keyCode));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

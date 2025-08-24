@@ -201,9 +201,19 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
   }
 
   Future<void> resetQuiz() async {
+    setState(() {
+      _imagesPreloaded = false;
+    });
+
     await haniQuizService(userData!.id, widget.keyCode, userData!.year);
+
+    await _preloadAllImages();
+
     setState(() {
       currentIndex = 0;
+      _answeredCorrect = false;
+      _arrivedImage = false;
+      _tappedIndex = -1;
       _setupAnswer();
     });
   }

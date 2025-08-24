@@ -57,6 +57,9 @@ class HaniRecordLearning extends StatelessWidget {
       return text.split('').where((char) => char.trim().isNotEmpty).toList();
     }
 
+    String level = recordLearningData.recordLearningData!.leverString.substring(3, 4);
+    String course = recordLearningData.recordLearningData!.leverString.substring(0, 2);
+    Logger().d(course);
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -66,34 +69,71 @@ class HaniRecordLearning extends StatelessWidget {
       child: Align(
         alignment: Alignment.center,
         child: RichText(
-          text: TextSpan(
-            style: TextStyle(fontSize: 7.sp, color: Colors.black),
-            children: [
-              const TextSpan(text: '신습한자 '),
-              ...newChinese().map(
-                (char) => WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Container(
-                    margin: const EdgeInsets.all(2),
-                    padding: const EdgeInsets.all(3),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFF0F0F0),
-                    ),
-                    child: Text(
-                      char,
-                      style: TextStyle(
-                        fontSize: 6.sp,
-                        color: Colors.black,
+          text: course == '신동'
+              ? TextSpan(
+                  style: TextStyle(fontSize: 7.sp, color: Colors.black),
+                  children: [
+                    const TextSpan(text: '신습한자 '),
+                    ...newChinese().map(
+                      (char) => WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFFF0F0F0),
+                          ),
+                          child: Text(
+                            char,
+                            style: TextStyle(
+                              fontSize: 6.sp,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                ),
-              ),
-              TextSpan(text: ' 총 ${newChinese().length}자를 배웠어요.'),
-            ],
-          ),
+                    TextSpan(text: ' 총 ${newChinese().length}자를 배웠어요.'),
+                  ],
+                )
+              : level == '5' || level == '10'
+                  ? TextSpan(
+                      style: TextStyle(fontSize: 7.sp, color: Colors.black),
+                      children: [
+                        const TextSpan(text: '복습한자 '),
+                        TextSpan(text: '${recordLearningData.recordLearningData!.chinese}을 배웠어요.'),
+                      ],
+                    )
+                  : TextSpan(
+                      style: TextStyle(fontSize: 7.sp, color: Colors.black),
+                      children: [
+                        const TextSpan(text: '신습한자 '),
+                        ...newChinese().map(
+                          (char) => WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Container(
+                              margin: const EdgeInsets.all(2),
+                              padding: const EdgeInsets.all(3),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFFF0F0F0),
+                              ),
+                              child: Text(
+                                char,
+                                style: TextStyle(
+                                  fontSize: 6.sp,
+                                  color: Colors.black,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                        TextSpan(text: ' 총 ${newChinese().length}자를 배웠어요.'),
+                      ],
+                    ),
         ),
       ),
     );
@@ -172,7 +212,9 @@ class HaniRecordLearning extends StatelessWidget {
                       children: [
                         _buildCircleItem(const Color(0xFFF8B82F), [
                           recordLearningData.recordLearningData!.part_1,
-                          recordLearningData.recordLearningData!.note_1
+                          newLineAfterThird(
+                            recordLearningData.recordLearningData!.note_1,
+                          )
                         ]),
                         _buildCircleItem(const Color(0xFF57A6FF), [
                           recordLearningData.recordLearningData!.part_2,

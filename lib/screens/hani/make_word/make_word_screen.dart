@@ -13,6 +13,7 @@ import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
 
@@ -25,13 +26,17 @@ class MakeWordScreen extends StatefulWidget {
   State<MakeWordScreen> createState() => _MakeWordScreenState();
 }
 
-class _MakeWordScreenState extends State<MakeWordScreen> {
+class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStateMixin {
   final bgmController = Get.find<BgmController>();
   final makeWord = Get.find<HaniMakeWordDataController>();
   final userData = Get.find<UserDataController>().userData;
+  late AudioPlayer _audioPlayer;
 
-  final GlobalKey _imageKey = GlobalKey();
+  final GlobalKey _firstPlaceholderKey = GlobalKey();
+  final GlobalKey _secondPlaceholderKey = GlobalKey();
+  List<GlobalKey> _choiceKeys = [];
 
+  bool _hideChoices = false;
   bool _isPressed = false;
   bool _imagesPreloaded = false;
   bool _isInteractionDisabled = false;
@@ -49,11 +54,22 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
   void initState() {
     super.initState();
     bgmController.playBgm('word');
+    _audioPlayer = AudioPlayer();
     loadCard();
     shuffleChoices();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _preloadAllImages();
     });
+  }
+
+  Future<void> _playSound(String url) async {
+    Logger().d('url = $url');
+    try {
+      await _audioPlayer.setUrl(url);
+      _audioPlayer.play();
+    } catch (e) {
+      Logger().d('사운드 없음');
+    }
   }
 
   Future<void> _preloadAllImages() async {
@@ -82,6 +98,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
       {'url': card.wrong2, 'type': 'wrong'},
       {'url': card.wrong3, 'type': 'wrong'},
     ]..shuffle();
+    _choiceKeys = List.generate(choices.length, (_) => GlobalKey());
     setState(() {});
   }
 
@@ -93,6 +110,19 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
 
     firstIsPic = !firstUrl.endsWith('word.png');
     secondIsPic = !secondUrl.endsWith('word.png');
+  }
+
+  void _onChoiceTap(int index) {
+    if (choices[index]['type'] == 'correct') {
+      SoundManager.playCorrect();
+      setState(() {
+        _hideChoices = true;
+        _isInteractionDisabled = true;
+      });
+      _animateChoiceToPlaceholder(index);
+    } else {
+      SoundManager.playNo();
+    }
   }
 
   void nextWord(String data) async {
@@ -110,9 +140,8 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
         }
       });
       await Future.delayed(const Duration(milliseconds: 1000));
-
-      _goNextCard();
       setState(() => _isInteractionDisabled = false);
+      _goNextCard();
     } else {
       await SoundManager.playNo();
     }
@@ -122,6 +151,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
     if (currentIndex < makeWord.makeWordDataList.length - 1) {
       setState(() {
         currentIndex++;
+        _hideChoices = false;
         loadCard();
         shuffleChoices();
       });
@@ -151,6 +181,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
 
       loadCard();
       shuffleChoices();
+      _hideChoices = false;
       _imagesPreloaded = false;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -202,7 +233,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Spacer(flex: screenWidth >= 1000 ? 2 : 1),
+                Spacer(flex: 1),
                 Expanded(
                   flex: 8,
                   child: Row(
@@ -239,7 +270,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                           });
                                         },
                                         onTap: () {
-                                          Logger().d('사운드 재생!');
+                                          _playSound(makeWord.makeWordDataList[currentIndex].voice);
                                         },
                                         child: AnimatedScale(
                                           scale: _isPressed ? 0.9 : 1.0,
@@ -283,27 +314,18 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                               child: Padding(
                                                 padding: const EdgeInsets.all(16.0),
                                                 child: ClipRRect(
+                                                  key: _firstPlaceholderKey,
                                                   borderRadius: BorderRadius.circular(15),
-                                                  child: firstIsPic
-                                                      ? Container(
-                                                          decoration: BoxDecoration(
-                                                            color: Color(0xFFDFD7FE),
-                                                          ),
-                                                          child: Center(
-                                                            child: Text(
-                                                              '?',
-                                                              style: TextStyle(
-                                                                  color: Colors.white,
-                                                                  fontSize: 125,
-                                                                  fontWeight: FontWeight.bold,
-                                                                  fontFamily: 'BMJUA'),
-                                                            ),
-                                                          ),
-                                                        )
-                                                      : Image.network(
-                                                          firstUrl,
-                                                          fit: BoxFit.contain,
-                                                        ),
+                                                  child: LayoutBuilder(
+                                                    builder: (context, constraints) {
+                                                      return firstIsPic
+                                                          ? _buildQuestionMarkContainer()
+                                                          : Image.network(
+                                                              firstUrl,
+                                                              fit: BoxFit.contain,
+                                                            );
+                                                    },
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -311,23 +333,10 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                                               child: Padding(
                                                 padding: const EdgeInsets.all(16.0),
                                                 child: ClipRRect(
+                                                  key: _secondPlaceholderKey,
                                                   borderRadius: BorderRadius.circular(15),
                                                   child: secondIsPic
-                                                      ? Container(
-                                                          decoration: BoxDecoration(
-                                                            color: Color(0xFFDFD7FE),
-                                                          ),
-                                                          child: Center(
-                                                            child: Text(
-                                                              '?',
-                                                              style: TextStyle(
-                                                                  color: Colors.white,
-                                                                  fontSize: 125,
-                                                                  fontWeight: FontWeight.bold,
-                                                                  fontFamily: 'BMJUA'),
-                                                            ),
-                                                          ),
-                                                        )
+                                                      ? _buildQuestionMarkContainer()
                                                       : Image.network(
                                                           secondUrl,
                                                           fit: BoxFit.contain,
@@ -356,35 +365,36 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
                           ),
                         ),
                       ),
-                      Expanded(
-                        flex: 6,
-                        child: Center(
-                          child: GridView.count(
-                            shrinkWrap: true,
-                            crossAxisCount: 2,
-                            childAspectRatio: 1,
-                            padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: choices.map((choice) {
-                              return GestureDetector(
-                                onTap: () => nextWord(choice['type']!),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Center(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(25),
-                                      child: Image.network(
-                                        choice['url']!,
-                                        fit: BoxFit.cover,
+                      !_hideChoices
+                          ? Expanded(
+                              flex: 6,
+                              child: GridView.count(
+                                shrinkWrap: true,
+                                crossAxisCount: 2,
+                                padding: EdgeInsets.zero,
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: List.generate(
+                                  choices.length,
+                                  (index) {
+                                    final choice = choices[index];
+                                    return KeyedSubtree(
+                                      key: _choiceKeys[index],
+                                      child: GestureDetector(
+                                        onTap: () => _onChoiceTap(index),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(25),
+                                            child: Image.network(choice['url']!, fit: BoxFit.cover),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
+                              ),
+                            )
+                          : Spacer(flex: 6),
                     ],
                   ),
                 )
@@ -394,6 +404,86 @@ class _MakeWordScreenState extends State<MakeWordScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildQuestionMarkContainer() {
+    return Container(
+      width: double.infinity,
+      height: screenWidth >= 1000 ? screenHeight * 0.35 : null,
+      decoration: const BoxDecoration(color: Color(0xFFDFD7FE)),
+      child: Center(
+        child: Text(
+          '?',
+          style: TextStyle(color: Colors.white, fontSize: 120, fontWeight: FontWeight.bold, fontFamily: 'BMJUA'),
+        ),
+      ),
+    );
+  }
+
+  void _animateChoiceToPlaceholder(int index) {
+    final choiceCtx = _choiceKeys[index].currentContext;
+    final targetKey = firstIsPic ? _firstPlaceholderKey : _secondPlaceholderKey;
+    final placeholderCtx = targetKey.currentContext;
+    if (choiceCtx == null || placeholderCtx == null) return;
+
+    final choiceBox = choiceCtx.findRenderObject() as RenderBox;
+    final placeholderBox = placeholderCtx.findRenderObject() as RenderBox;
+    final start = choiceBox.localToGlobal(Offset.zero);
+    final end = placeholderBox.localToGlobal(Offset.zero);
+    final size = choiceBox.size;
+
+    final controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 400),
+    );
+    final animation = CurvedAnimation(parent: controller, curve: Curves.easeInOut);
+
+    final overlayEntry = OverlayEntry(builder: (ctx) {
+      return AnimatedBuilder(
+        animation: animation,
+        builder: (ctx, child) {
+          final offset = Offset.lerp(start, end, animation.value)!;
+          return Positioned(
+            left: offset.dx,
+            top: offset.dy,
+            width: size.width,
+            height: size.height,
+            child: child!,
+          );
+        },
+        child: Material(
+          color: Colors.transparent,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: Image.network(choices[index]['url']!, fit: BoxFit.cover),
+          ),
+        ),
+      );
+    });
+
+    Overlay.of(context).insert(overlayEntry);
+    controller.forward();
+
+    controller.addStatusListener((status) async {
+      if (status == AnimationStatus.completed) {
+        overlayEntry.remove();
+        controller.dispose();
+
+        setState(() {
+          if (firstIsPic) {
+            firstUrl = makeWord.makeWordDataList[currentIndex].clear;
+            firstIsPic = false;
+          } else {
+            secondUrl = makeWord.makeWordDataList[currentIndex].clear;
+            secondIsPic = false;
+          }
+        });
+
+        await Future.delayed(Duration(milliseconds: 1000));
+        _goNextCard();
+        setState(() => _isInteractionDisabled = false);
+      }
+    });
   }
 
   @override

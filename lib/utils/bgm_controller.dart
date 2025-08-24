@@ -6,7 +6,8 @@ import 'package:logger/logger.dart';
 class BgmController extends GetxController with WidgetsBindingObserver {
   final AudioPlayer _player = AudioPlayer();
   final Map<String, String> _bgmTracks = {
-    'write': 'assets/audio/bgm/write.mp3',
+    'hani_write': 'assets/audio/bgm/hani_write.mp3',
+    'booki_write': 'assets/audio/bgm/booki_write.mp3',
     'intro': 'assets/audio/effect/intro.mp3',
     'hani': 'assets/audio/bgm/hani_main.mp3',
     'puzzle': 'assets/audio/bgm/puzzle.mp3',

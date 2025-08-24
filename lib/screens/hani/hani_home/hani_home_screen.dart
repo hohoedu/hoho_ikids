@@ -14,7 +14,7 @@ import 'package:hani_booki/services/hani/hani_hanjasong_service.dart';
 import 'package:hani_booki/services/hani/hani_insung_service.dart';
 import 'package:hani_booki/services/hani/hani_puzzle_service.dart';
 import 'package:hani_booki/services/hani/hani_song_service.dart';
-import 'package:hani_booki/services/hani/hani_storke_service.dart';
+import 'package:hani_booki/services/hani/hani_stroke_service.dart';
 import 'package:hani_booki/services/hani/hani_story_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 

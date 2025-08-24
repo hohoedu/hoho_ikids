@@ -746,8 +746,9 @@ void showWithdrawDialog() {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        await withdrawService();
+                        // await withdrawService();
                         Get.back();
+                        showDeleteProtectDialog(context, withdrawService);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -814,8 +815,8 @@ void showCodeDeleteDialog({required VoidCallback onDeleteConfirmed}) {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        onDeleteConfirmed();
                         Get.back();
+                        showDeleteProtectDialog(context, onDeleteConfirmed);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey,
@@ -831,6 +832,129 @@ void showCodeDeleteDialog({required VoidCallback onDeleteConfirmed}) {
       ),
     ),
     barrierDismissible: false,
+  );
+}
+
+void showDeleteProtectDialog(BuildContext context, VoidCallback onDeleteConfirmed) {
+  final rand = Random();
+  final isSimple = rand.nextBool();
+
+  late String question;
+  late int correctAnswer;
+
+  if (isSimple) {
+    int num1 = rand.nextInt(999) + 1;
+    int num2 = rand.nextInt(999) + 1;
+    bool isAddition = rand.nextBool();
+
+    if (!isAddition && num1 < num2) {
+      final temp = num1;
+      num1 = num2;
+      num2 = temp;
+    }
+
+    final operator = isAddition ? '+' : '-';
+    question = "$num1 $operator $num2";
+    correctAnswer = isAddition ? num1 + num2 : num1 - num2;
+  } else {
+    final a = rand.nextInt(9) + 1;
+    final b = rand.nextInt(9) + 1;
+    final c = rand.nextInt(9) + 1;
+    question = "$a × ($b + $c)";
+    correctAnswer = a * (b + c);
+  }
+
+  String input = '';
+  String? errorText;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext ctx) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.all(16),
+        content: SizedBox(
+          width: 500,
+          height: 250,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Row(
+                children: [
+                  // 왼쪽: 문제 및 입력 상태
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text("부모님 확인", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 16),
+                        Text("문제: $question = ?", style: const TextStyle(fontSize: 18)),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            input.isEmpty ? "정답 입력" : input,
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        if (errorText != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              errorText!,
+                              style: const TextStyle(color: Colors.red, fontSize: 14),
+                            ),
+                          ),
+                        const Spacer(),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text("취소"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const VerticalDivider(),
+
+                  // 오른쪽: 키패드
+                  Expanded(
+                    flex: 1,
+                    child: SizedBox(
+                      width: 220,
+                      child: _buildKeypad(onTap: (value) async {
+                        setState(() {
+                          if (value == '←') {
+                            if (input.isNotEmpty) input = input.substring(0, input.length - 1);
+                          } else if (value == '확인') {
+                            final answer = int.tryParse(input);
+                            if (answer == correctAnswer) {
+                              onDeleteConfirmed();
+                              Navigator.of(ctx).pop();
+                            } else {
+                              errorText = "정답이 아닙니다.";
+                            }
+                          } else {
+                            if (input.length < 4) input += value;
+                          }
+                        });
+                      }),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -946,7 +1070,6 @@ void showParentGateDialog(BuildContext context, String url) {
     bool isAddition = rand.nextBool();
 
     if (!isAddition && num1 < num2) {
-      // num1이 더 작으면 두 숫자 스왑해서 양수 결과 보장
       final temp = num1;
       num1 = num2;
       num2 = temp;

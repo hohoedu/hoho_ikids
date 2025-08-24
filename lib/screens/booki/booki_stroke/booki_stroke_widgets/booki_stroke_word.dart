@@ -1,31 +1,31 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hani_booki/_data/hani/hani_stroke_data.dart';
-import 'package:hani_booki/screens/hani/stroke/stroke_widgets/stroke_painter.dart';
+import 'package:hani_booki/_data/booki/booki_stroke_data.dart';
+import 'package:hani_booki/screens/booki/booki_stroke/booki_stroke_widgets/booki_stroke_painter.dart';
 import 'package:hani_booki/utils/get_svg_path.dart';
 import 'package:logger/logger.dart';
 import 'package:path_drawing/path_drawing.dart';
 
-class StrokePath {
+class BookiStrokePath {
   final Path path;
   final String strokeClass;
 
-  StrokePath({required this.path, required this.strokeClass});
+  BookiStrokePath({required this.path, required this.strokeClass});
 }
 
-class StrokeWord extends StatefulWidget {
-  final HaniStrokeDataController strokeController;
+class BookiStrokeWord extends StatefulWidget {
+  final BookiStrokeDataController strokeController;
   final ValueNotifier<bool> resetNotifier;
   final int currentIndex;
   final VoidCallback onComplete;
   final bool isPointerShown;
   final Color strokeColor;
 
-  const StrokeWord({
+  const BookiStrokeWord({
     super.key,
     required this.strokeController,
     required this.resetNotifier,
@@ -36,18 +36,20 @@ class StrokeWord extends StatefulWidget {
   });
 
   @override
-  State<StrokeWord> createState() => _StrokeWordState();
+  State<BookiStrokeWord> createState() => _BookiStrokeWordState();
 }
 
-class _StrokeWordState extends State<StrokeWord> {
+class _BookiStrokeWordState extends State<BookiStrokeWord> {
   final customGlobalKey = GlobalKey();
   List<List<Offset>> _lines = [];
   List<Offset> _currentLine = [];
+
   double _top = 100;
   double _left = 100;
+
   List<Path>? firstPaths;
   List<Path>? pointerPaths;
-  List<StrokePath> remainingStrokePaths = [];
+  List<BookiStrokePath> remainingStrokePaths = [];
   double scratchPercent = 0.0;
   Set<int> completedPaths = {};
 
@@ -72,86 +74,86 @@ class _StrokeWordState extends State<StrokeWord> {
   }
 
   //assets에서 SVG가져오기
-  // Future<void> _loadSvgPathFromAssets(Size size, int currentIndex) async {
-  //   try {
-  //     final svgData = await rootBundle.loadString('assets/images/long.svg');
-  //
-  //     final st0PathData = SvgPathParser.getPathsByClassFromData(svgData, 'st0');
-  //     if (st0PathData.isNotEmpty) {
-  //       setState(() {
-  //         const svgSize = Size(200, 248);
-  //         final scaleX = size.width / svgSize.width;
-  //         final scaleY = size.height / svgSize.height;
-  //
-  //         firstPaths = st0PathData.map((pathData) {
-  //           final path = parseSvgPathData(pathData);
-  //           return path
-  //               .transform(Matrix4.diagonal3Values(scaleX, scaleY, 1).storage);
-  //         }).toList();
-  //       });
-  //     } else {
-  //       Logger().d("class='st0' 속성을 가진 path 데이터를 찾을 수 없습니다.");
-  //     }
-  //
-  //     List<List<Path>> groupPaths(List<Path> paths, int groupSize) {
-  //       List<List<Path>> groups = [];
-  //       for (int i = 0; i < paths.length; i += groupSize) {
-  //         int endIndex =
-  //             (i + groupSize) > paths.length ? paths.length : (i + groupSize);
-  //         groups.add(paths.sublist(i, endIndex));
-  //       }
-  //       return groups;
-  //     }
-  //
-  //     final allElements = SvgPathParser.getAllElementsFromData(svgData);
-  //
-  //     setState(() {
-  //       remainingStrokePaths = allElements
-  //           .where((element) {
-  //             final classAttr = (element['class'])?.trim() ?? '';
-  //             return classAttr.contains('st1') ||
-  //                 classAttr.contains('st2') ||
-  //                 classAttr.contains('st3');
-  //           })
-  //           .map((element) {
-  //             String? dAttribute;
-  //             if (element['type'] == 'path') {
-  //               dAttribute = element['d'];
-  //             } else if (element['type'] == 'line') {
-  //               dAttribute =
-  //                   'M${element['x1']},${element['y1']} L${element['x2']},${element['y2']}';
-  //             }
-  //             if (dAttribute != null) {
-  //               final path = parseSvgPathData(dAttribute).transform(
-  //                   Matrix4.diagonal3Values(
-  //                           size.width / 200, size.height / 248, 1)
-  //                       .storage);
-  //               final strokeClass = (element['class'] as String?)?.trim() ?? '';
-  //               return StrokePath(path: path, strokeClass: strokeClass);
-  //             }
-  //             return null;
-  //           })
-  //           .where((s) => s != null)
-  //           .cast<StrokePath>()
-  //           .toList();
-  //
-  //       List<List<StrokePath>> groups = groupPathsBySt1(remainingStrokePaths);
-  //
-  //       groupedPaths =
-  //           groups.map((group) => group.map((s) => s.path).toList()).toList();
-  //
-  //       if (remainingStrokePaths.isNotEmpty) {
-  //         _updatePointerPositionForGroup(currentGroupIndex);
-  //       }
-  //     });
-  //   } catch (e) {
-  //     Logger().e("SVG 데이터를 불러오는 중 오류 발생: $e");
-  //   }
-  // }
+  Future<void> _loadSvgPathFromAssets(Size size, int currentIndex) async {
+    try {
+      final svgData = await rootBundle.loadString('assets/images/mountain.svg');
+
+      final st0PathData = SvgPathParser.getPathsByClassFromData(svgData, 'st0');
+      if (st0PathData.isNotEmpty) {
+        setState(() {
+          const svgSize = Size(200, 248);
+          final scaleX = size.width / svgSize.width;
+          final scaleY = size.height / svgSize.height;
+
+          firstPaths = st0PathData.map((pathData) {
+            final path = parseSvgPathData(pathData);
+            return path
+                .transform(Matrix4.diagonal3Values(scaleX, scaleY, 1).storage);
+          }).toList();
+        });
+      } else {
+        Logger().d("class='st0' 속성을 가진 path 데이터를 찾을 수 없습니다.");
+      }
+
+      List<List<Path>> groupPaths(List<Path> paths, int groupSize) {
+        List<List<Path>> groups = [];
+        for (int i = 0; i < paths.length; i += groupSize) {
+          int endIndex =
+              (i + groupSize) > paths.length ? paths.length : (i + groupSize);
+          groups.add(paths.sublist(i, endIndex));
+        }
+        return groups;
+      }
+
+      final allElements = SvgPathParser.getAllElementsFromData(svgData);
+
+      setState(() {
+        remainingStrokePaths = allElements
+            .where((element) {
+              final classAttr = (element['class'])?.trim() ?? '';
+              return classAttr.contains('st1') ||
+                  classAttr.contains('st2') ||
+                  classAttr.contains('st3');
+            })
+            .map((element) {
+              String? dAttribute;
+              if (element['type'] == 'path') {
+                dAttribute = element['d'];
+              } else if (element['type'] == 'line') {
+                dAttribute =
+                    'M${element['x1']},${element['y1']} L${element['x2']},${element['y2']}';
+              }
+              if (dAttribute != null) {
+                final path = parseSvgPathData(dAttribute).transform(
+                    Matrix4.diagonal3Values(
+                            size.width / 200, size.height / 248, 1)
+                        .storage);
+                final strokeClass = (element['class'] as String?)?.trim() ?? '';
+                return BookiStrokePath(path: path, strokeClass: strokeClass);
+              }
+              return null;
+            })
+            .where((s) => s != null)
+            .cast<BookiStrokePath>()
+            .toList();
+
+        // List<List<BookiStrokePath>> groups = groupPathsBySt1(remainingStrokePaths);
+        //
+        // groupedPaths =
+        //     groups.map((group) => group.map((s) => s.path).toList()).toList();
+        //
+        // if (remainingStrokePaths.isNotEmpty) {
+        //   _updatePointerPositionForGroup(currentGroupIndex);
+        // }
+      });
+    } catch (e) {
+      Logger().e("SVG 데이터를 불러오는 중 오류 발생: $e");
+    }
+  }
 
   Future<void> _loadSvgPathFromServer(Size size, int currentIndex) async {
     try {
-      final response = await Dio().get(widget.strokeController.haniStrokeDataList![currentIndex].imagePath);
+      final response = await Dio().get(widget.strokeController.bookiStrokeDataList[currentIndex].imagePath);
       if (response.statusCode == 200) {
         final svgData = response.data;
         final st0PathData = SvgPathParser.getPathsByClassFromData(svgData, 'st0');
@@ -183,7 +185,7 @@ class _StrokeWordState extends State<StrokeWord> {
           String? d = e['type'] == 'path' ? e['d'] : 'M${e['x1']},${e['y1']} L${e['x2']},${e['y2']}';
           final path =
               parseSvgPathData(d!).transform(Matrix4.diagonal3Values(size.width / 200, size.height / 248, 1).storage);
-          return StrokePath(path: path, strokeClass: e['class']!);
+          return BookiStrokePath(path: path, strokeClass: e['class']!);
         }).toList();
         _updatePointer();
       }
@@ -321,7 +323,7 @@ class _StrokeWordState extends State<StrokeWord> {
               CustomPaint(
                 key: customGlobalKey,
                 size: Size.infinite,
-                painter: StrokePainter(
+                painter: BookiStrokePainter(
                   _lines,
                   _currentLine,
                   clipPath: firstPaths,
@@ -339,9 +341,8 @@ class _StrokeWordState extends State<StrokeWord> {
                   top: _top,
                   left: _left,
                   child: SizedBox(
-                    width: 50.w,
                     height: 50.h,
-                    child: Image.asset('assets/images/icons/pointer.png'),
+                    child: Image.asset('assets/images/icons/booki_pointer.png'),
                   ),
                 ),
               ),

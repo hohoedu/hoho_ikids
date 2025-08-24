@@ -41,9 +41,7 @@ class NewKidokButton extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   Padding(
-                    padding: screenWidth >= 1000
-                        ? EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0)
-                        : EdgeInsets.symmetric(vertical: 16.0),
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
                     child: Align(
                       alignment: const Alignment(0.0, 0.5),
                       child: Column(
@@ -53,12 +51,12 @@ class NewKidokButton extends StatelessWidget {
                             transform: Matrix4.identity()..scale(-1.0, 1.0),
                             child: Image.asset(
                               'assets/images/kido.png',
-                              scale: 2,
+                              scale: screenWidth >= 1000 ? 1.3 : 2,
                             ),
                           ),
                           Container(
-                            width: constraints.maxWidth * 0.8,
-                            height: constraints.maxHeight * 0.38,
+                            width: screenWidth >= 1000 ? constraints.maxWidth * 0.75 : constraints.maxWidth * 0.83,
+                            height: screenWidth >= 1000 ? constraints.maxHeight * 0.35 : constraints.maxHeight * 0.38,
                             decoration: BoxDecoration(
                               color: Color(kidokThemeController.kidokThemeData!.boxColor),
                               borderRadius: BorderRadius.only(
@@ -71,16 +69,16 @@ class NewKidokButton extends StatelessWidget {
                               children: [
                                 type == 'hani' ? SizedBox.shrink() : Spacer(),
                                 Expanded(
-                                  flex: 4,
+                                  flex: screenWidth >= 1000 ? 10 : 4,
                                   child: Align(
-                                    alignment: Alignment.bottomCenter,
+                                    alignment: screenWidth >= 1000 ? Alignment.center : Alignment.bottomCenter,
                                     child: RichText(
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
                                         style: TextStyle(
                                           color: fontMain,
                                           fontFamily: 'Cookie',
-                                          fontSize: 20,
+                                          fontSize: screenWidth >= 1000 ? 30 : 20,
                                           height: 1.2,
                                         ),
                                         children: [
@@ -94,7 +92,7 @@ class NewKidokButton extends StatelessWidget {
                                             style: TextStyle(
                                                 color: Color(kidokThemeController.kidokThemeData!.subjectColor),
                                                 // color: Colors.red,
-                                                fontSize: 15,
+                                                fontSize: screenWidth >= 1000 ? 25 : 15,
                                                 height: 1.4),
                                           )
                                         ],
@@ -116,7 +114,7 @@ class NewKidokButton extends StatelessWidget {
                     right: 0,
                     child: Image.asset(
                       'assets/images/kido_logo_vertical.png',
-                      scale: 2,
+                      scale: screenWidth >= 1000 ? 1.5 : 2,
                     ),
                   ),
                 ],

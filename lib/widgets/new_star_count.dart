@@ -29,8 +29,8 @@ class NewStarCount extends StatelessWidget {
         Get.to(() => RecordHomeSchoolScreen(type: type, keyCode: keyCode));
       },
       child: Container(
-        width: constraints.maxWidth * 0.83,
-        height: constraints.maxHeight * 0.28,
+        width: screenWidth >= 1000 ? constraints.maxWidth * 0.75 : constraints.maxWidth * 0.83,
+        height: screenWidth >= 1000 ? constraints.maxHeight * 0.15 : constraints.maxHeight * 0.28,
         decoration: BoxDecoration(
           color: Color(0xFFFFDE00),
           borderRadius: BorderRadius.circular(15),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:logger/logger.dart';
 
-class StrokePainter extends CustomPainter {
+class HaniStrokePainter extends CustomPainter {
   final List<List<Offset>> lines;
   final List<Offset> currentLine;
   final List<Path>? clipPath;
@@ -14,7 +14,7 @@ class StrokePainter extends CustomPainter {
   final double scratchPercent;
   final Color strokeColor;
 
-  StrokePainter(
+  HaniStrokePainter(
     this.lines,
     this.currentLine, {
     this.clipPath,

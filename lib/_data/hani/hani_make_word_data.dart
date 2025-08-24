@@ -9,6 +9,7 @@ class HaniMakeWordData {
   final String wrong3;
   final String clear;
   final String title;
+  final String voice;
 
   HaniMakeWordData({
     required this.first,
@@ -19,6 +20,7 @@ class HaniMakeWordData {
     required this.wrong3,
     required this.clear,
     required this.title,
+    required this.voice,
   });
 
   HaniMakeWordData.fromJson(Map<String, dynamic> json)
@@ -29,7 +31,8 @@ class HaniMakeWordData {
         wrong2 = json["wrong2"],
         wrong3 = json["wrong3"],
         clear = json["over"],
-        title = json["title"];
+        title = json["title"],
+        voice = json["voice"] ?? "";
 }
 
 class HaniMakeWordDataController extends GetxController {

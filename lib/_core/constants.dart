@@ -32,10 +32,6 @@ const List<Color> gridInsideColors = [
   Color(0xFFEAA993),
   Color(0xFFD1B3E0),
   Color(0xFFAECA69),
-  Color(0xFF8FBC86),
-  Color(0xFFF1C64F),
-  Color(0xFFDA9DAE),
-  Color(0xFF6FC1B3),
 ];
 
 const Map<String, Color> kidoColors = {
@@ -106,11 +102,18 @@ final List<Color> strokeColors = [
   Color(0xFF6FC1B3),
 ];
 
+final List<Color> bookiStrokeColors = [
+  Color(0xFFA93A8B),
+  Color(0xFF2C9C37),
+  Color(0xFF0DBCEF),
+  Color(0xFFF18B02),
+];
+
 final Map<String, String> noticeIcon = {
   '0': 'assets/images/icons/board_type4.png', // 공지사항
-  '1': 'assets/images/icons/board_type3.png', // 교육정보
-  '2': 'assets/images/icons/board_type2.png', // 한자성어
-  '3': 'assets/images/icons/board_type6.png', // 인물소개
+  '1': 'assets/images/icons/board_type3.png', // 교육정보 - 카카오 채널
+  '2': 'assets/images/icons/board_type2.png', // 한자성어 - 유튜브
+  '3': 'assets/images/icons/board_type6.png', // 인물소개 - 유튜브
   '7': 'assets/images/icons/board_type5.png', // 호호스타 발표
   '8': 'assets/images/icons/board_type1.png', // 호호스타 콘텐츠
 };
