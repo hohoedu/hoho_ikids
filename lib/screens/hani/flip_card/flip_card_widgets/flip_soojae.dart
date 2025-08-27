@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_index_card.dart';
+import 'package:logger/logger.dart';
 
 class FlipSoojae extends StatefulWidget {
   final List<dynamic> haniFlipDataList;
@@ -28,10 +29,10 @@ class FlipSoojae extends StatefulWidget {
   });
 
   @override
-  State<FlipSoojae> createState() => _FlipSoojaeState();
+  State<FlipSoojae> createState() => _FlipSindongState();
 }
 
-class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateMixin {
+class _FlipSindongState extends State<FlipSoojae> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isInitialAnimationDone = false;
@@ -80,6 +81,64 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
       children: [
         Expanded(
           flex: 1,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(
+                    children: List.generate(
+                      2,
+                      (index) => Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: FlipIndexCard(
+                            imageUrl: widget.haniFlipDataList[index].frontImagePath,
+                            index: index,
+                            onTap: (index, imageUrl) async {
+                              final soundUrl = widget.haniFlipDataList[index].frontVoicePath;
+                              await widget.playSound(soundUrl);
+                              widget.updateSelectedCard(index);
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Row(
+                    children: List.generate(
+                      2,
+                      (index) => Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: FlipIndexCard(
+                            imageUrl: widget.haniFlipDataList[index + 2].frontImagePath,
+                            index: index + 2,
+                            onTap: (index, imageUrl) async {
+                              final soundUrl = widget.haniFlipDataList[index].frontVoicePath;
+                              await widget.playSound(soundUrl);
+                              widget.updateSelectedCard(index);
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 1,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: LayoutBuilder(
@@ -108,14 +167,17 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
                         back: widget.backImage,
                         onFlip: () async {
                           if (widget.cardKey.currentState != null && widget.cardKey.currentState!.isFront) {
-                            final soundUrl = widget.haniFlipDataList[widget.currentIndex].voicePath;
+                            final soundUrl = widget.haniFlipDataList[widget.currentIndex].backVoicePath;
                             await widget.playSound(soundUrl);
                             if (!widget.flippedIndices.contains(widget.currentIndex)) {
                               widget.flippedIndices.add(widget.currentIndex);
-                              if (widget.flippedIndices.length == 6) {
+                              if (widget.flippedIndices.length == 8) {
                                 widget.completeGame();
                               }
                             }
+                          } else {
+                            final soundUrl = widget.haniFlipDataList[widget.currentIndex].frontVoicePath;
+                            await widget.playSound(soundUrl);
                           }
                         },
                       ),
@@ -128,23 +190,23 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
         Expanded(
           flex: 1,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 flex: 1,
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: List.generate(
-                      3,
+                      2,
                       (index) => Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: FlipIndexCard(
-                            imageUrl: widget.haniFlipDataList[index].frontImagePath,
-                            index: index,
-                            onTap: (index, imageUrl) {
+                            imageUrl: widget.haniFlipDataList[index + 4].frontImagePath,
+                            index: index + 4,
+                            onTap: (index, imageUrl) async {
+                              final soundUrl = widget.haniFlipDataList[index].frontVoicePath;
+                              await widget.playSound(soundUrl);
                               widget.updateSelectedCard(index);
                             },
                           ),
@@ -160,14 +222,16 @@ class _FlipSoojaeState extends State<FlipSoojae> with SingleTickerProviderStateM
                   alignment: Alignment.topCenter,
                   child: Row(
                     children: List.generate(
-                      3,
+                      2,
                       (index) => Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: FlipIndexCard(
-                            imageUrl: widget.haniFlipDataList[index + 3].frontImagePath,
-                            index: index + 3,
-                            onTap: (index, imageUrl) {
+                            imageUrl: widget.haniFlipDataList[index + 6].frontImagePath,
+                            index: index + 6,
+                            onTap: (index, imageUrl) async {
+                              final soundUrl = widget.haniFlipDataList[index].frontVoicePath;
+                              await widget.playSound(soundUrl);
                               widget.updateSelectedCard(index);
                             },
                           ),

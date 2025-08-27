@@ -41,6 +41,8 @@ Future<void> bookiStrokeService(id, String keyCode, year) async {
             ),
           );
         } else {
+          const platform = MethodChannel('orientation');
+          await platform.invokeMethod('setPortrait');
           await SystemChrome.setPreferredOrientations([
             DeviceOrientation.portraitUp,
             DeviceOrientation.portraitDown,

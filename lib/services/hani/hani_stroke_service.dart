@@ -34,7 +34,8 @@ Future<void> haniStrokeService(id, keyCode, year) async {
         final List<HaniStrokeData> haniStrokeDataList =
             responseData.map((json) => HaniStrokeData.fromJson(json)).toList();
         haniStrokeDataController.setHaniStrokeDataList(haniStrokeDataList);
-
+        const platform = MethodChannel('orientation');
+        await platform.invokeMethod('setPortrait');
         await SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,
           DeviceOrientation.portraitDown,

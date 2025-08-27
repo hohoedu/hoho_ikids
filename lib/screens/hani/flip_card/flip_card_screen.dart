@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/hani/hani_Flip_data.dart';
+
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_sindong.dart';
-import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_soojae.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_default.dart';
+import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_soojae.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
@@ -123,7 +124,7 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
                       completeGame: completeGame,
                     )
                   : widget.keyCode.substring(0, 1) == 'G'
-                      ? FlipSindong(
+                      ? FlipSoojae(
                           haniFlipDataList: haniFlipDataController.haniFlipDataList,
                           cardKey: _cardKey,
                           updateSelectedCard: _updateSelectedCard,
@@ -134,7 +135,7 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
                           flippedIndices: flippedIndices,
                           completeGame: completeGame,
                         )
-                      : FlipSoojae(
+                      : FlipSindong(
                           haniFlipDataList: haniFlipDataController.haniFlipDataList,
                           cardKey: _cardKey,
                           updateSelectedCard: _updateSelectedCard,

@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hani_booki/_data/hani/hani_stroke_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/hani/hani_stroke/hani_stroke_widgets/hani_stroke_painter.dart';
 import 'package:hani_booki/utils/get_svg_path.dart';
 import 'package:logger/logger.dart';
@@ -273,7 +274,7 @@ class _HaniStrokeWordState extends State<HaniStrokeWord> {
       if (start != null) {
         setState(() {
           _left = start.dx - 25;
-          _top = start.dy - 25;
+          _top = start.dy - 35;
         });
       }
     }
@@ -299,13 +300,23 @@ class _HaniStrokeWordState extends State<HaniStrokeWord> {
           _loadSvgPathFromServer(Size(constraints.maxWidth, constraints.maxHeight), widget.currentIndex);
         }
         return GestureDetector(
+          onPanStart: (d) {
+            RenderBox box = customGlobalKey.currentContext!.findRenderObject() as RenderBox;
+            final pos = box.globalToLocal(d.globalPosition);
+
+            setState(() {
+              _currentLine = [pos];
+              _top = pos.dy - 35;
+              _left = pos.dx - 25;
+            });
+          },
           onPanUpdate: (d) {
             RenderBox box = customGlobalKey.currentContext!.findRenderObject() as RenderBox;
             final pos = box.globalToLocal(d.globalPosition);
 
             setState(() {
               _currentLine.add(pos);
-              _top = pos.dy - 25;
+              _top = pos.dy - 35;
               _left = pos.dx - 25;
             });
           },
@@ -339,8 +350,8 @@ class _HaniStrokeWordState extends State<HaniStrokeWord> {
                   top: _top,
                   left: _left,
                   child: SizedBox(
-                    width: 50.w,
-                    height: 50.h,
+                    width: screenHeight > 1000 ? 25.w : 50.w,
+                    height: screenHeight > 1000 ? 25.w : 50.h,
                     child: Image.asset('assets/images/icons/hani_pointer.png'),
                   ),
                 ),

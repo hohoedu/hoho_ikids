@@ -81,7 +81,7 @@ class _FlipDefaultState extends State<FlipDefault> with SingleTickerProviderStat
           child: Column(
             children: List.generate(
               4,
-                  (index) => Expanded(
+              (index) => Expanded(
                 child: FlipIndexCard(
                   imageUrl: widget.haniFlipDataList[index].frontImagePath,
                   index: index,
@@ -113,7 +113,6 @@ class _FlipDefaultState extends State<FlipDefault> with SingleTickerProviderStat
                         );
                       },
                     ),
-
                   if (_isInitialAnimationDone)
                     FlipCard(
                       key: widget.cardKey,
@@ -121,9 +120,8 @@ class _FlipDefaultState extends State<FlipDefault> with SingleTickerProviderStat
                       front: widget.frontImage,
                       back: widget.backImage,
                       onFlip: () async {
-                        if (widget.cardKey.currentState != null &&
-                            widget.cardKey.currentState!.isFront) {
-                          final soundUrl = widget.haniFlipDataList[widget.currentIndex].voicePath;
+                        if (widget.cardKey.currentState != null && widget.cardKey.currentState!.isFront) {
+                          final soundUrl = widget.haniFlipDataList[widget.currentIndex].frontVoicePath;
                           await widget.playSound(soundUrl);
                           if (!widget.flippedIndices.contains(widget.currentIndex)) {
                             widget.flippedIndices.add(widget.currentIndex);
@@ -144,7 +142,7 @@ class _FlipDefaultState extends State<FlipDefault> with SingleTickerProviderStat
           child: Column(
             children: List.generate(
               4,
-                  (index) => Expanded(
+              (index) => Expanded(
                 child: FlipIndexCard(
                   imageUrl: widget.haniFlipDataList[index + 4].frontImagePath,
                   index: index + 4,

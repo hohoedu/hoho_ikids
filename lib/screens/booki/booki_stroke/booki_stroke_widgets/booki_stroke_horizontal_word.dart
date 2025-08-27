@@ -308,6 +308,16 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
       }
 
       return GestureDetector(
+        onPanStart: (d) {
+          RenderBox box = customGlobalKey.currentContext!.findRenderObject() as RenderBox;
+          final pos = box.globalToLocal(d.globalPosition);
+
+          setState(() {
+            _currentLine = [pos];
+            _pointerTop = pos.dy - 35;
+            _pointerLeft = pos.dx - 25;
+          });
+        },
         onPanUpdate: (d) {
           final box = customGlobalKey.currentContext?.findRenderObject() as RenderBox?;
           if (box == null) return;
@@ -316,7 +326,7 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
           setState(() {
             _currentLine.add(pos);
             _pointerLeft = pos.dx - 25;
-            _pointerTop = pos.dy - 25;
+            _pointerTop = pos.dy - 35;
           });
         },
         onPanEnd: (_) {

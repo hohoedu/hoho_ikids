@@ -38,9 +38,12 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
   final Random random = Random();
   int strokeIndex = 0;
 
+  static const platform = MethodChannel('orientation');
+
   @override
   void initState() {
     super.initState();
+    platform.invokeMethod('setPortrait');
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -114,6 +117,7 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
       },
       onMain: () async {
         if (Platform.isIOS) {
+          platform.invokeMethod('setLandscape');
           await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
         } else {
           await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
@@ -178,16 +182,17 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
                     child: Padding(
                       padding: EdgeInsets.all(16),
                       child: ClipRect(
-                        child: SizedBox(
-                          height: double.infinity,
-                          width: double.infinity,
-                          child: HaniStrokeWord(
-                            strokeController: strokeData,
-                            currentIndex: currentIndex,
-                            resetNotifier: resetNotifier,
-                            onComplete: _completeWord,
-                            isPointerShown: isPointerShown,
-                            strokeColor: strokeColors[strokeIndex],
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: 3 / 5,
+                            child: HaniStrokeWord(
+                              strokeController: strokeData,
+                              currentIndex: currentIndex,
+                              resetNotifier: resetNotifier,
+                              onComplete: _completeWord,
+                              isPointerShown: isPointerShown,
+                              strokeColor: strokeColors[strokeIndex],
+                            ),
                           ),
                         ),
                       ),
@@ -275,6 +280,7 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
   @override
   void dispose() {
     if (Platform.isIOS) {
+      platform.invokeMethod('setLandscape');
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeRight,
       ]);

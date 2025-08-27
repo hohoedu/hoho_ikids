@@ -57,7 +57,7 @@ class HaniStrokePainter extends CustomPainter {
 
         final userPaint = Paint()
           ..color = strokeColor
-          ..strokeWidth = 60.sp
+          ..strokeWidth = 10
           ..strokeCap = StrokeCap.round;
 
         for (var line in lines) {
@@ -81,7 +81,7 @@ class HaniStrokePainter extends CustomPainter {
 
       final userPaint = Paint()
         ..color = strokeColor
-        ..strokeWidth = 60.sp
+        ..strokeWidth = 60
         ..strokeCap = StrokeCap.round;
 
       for (var line in lines) {

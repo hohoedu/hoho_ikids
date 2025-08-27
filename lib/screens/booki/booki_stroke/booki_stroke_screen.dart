@@ -7,9 +7,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/booki/booki_stroke_data.dart';
-import 'package:hani_booki/_data/hani/hani_stroke_data.dart';
 import 'package:hani_booki/screens/booki/booki_stroke/booki_stroke_widgets/booki_stroke_word.dart';
-import 'package:hani_booki/screens/hani/hani_stroke/hani_stroke_widgets/hani_stroke_word.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
@@ -38,12 +36,14 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
 
   late AudioPlayer _audioPlayer;
   final Random random = Random();
-
   int strokeIndex = 0;
+
+  static const platform = MethodChannel('orientation');
 
   @override
   void initState() {
     super.initState();
+    platform.invokeMethod('setPortrait');
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -117,6 +117,7 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
       },
       onMain: () async {
         if (Platform.isIOS) {
+          platform.invokeMethod('setLandscape');
           await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
         } else {
           await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
@@ -181,16 +182,17 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
                     child: Padding(
                       padding: EdgeInsets.all(16),
                       child: ClipRect(
-                        child: SizedBox(
-                          height: double.infinity,
-                          width: double.infinity,
-                          child: BookiStrokeWord(
-                            strokeController: strokeData,
-                            currentIndex: currentIndex,
-                            resetNotifier: resetNotifier,
-                            onComplete: _completeWord,
-                            isPointerShown: isPointerShown,
-                            strokeColor: bookiStrokeColors[strokeIndex],
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: 3 / 5,
+                            child: BookiStrokeWord(
+                              strokeController: strokeData,
+                              currentIndex: currentIndex,
+                              resetNotifier: resetNotifier,
+                              onComplete: _completeWord,
+                              isPointerShown: isPointerShown,
+                              strokeColor: bookiStrokeColors[strokeIndex],
+                            ),
                           ),
                         ),
                       ),
@@ -272,6 +274,7 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
   @override
   void dispose() {
     if (Platform.isIOS) {
+      platform.invokeMethod('setLandscape');
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeRight,
       ]);
