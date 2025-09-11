@@ -6,6 +6,7 @@ import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/record/booki_record_learning_data.dart';
 import 'package:hani_booki/_data/record/hani_record_learning_data.dart';
+import 'package:hani_booki/services/record/report_read_service.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
@@ -41,6 +42,7 @@ Future<void> bookiRecordLearningService(teacherId, pin, hosu, schoolId) async {
       if (resultValue == "0000") {
         final BookiRecordLearningData recordLearningData = BookiRecordLearningData.fromJson(resultList['data'][0]);
         recordLearningDataController.setBookiRecordLearningData(recordLearningData);
+        await reportReadService(pin, hosu);
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

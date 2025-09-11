@@ -22,8 +22,6 @@ Future<void> kidokChartService(String hosu, String keyCode) async {
     'keycode': keyCode,
   };
 
-  Logger().d('requestData = $requestData');
-
   try {
     final response = await dio.post(url, data: jsonEncode(requestData));
 

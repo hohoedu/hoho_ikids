@@ -59,7 +59,6 @@ class HaniRecordLearning extends StatelessWidget {
 
     String level = recordLearningData.recordLearningData!.leverString.substring(3, 4);
     String course = recordLearningData.recordLearningData!.leverString.substring(0, 2);
-    Logger().d(course);
     return Container(
       decoration: BoxDecoration(
         border: Border(

@@ -20,16 +20,44 @@ class BadgeController extends GetxController {
     isBadgeVisible.value = _badgeBox.values.any((value) => value['status'] == false);
   }
 
-  void setUnreadNoticesFromList(List<Map<String, dynamic>> list) {
-    for (var item in list) {
-      final idx = item['idx'].toString();
-      if (!_badgeBox.containsKey(idx)) {
-        _badgeBox.put(idx, {'notificationIndex': idx, 'status': false});
+  Future<void> reconcileWithServer(List<Map<String, dynamic>> serverList) async {
+    final serverIds = serverList
+        .map((e) => e['idx'])
+        .where((e) => e != null)
+        .map((e) => e.toString())
+        .toSet();
+
+    final existingKeys = _badgeBox.keys.map((k) => k.toString()).toSet();
+
+    final toDelete = existingKeys.difference(serverIds);
+
+    final batchPut = <dynamic, Map>{};
+    for (final id in serverIds) {
+      if (_badgeBox.containsKey(id)) {
+        final prev = Map.of(_badgeBox.get(id) ?? {});
+        prev['notificationIndex'] = id;
+        prev['status'] = prev['status'] ?? false;
+        batchPut[id] = prev;
+      } else {
+        batchPut[id] = {
+          'notificationIndex': id,
+          'status': false,
+        };
       }
     }
+
+    if (toDelete.isNotEmpty) {
+      await _badgeBox.deleteAll(toDelete);
+    }
+    if (batchPut.isNotEmpty) {
+      await _badgeBox.putAll(batchPut);
+    }
+
+    calculateUnread();
     updateBadgeVisibility();
     update();
   }
+
 
   void saveNotificationStatus(String index, bool status) {
     _badgeBox.put(index.toString(), {'notificationIndex': index, 'status': status});
@@ -37,7 +65,6 @@ class BadgeController extends GetxController {
   }
 
   void markNotificationAsRead(String index) async {
-    // 알림 읽기 처리
     if (_badgeBox.containsKey(index.toString())) {
       await _badgeBox.put(index.toString(), {'notificationIndex': index, 'status': true});
       updateBadgeVisibility();

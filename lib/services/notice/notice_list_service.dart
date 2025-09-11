@@ -40,7 +40,7 @@ Future<void> noticeListService() async {
         noticeListDataController.setNoticeListData(noticeListDataList);
 
         await badgeController.initHive(userdata.userData!.id);
-        badgeController.setUnreadNoticesFromList(
+        badgeController.reconcileWithServer(
           noticeListDataList.map((e) => {'idx': e.index}).toList(),
         );
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -34,8 +35,10 @@ Future<void> haniStrokeService(id, keyCode, year) async {
         final List<HaniStrokeData> haniStrokeDataList =
             responseData.map((json) => HaniStrokeData.fromJson(json)).toList();
         haniStrokeDataController.setHaniStrokeDataList(haniStrokeDataList);
-        const platform = MethodChannel('orientation');
-        await platform.invokeMethod('setPortrait');
+        if (Platform.isIOS) {
+          const platform = MethodChannel('orientation');
+          await platform.invokeMethod('setPortrait');
+        }
         await SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,
           DeviceOrientation.portraitDown,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -41,8 +42,10 @@ Future<void> bookiStrokeService(id, String keyCode, year) async {
             ),
           );
         } else {
-          const platform = MethodChannel('orientation');
-          await platform.invokeMethod('setPortrait');
+          if (Platform.isIOS) {
+            const platform = MethodChannel('orientation');
+            await platform.invokeMethod('setPortrait');
+          }
           await SystemChrome.setPreferredOrientations([
             DeviceOrientation.portraitUp,
             DeviceOrientation.portraitDown,
