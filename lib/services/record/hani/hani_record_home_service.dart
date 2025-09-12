@@ -44,12 +44,7 @@ Future<void> haniRecordHomeService() async {
       if (resultValue == "0000") {
         final HaniRecordHomeData recordHomeData = HaniRecordHomeData.fromJson(resultList['data'][index]);
         recordHomeDataController.setHaniRecordHomeData(recordHomeData);
-        await haniRecordLearningService(
-          recordHomeData.teacherId,
-          recordHomeData.keyCode,
-          recordHomeData.category,
-          recordHomeData.schoolId,
-        );
+
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

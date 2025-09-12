@@ -43,12 +43,7 @@ Future<void> bookiRecordHomeService() async {
       if (resultValue == "0000") {
         final BookiRecordHomeData recordHomeData = BookiRecordHomeData.fromJson(resultList['data'][index]);
         recordHomeDataController.setBookiRecordHomeData(recordHomeData);
-        await bookiRecordLearningService(
-          recordHomeData.teacherId,
-          recordHomeData.keyCode,
-          recordHomeData.category,
-          recordHomeData.schoolId,
-        );
+
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

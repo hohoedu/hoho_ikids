@@ -35,22 +35,28 @@ class RecordScreen extends StatefulWidget {
 }
 
 class _RecordScreenState extends State<RecordScreen> {
+  HaniRecordHomeData? haniData;
+  BookiRecordHomeData? bookiData;
+
   @override
   void initState() {
     super.initState();
     Get.find<BgmController>().pauseBgm();
+    initController();
   }
 
-  Future<String> checkRecordServices() async {
+  void initController() async {
     final haniRecordController = Get.put(HaniRecordHomeDataController());
     final bookiRecordController = Get.put(BookiRecordHomeDataController());
 
     await haniRecordHomeService();
-    final haniData = haniRecordController.recordHomeData;
+    haniData = haniRecordController.recordHomeData;
 
     await bookiRecordHomeService();
-    final bookiData = bookiRecordController.recordHomeData;
+    bookiData = bookiRecordController.recordHomeData;
+  }
 
+  Future<String> checkRecordServices() async {
     if (haniData != null && bookiData != null) {
       return 'c';
     } else if (haniData != null && bookiData == null) {
@@ -106,6 +112,7 @@ class _RecordScreenState extends State<RecordScreen> {
                       child: GestureDetector(
                         onTap: () async {
                           String status = await checkRecordServices();
+
                           Get.to(() => RecordClassScreen(type: widget.type, classStatus: status));
                         },
                         child: Padding(
