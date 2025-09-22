@@ -64,13 +64,16 @@ class _RecordGraphState extends State<RecordGraph> {
   void _setCurrentIndex() {
     if (widget.type == 'hani') {
       _currentIndex = haniData.userHaniDataList.length - 1;
+
     } else {
       _currentIndex = bookiData.userBookiDataList.length - 1;
+      Logger().d(_currentIndex);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+
     return LayoutBuilder(builder: (context, constraints) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -215,19 +218,19 @@ class _RecordGraphState extends State<RecordGraph> {
                                   Row(
                                     children: [
                                       Text(
-                                        widget.contentStar.contentStarDataList[_currentIndex - 1].subject,
+                                        widget.contentStar.contentStarDataList[0].subject,
                                         style: TextStyle(
                                           fontSize: 8.sp,
                                           fontWeight: FontWeight.bold,
                                           color: widget.type == 'hani'
                                               ? haniReportTextColor[
-                                                  widget.contentStar.contentStarDataList[_currentIndex - 1].index]
+                                                  widget.contentStar.contentStarDataList[0].index]
                                               : bookiReportColor[
-                                                  widget.contentStar.contentStarDataList[_currentIndex - 1].index],
+                                                  widget.contentStar.contentStarDataList[0].index],
                                         ),
                                       ),
                                       ...List.generate(
-                                        widget.contentStar.contentStarDataList[_currentIndex - 1].contentList.length,
+                                        widget.contentStar.contentStarDataList[0].contentList.length,
                                         (index) {
                                           return Padding(
                                             padding: const EdgeInsets.all(8.0),
@@ -241,7 +244,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                                 child: Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                                                   child: Text(
-                                                    widget.contentStar.contentStarDataList[_currentIndex - 1]
+                                                    widget.contentStar.contentStarDataList[0]
                                                         .contentList[index],
                                                     style: TextStyle(
                                                       color: fontWhite,
@@ -261,7 +264,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        widget.contentStar.contentStarDataList[_currentIndex - 1].note,
+                                        widget.contentStar.contentStarDataList[0].note,
                                         style: TextStyle(
                                           color: fontMain,
                                           fontSize: 6.5.sp,

@@ -122,11 +122,11 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
                               Row(
                                 children: [
                                   BookiTopContents(
-                                    imagePath: '${bookiData['song']}',
+                                    imagePath: '${bookiData['story']}',
                                     onTap: () => bookiStoryService(id, widget.keyCode, year),
                                   ),
                                   BookiTopContents(
-                                    imagePath: '${bookiData['story']}',
+                                    imagePath: '${bookiData['song']}',
                                     onTap: () => bookiSongService(id, widget.keyCode, year),
                                   ),
                                   BookiTopContents(
