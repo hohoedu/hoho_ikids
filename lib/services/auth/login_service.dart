@@ -41,7 +41,7 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
         if (!isManager) {
-          await getToken(id);
+          // await getToken(id);
         }
         if (isAutoLoginChecked) {
           await storage.write(key: 'user_id', value: id);
@@ -63,7 +63,7 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
         }
       } else if (resultValue == '7777') {
         if (!isManager) {
-          await getToken(id);
+          // await getToken(id);
         }
         oneButtonDialog(
           title: '로그인',
@@ -83,7 +83,7 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
         );
       } else if (resultValue == '6666') {
         if (!isManager) {
-          await getToken(id);
+          // await getToken(id);
         }
         Get.to(() => JoinSelectVerificationScreen(
               loginCode: resultValue,

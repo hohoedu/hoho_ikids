@@ -154,17 +154,22 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
               flex: 2,
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Color(0xFFE7610B), fontSize: 28, fontWeight: FontWeight.bold),
-                    children: [
-                      TextSpan(text: '$totalCompletedIndex'),
-                      TextSpan(
-                        text: ' / ${strokeData.bookiStrokeDataList.length}',
-                        style: const TextStyle(color: fontMain),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(color: Color(0xFFE7610B), fontSize: 28, fontWeight: FontWeight.bold),
+                        children: [
+                          TextSpan(text: '$totalCompletedIndex'),
+                          TextSpan(
+                            text: ' / ${strokeData.bookiStrokeDataList.length}',
+                            style: const TextStyle(color: fontMain),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -198,7 +203,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
                               child: GestureDetector(
                                 onTap: _onPrevWord,
                                 child: currentIndex > 0
-                                    ? const Icon(Icons.skip_previous, size: 46, color: fontWhite)
+                                    ?  Icon(Icons.skip_previous, size: screenWidth >= 1000 ? 100:  46, color: fontWhite)
                                     : const SizedBox.shrink(),
                               ),
                             ),
@@ -208,7 +213,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
                                   Logger().d('클릭');
                                   _onResetTracing();
                                 },
-                                child: const Icon(Icons.refresh, size: 46, color: fontWhite),
+                                child:  Icon(Icons.refresh, size: screenWidth >= 1000 ? 100:  46, color: fontWhite),
                               ),
                             ),
                             Expanded(
@@ -218,7 +223,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
                                   _onNextWord();
                                 },
                                 child: (strokeData.bookiStrokeDataList.length - 1) > currentIndex
-                                    ? const Icon(Icons.skip_next, size: 46, color: fontWhite)
+                                    ? Icon(Icons.skip_next, size: screenWidth >= 1000 ? 100:  46, color: fontWhite)
                                     : const SizedBox.shrink(),
                               ),
                             ),

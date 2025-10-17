@@ -141,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           EasyLoading.dismiss();
                           oneButtonDialog(
                             title: '오류',
-                            content: '로그인에 실패했습니다.\n다시 시도해주세요.',
+                            content: '네트워크 확인 후\n다시 시도해주세요.',
                             onTap: () => Get.back(),
                             buttonText: '확인',
                           );

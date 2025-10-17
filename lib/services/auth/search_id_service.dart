@@ -51,7 +51,7 @@ Future<void> searchIdService(username, phoneNumber) async {
       // 응답 데이터가 오류일 때("9999": 오류)
       else {
         oneButtonDialog(
-          title: '비밀번호 찾기',
+          title: '아이디 찾기',
           content: resultList['message'],
           onTap: () => Get.back(),
           buttonText: '확인',
@@ -62,6 +62,11 @@ Future<void> searchIdService(username, phoneNumber) async {
 
   // 예외처리
   catch (e) {
-    Logger().d('e = $e');
+    oneButtonDialog(
+      title: '네트워크 오류',
+      content: '네트워크를 확인하고\n다시 시도해주세요.',
+      onTap: () => Get.back(),
+      buttonText: '확인',
+    );
   }
 }

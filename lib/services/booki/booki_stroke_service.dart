@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -23,7 +24,7 @@ Future<void> bookiStrokeService(id, String keyCode, year) async {
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-
+Logger().d(response);
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
@@ -33,9 +34,18 @@ Future<void> bookiStrokeService(id, String keyCode, year) async {
       if (responseData[0]['result'] == "0000") {
         final List<BookiStrokeData> bookiStrokeDataList =
             responseData.map((json) => BookiStrokeData.fromJson(json)).toList();
-        bookiStrokeDataController.setBookiStrokeDataList(bookiStrokeDataList);
-        if (int.parse(keyCode.substring(2, 4)) >= 8) {
-          // if (int.parse('JA08LH56'.substring(2, 4)) >= 8) {
+        final keyNum = int.parse(keyCode.substring(2, 4));
+
+        if (keyNum >= 8) {
+          final random = Random();
+          final List<BookiStrokeData> randomEight = List.from(bookiStrokeDataList)..shuffle(random);
+          Logger().d(randomEight.take(8).toList());
+          bookiStrokeDataController.setBookiStrokeDataList(randomEight.take(8).toList());
+        } else {
+          bookiStrokeDataController.setBookiStrokeDataList(bookiStrokeDataList);
+        }
+
+        if (keyNum >= 8) {
           Get.to(
             () => BookiStrokeHorizontalScreen(
               keyCode: keyCode,

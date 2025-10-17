@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
         child: Container(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
+          width: Platform.isIOS && screenWidth <= 1000 ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
           decoration: BoxDecoration(
             color: _currentIndex == 1 ? bookiColor : haniColor,
           ),
@@ -98,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Visibility(
                           visible: isHaniExist,
@@ -245,45 +246,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-// Positioned(
-//   bottom: 0,
-//   left: 20,
-//   child: GestureDetector(
-//     onTap: () async {
-//       // badgeController.resetBadge();
-//       showNoticeDialog(Get.context!);
-//     },
-//     child: Obx(
-//       () {
-//         return badges.Badge(
-//           position: badges.BadgePosition.topEnd(top: 5, end: 5),
-//           showBadge: badgeController.isBadgeVisible.value,
-//           badgeContent: Text(
-//             '${badgeController.unReadCount()}',
-//             style: TextStyle(color: fontWhite, fontSize: 14),
-//           ),
-//           badgeStyle: badges.BadgeStyle(
-//             badgeColor: Colors.red,
-//             padding: EdgeInsets.all(6),
-//           ),
-//           child: Padding(
-//             padding: EdgeInsets.all(screenWidth >= 1000 ? 24.0 : 16.0),
-//             child: Container(
-//               decoration: BoxDecoration(
-//                 borderRadius: BorderRadius.circular(20),
-//               ),
-//               child: Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Image.asset(
-//                   'assets/images/icons/notification.png',
-//                   scale: screenWidth >= 1000 ? 2 : 3,
-//                 ),
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     ),
-//   ),
-// ),

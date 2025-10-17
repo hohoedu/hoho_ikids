@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_레이어_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 248">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st1 {
+        fill: none;
+        stroke: #cf121b;
+        stroke-linecap: round;
+        stroke-miterlimit: 10;
+        stroke-width: .9px;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M65.5,151.8V48h41.4v103.8h-41.4Z" />
+  <path class="st0" d="M106.9,48h63.6v103.8h-41.2v-65.6h-22.4v-38.2Z" />
+  <path class="st0" d="M170.5,151.8v38.2h-105v-38.2h105Z" />
+  <path class="st0" d="M170.5 97h21v40H170.5Z" />
+  <path class="st0" d="M191.5 97L191.5 28L234.5 28L234.5 220L191.5 220L191.5 137L191.5 97z" />
+  <path class="st0" d="M330.9,101v-15.4h-66.4v-37.6h104.2v53h-37.8Z" />
+  <path class="st0" d="M265.5,101h103.2v33.6h-103.2v-33.6Z" />
+  <path class="st0" d="M391.5,179.6c-22.2,6.8-55.6,10.4-126,10.4v-55.4h40.8v17.4c33.4,0,61.2-2.6,85.2-8v35.6Z" />
+  <path class="st0" d="M391.5 144L391.5 28L434.5 28L434.5 220L391.5 220L391.5 179.6L391.5 144z" />
+  <path class="st1" d="M85.5,71.8c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M102.2,71.8c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M85.7,175.5c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M172,121.3c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M212.1,45.8c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M280.6,70.4c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M286.3,123.3c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M286.3,136.8c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M412.8,45.8c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+</svg>

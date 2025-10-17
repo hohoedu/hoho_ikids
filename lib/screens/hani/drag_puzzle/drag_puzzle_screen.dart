@@ -78,7 +78,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
         _prepareCurrentPuzzle();
       });
     } else {
-      await starUpdateService('workbook', widget.keyCode);
+      await starUpdateService('puz', widget.keyCode);
       lottieDialog(
         onMain: () {
           Get.back();

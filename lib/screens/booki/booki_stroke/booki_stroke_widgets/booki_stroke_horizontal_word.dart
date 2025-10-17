@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hani_booki/_data/booki/booki_stroke_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/utils/get_svg_path.dart';
 import 'package:logger/logger.dart';
 import 'package:path_drawing/path_drawing.dart';
@@ -77,9 +78,12 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
     });
   }
 
+  // 배포용 에셋에서 svg가져오기
   Future<void> _loadSvgFromAssets(Size canvasSize, int currentIndex) async {
     try {
-      final svgData = await rootBundle.loadString('assets/images/mountain.svg');
+      // final svgData = await rootBundle.loadString('assets/images/shoes.svg');
+      final svgData = await rootBundle.loadString('assets/images/svg/shout.svg');
+      // final svgData = await rootBundle.loadString('assets/images/bridge.svg');
 
       final st0List = SvgPathParser.getPathsByClassFromData(svgData, 'st0');
 
@@ -87,12 +91,17 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
 
       final allElements = SvgPathParser.getAllElementsFromData(svgData);
 
-      final scale = _computeScale(canvasSize, kSvgViewport);
+      double scale = _computeScale(canvasSize, kSvgViewport);
+
       final off = _computeOffset(canvasSize, kSvgViewport, scale);
 
-      final Matrix4 m = Matrix4.identity()
-        ..translate(off.dx, off.dy)
-        ..scale(scale, scale);
+      final Matrix4 m = screenWidth >= 1000
+          ? (Matrix4.identity()
+            ..translate(off.dx -  20, off.dy + 50)
+            ..scale(scale * 0.5, scale * 0.6))
+          : (Matrix4.identity()
+            ..translate(off.dx - 100, off.dy)
+            ..scale(scale * 0.75, scale * 0.8));
 
       setState(() {
         clipPaths = st0List.map((d) => parseSvgPathData(d).transform(m.storage)).toList();
@@ -126,6 +135,7 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
     }
   }
 
+  // 배포용 서버에서 svg가져오기
   Future<void> _loadSvgFromServer(Size canvasSize, int currentIndex) async {
     try {
       final response = await Dio().get(widget.strokeController.bookiStrokeDataList[currentIndex].imagePath);
@@ -138,9 +148,13 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
 
       final scale = _computeScale(canvasSize, kSvgViewport);
       final off = _computeOffset(canvasSize, kSvgViewport, scale);
-      final Matrix4 m = Matrix4.identity()
-        ..translate(off.dx, off.dy)
-        ..scale(scale, scale);
+      final Matrix4 m = screenWidth >= 1000
+          ? (Matrix4.identity()
+        ..translate(off.dx -  20, off.dy + 50)
+        ..scale(scale * 0.5, scale * 0.6))
+          : (Matrix4.identity()
+        ..translate(off.dx - 100, off.dy)
+        ..scale(scale * 0.75, scale * 0.8));
 
       setState(() {
         clipPaths = st0List.map((d) => parseSvgPathData(d).transform(m.storage)).toList();
@@ -223,9 +237,11 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
     canvas.save();
     canvas.clipPath(target);
 
+    double strokeWidth = screenWidth >= 1000 ? 100 : 56;
+
     final paint = Paint()
       ..color = Colors.black
-      ..strokeWidth = 56
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
     for (final line in _lines) {
@@ -303,8 +319,8 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
             scratchPercent = 0.0;
           });
         });
-        _loadSvgFromAssets(canvasSize, widget.currentIndex);
-        // _loadSvgFromServer(canvasSize, widget.currentIndex);
+        // _loadSvgFromAssets(canvasSize, widget.currentIndex);
+        _loadSvgFromServer(canvasSize, widget.currentIndex);
       }
 
       return GestureDetector(

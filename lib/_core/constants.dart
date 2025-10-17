@@ -49,23 +49,6 @@ const Map<String, Color> kidoSubColors = {
   '끈기': Color(0xFF3FCA94),
 };
 
-const Map<String, String> kidoMonth = {
-  '1': '배려',
-  '2': '존중',
-  '3': '효',
-  '4': '협력',
-  '5': '끈기',
-};
-
-final items = [
-  {'title': '루이브라유', 'category': '배려', 'color': gridColors[0], 'circleColor': gridInsideColors[0]},
-  {'title': '방정환', 'category': '존중', 'color': gridColors[1], 'circleColor': gridInsideColors[1]},
-  {'title': '김구', 'category': '효', 'color': gridColors[2], 'circleColor': gridInsideColors[2]},
-  {'title': '간디', 'category': '협력', 'color': gridColors[3], 'circleColor': gridInsideColors[3]},
-  {'title': '최무선', 'category': '끈기', 'color': gridColors[4], 'circleColor': gridInsideColors[4]},
-  {'title': '유관순', 'category': '애국심', 'color': gridColors[5], 'circleColor': gridInsideColors[5]},
-  {'title': '정조•정약용', 'category': '협력', 'color': gridColors[6], 'circleColor': gridInsideColors[6]},
-];
 
 final Map<String, String> haniCategory = {
   'song': '동요',

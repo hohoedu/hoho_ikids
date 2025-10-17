@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hani_booki/main.dart';
 
 class BookiStrokeHorizontalPainter extends CustomPainter {
   final List<List<Offset>> lines;
@@ -48,7 +49,7 @@ class BookiStrokeHorizontalPainter extends CustomPainter {
 
       final userPaint = Paint()
         ..color = strokeColor
-        ..strokeWidth = 56
+        ..strokeWidth = screenWidth >= 1000 ? 65 : 55
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 

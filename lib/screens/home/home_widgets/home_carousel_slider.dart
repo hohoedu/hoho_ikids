@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/user_booki_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_ebook_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_screen.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen.dart';
 import 'package:hani_booki/services/booki/booki_content_service.dart';
@@ -68,7 +72,6 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
                     return GestureDetector(
                       onTap: isVisible
                           ? () async {
-                              // if (connectivityController.isConnected.value) {
                               widget.currentIndex == 1
                                   ? await kidokThemeService(data.keyCode, userDataController.userData!.year)
                                   : await kidokThemeService(data.keyCode, userDataController.userData!.year);
@@ -77,15 +80,6 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
                                       userDataController.userData!.year)
                                   : await haniContentService(data.keyCode, userDataController.userData!.schoolId,
                                       userDataController.userData!.year);
-                              // } else {
-                              //   oneButtonDialog(
-                              //       title: '네트워크 에러',
-                              //       content: '인터넷 연결을 확인해 주세요.',
-                              //       onTap: () {
-                              //         Get.back();
-                              //       },
-                              //       buttonText: '확인');
-                              // }
                             }
                           : null,
                       child: Padding(
@@ -94,6 +88,7 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
                           children: [
                             Container(
                               width: double.infinity,
+                              height: screenWidth>=1000 && Platform.isIOS ? screenHeight * 0.5 : screenHeight * 0.6,
                               decoration: BoxDecoration(
                                 color: mBackWhite,
                                 borderRadius: BorderRadius.circular(30),
@@ -110,7 +105,8 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
                                           : '진행 중인 학습',
                                       style: TextStyle(
                                           color: fontMain,
-                                          fontSize: 20,
+                                          fontSize: 8.5.sp,
+                                          // fontSize: 20,
                                           fontFamily: 'GSans-Bold',
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -125,7 +121,10 @@ class _HomeCarouselSliderState extends State<HomeCarouselSlider> {
                                         ),
                                         child: Text(
                                           (int.parse(data.date) >= 0) ? '${data.date}일 남음' : '0일 남음',
-                                          style: TextStyle(color: widget.currentIndex == 1 ? bookiColor : haniColor),
+                                          style: TextStyle(
+                                            color: widget.currentIndex == 1 ? bookiColor : haniColor,
+                                            fontSize: 6.sp,
+                                          ),
                                         ),
                                       ),
                                     ),

@@ -40,7 +40,7 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
   @override
   void initState() {
     super.initState();
-    isSelectedList = List.generate(items.length, (index) => index == 0);
+    isSelectedList = List.generate(kidokBookcaseController.kidokBookcaseDataList.length, (index) => index == 0);
   }
 
   @override
@@ -94,7 +94,8 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
                                       widget.keyCode,
                                     );
                                     setState(() {
-                                      isSelectedList = List.generate(items.length, (i) => i == index);
+                                      isSelectedList = List.generate(kidokBookcaseController.kidokBookcaseDataList.length, (i) => i ==
+                                          index);
                                     });
                                   },
                                   child: KidokListView(

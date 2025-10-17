@@ -11,15 +11,12 @@ import 'package:logger/logger.dart';
 Future<void> searchPasswordService(id, phoneNumber) async {
   String url = dotenv.get('PASSWORD_SEARCH_URL');
 
-  final Map<String, dynamic> requestData = {
-    'id': id,
-    'ptel': phoneNumber
-  };
-
-  // HTTP POST 요청
-  final response = await dio.post(url, data: jsonEncode(requestData));
+  final Map<String, dynamic> requestData = {'id': id, 'ptel': phoneNumber};
 
   try {
+    // HTTP POST 요청
+    final response = await dio.post(url, data: jsonEncode(requestData));
+
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
       final Map<String, dynamic> resultList = json.decode(response.data);
@@ -47,9 +44,13 @@ Future<void> searchPasswordService(id, phoneNumber) async {
       }
     }
   }
-
   // 예외처리
   catch (e) {
-    Logger().d('e = $e');
+    oneButtonDialog(
+      title: '오류',
+      content: '네트워크 확인 후\n다시 시도해주세요.',
+      onTap: () => Get.back(),
+      buttonText: '확인',
+    );
   }
 }

@@ -25,6 +25,8 @@ class KidokListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Logger().d("index $index");
+    Logger().d("isSelectedList $isSelectedList");
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -45,8 +47,7 @@ class KidokListView extends StatelessWidget {
                 backgroundColor: Color(circleColor),
                 child: Text(
                   subject,
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

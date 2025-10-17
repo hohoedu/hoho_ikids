@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_레이어_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 248">
+  <defs>
+    <style>
+      .st0 {
+        fill: #000000;
+      }
+      .st1 {
+        fill: none;
+        stroke: #cf121b;
+        stroke-linecap: round;
+        stroke-miterlimit: 10;
+        stroke-width: .9px;
+      }
+    </style>
+  </defs>
+
+  <!-- 기존 path (class 추가됨) -->
+  <path d="M170,113.4c2.8-13.6,4.8-28.8,5.4-43.8h-99.6v-36.2h143.6c-.6,32.6-4.8,59.8-10,80h-39.4Z" class="st0"/>
+
+  <!-- polygon → path -->
+  <path d="M128 150.4H55V113.4H170H209.4H245V150.4H172H128Z" class="st0"/>
+
+  <!-- rect → path -->
+  <path d="M128 150.4H172V216.4H128V150.4Z" class="st0"/>
+
+  <path d="M280.2 31.6H420.6V66.4H280.2V31.6Z" class="st0"/>
+
+  <!-- polygon → path -->
+  <path d="M323.6 31.6V82.2H424V115.6H280.2V31.6H323.6Z" class="st0"/>
+
+  <path d="M328 164.4H255V128.4H445V164.4H372H328Z" class="st0"/>
+
+  <!-- rect → path -->
+  <path d="M328 164.4H372V216.4H328V164.4Z" class="st0"/>
+  <path class="st1" d="M90.1,56c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M70.9,137c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M149.2,137c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M302.6,54.3c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M302.6,68.1c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M270.5,150.3c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+  <path class="st1" d="M349,150.3c2.7,0,5-2.2,5-5s-2.2-5-5-5-5,2.2-5,5,2.3,5,5,5Z"/>
+</svg>
