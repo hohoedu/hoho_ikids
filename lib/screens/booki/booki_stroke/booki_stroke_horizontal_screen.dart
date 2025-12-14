@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
@@ -39,6 +40,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
   final Random random = Random();
 
   int strokeIndex = 0;
+  bool showImage = false;
 
   @override
   void initState() {
@@ -57,6 +59,35 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
     }
   }
 
+  Future<void> playAndWait(AudioPlayer player) async {
+    await player.play();
+
+    await player.processingStateStream.firstWhere(
+      (state) => state == ProcessingState.completed,
+    );
+  }
+
+  Future<void> _playSoundAndShowImage(String url, String url2) async {
+    final int actionIndex = currentIndex;
+
+    try {
+      await _audioPlayer.setUrl(url);
+
+      await playAndWait(_audioPlayer);
+
+      if (mounted && currentIndex == actionIndex) {
+        setState(() {
+          showImage = true;
+        });
+
+        await _audioPlayer.setUrl(url2);
+        _audioPlayer.play();
+      }
+    } catch (e) {
+      Logger().e("Error playing sound: $e");
+    }
+  }
+
   void _updateNote() {
     setState(() {
       isPointerShown = true;
@@ -66,6 +97,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
 
   void _onNextWord() {
     setState(() {
+      showImage = false;
       _onResetTracing();
       currentIndex = (currentIndex + 1) % strokeData.bookiStrokeDataList.length;
       _updateNote();
@@ -74,6 +106,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
 
   void _onPrevWord() {
     setState(() {
+      showImage = false;
       _onResetTracing();
       currentIndex = (currentIndex - 1 + strokeData.bookiStrokeDataList.length) % strokeData.bookiStrokeDataList.length;
       _updateNote();
@@ -85,8 +118,14 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
       isPointerShown = false;
     });
     totalCompletedIndex++;
-    _playSound(strokeData.bookiStrokeDataList[currentIndex].voicePath);
-
+    if (widget.keyCode.substring(2, 4) == '10') {
+      _playSoundAndShowImage(
+        strokeData.bookiStrokeDataList[currentIndex].voicePath,
+        strokeData.bookiStrokeDataList[currentIndex].sentenceVoice,
+      );
+    } else {
+      _playSound(strokeData.bookiStrokeDataList[currentIndex].voicePath);
+    }
     if (totalCompletedIndex >= strokeData.bookiStrokeDataList.length) {
       starUpdateService('write', widget.keyCode);
       Future.delayed(const Duration(seconds: 1), () {
@@ -183,13 +222,43 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
                     Expanded(
                       flex: 10,
                       child: ClipRect(
-                        child: BookiStrokeHorizontalWord(
-                          strokeController: strokeData,
-                          currentIndex: currentIndex,
-                          resetNotifier: resetNotifier,
-                          onComplete: _completeWord,
-                          isPointerShown: isPointerShown,
-                          strokeColor: bookiStrokeColors[strokeIndex],
+                        child: Stack(
+                          children: [
+                            BookiStrokeHorizontalWord(
+                              strokeController: strokeData,
+                              currentIndex: currentIndex,
+                              resetNotifier: resetNotifier,
+                              onComplete: _completeWord,
+                              isPointerShown: isPointerShown,
+                              strokeColor: bookiStrokeColors[strokeIndex],
+                            ),
+                            (widget.keyCode.toString().substring(2, 4) == '10')
+                                ? Positioned(
+                                    top: 0, 
+                                    left: 60,
+                                    bottom: 30,
+                                    right: 0,
+                                    child: IgnorePointer(
+                                      child: AnimatedOpacity(
+                                        duration: showImage ? const Duration(milliseconds: 600) : Duration.zero,
+                                        curve: Curves.easeOut,
+                                        opacity: showImage ? 1 : 0,
+                                        child: AnimatedScale(
+                                          duration: showImage ? const Duration(milliseconds: 600) : Duration.zero,
+                                          curve: Curves.easeOutBack,
+                                          scale: showImage ? 1 : 0,
+                                          child: Image.network(
+                                            strokeData.bookiStrokeDataList[currentIndex].pngPath,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : const IgnorePointer(
+                                    child: SizedBox.shrink(),
+                                  ),
+                          ],
                         ),
                       ),
                     ),
@@ -203,27 +272,25 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
                               child: GestureDetector(
                                 onTap: _onPrevWord,
                                 child: currentIndex > 0
-                                    ?  Icon(Icons.skip_previous, size: screenWidth >= 1000 ? 100:  46, color: fontWhite)
+                                    ? Icon(Icons.skip_previous, size: screenWidth >= 1000 ? 100 : 46, color: fontWhite)
                                     : const SizedBox.shrink(),
                               ),
                             ),
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  Logger().d('클릭');
                                   _onResetTracing();
                                 },
-                                child:  Icon(Icons.refresh, size: screenWidth >= 1000 ? 100:  46, color: fontWhite),
+                                child: Icon(Icons.refresh, size: screenWidth >= 1000 ? 100 : 46, color: fontWhite),
                               ),
                             ),
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  Logger().d('넥스트 버튼');
                                   _onNextWord();
                                 },
                                 child: (strokeData.bookiStrokeDataList.length - 1) > currentIndex
-                                    ? Icon(Icons.skip_next, size: screenWidth >= 1000 ? 100:  46, color: fontWhite)
+                                    ? Icon(Icons.skip_next, size: screenWidth >= 1000 ? 100 : 46, color: fontWhite)
                                     : const SizedBox.shrink(),
                               ),
                             ),

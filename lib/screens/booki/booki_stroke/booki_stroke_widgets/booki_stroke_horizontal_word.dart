@@ -78,7 +78,7 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
     });
   }
 
-  // 배포용 에셋에서 svg가져오기
+  // 개발용 에셋에서 svg가져오기
   Future<void> _loadSvgFromAssets(Size canvasSize, int currentIndex) async {
     try {
       // final svgData = await rootBundle.loadString('assets/images/shoes.svg');
@@ -138,7 +138,7 @@ class _BookiStrokeHorizontalWordState extends State<BookiStrokeHorizontalWord> {
   // 배포용 서버에서 svg가져오기
   Future<void> _loadSvgFromServer(Size canvasSize, int currentIndex) async {
     try {
-      final response = await Dio().get(widget.strokeController.bookiStrokeDataList[currentIndex].imagePath);
+      final response = await Dio().get(widget.strokeController.bookiStrokeDataList[currentIndex].svgPath);
 
       final svgData = response.data!;
 

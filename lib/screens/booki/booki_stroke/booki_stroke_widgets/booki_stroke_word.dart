@@ -153,7 +153,7 @@ class _BookiStrokeWordState extends State<BookiStrokeWord> {
 
   Future<void> _loadSvgPathFromServer(Size size, int currentIndex) async {
     try {
-      final response = await Dio().get(widget.strokeController.bookiStrokeDataList[currentIndex].imagePath);
+      final response = await Dio().get(widget.strokeController.bookiStrokeDataList[currentIndex].svgPath);
       if (response.statusCode == 200) {
         final svgData = response.data;
         final st0PathData = SvgPathParser.getPathsByClassFromData(svgData, 'st0');

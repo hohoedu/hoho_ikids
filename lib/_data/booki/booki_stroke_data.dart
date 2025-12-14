@@ -3,20 +3,26 @@ import 'package:logger/logger.dart';
 
 class BookiStrokeData {
   final String phonetic;
-  final String imagePath;
+  final String svgPath;
   final String voicePath;
+  final String sentenceVoice;
+  final String pngPath;
 
   BookiStrokeData({
     required this.phonetic,
-    required this.imagePath,
+    required this.svgPath,
     required this.voicePath,
+    required this.sentenceVoice,
+    required this.pngPath,
   });
 
   factory BookiStrokeData.fromJson(Map<String, dynamic> json) {
     return BookiStrokeData(
       phonetic: json['note'],
-      imagePath: json['imgpath'],
+      svgPath: json['imgpath'],
       voicePath: json['voice'],
+      sentenceVoice: json['voice'].toString().replaceAll('.mp3', '_2.mp3'),
+      pngPath: json['pngimgpath'],
     );
   }
 }

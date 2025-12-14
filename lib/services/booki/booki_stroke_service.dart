@@ -24,7 +24,6 @@ Future<void> bookiStrokeService(id, String keyCode, year) async {
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-Logger().d(response);
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
@@ -39,7 +38,6 @@ Logger().d(response);
         if (keyNum >= 8) {
           final random = Random();
           final List<BookiStrokeData> randomEight = List.from(bookiStrokeDataList)..shuffle(random);
-          Logger().d(randomEight.take(8).toList());
           bookiStrokeDataController.setBookiStrokeDataList(randomEight.take(8).toList());
         } else {
           bookiStrokeDataController.setBookiStrokeDataList(bookiStrokeDataList);

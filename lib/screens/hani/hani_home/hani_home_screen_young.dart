@@ -20,6 +20,7 @@ import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/new_kidok_button.dart';
 import 'package:hani_booki/widgets/new_star_count.dart';
+import 'package:logger/logger.dart';
 
 class HaniHomeScreenYoung extends StatefulWidget {
   final String keyCode;
@@ -61,6 +62,7 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
 
   @override
   Widget build(BuildContext context) {
+    Logger().d('keyCode = ${widget.keyCode}');
     final haniData = haniHomeData.haniHomeData;
     String id = userData.userData!.id;
     String year = userData.userData!.year;

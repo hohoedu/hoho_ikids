@@ -136,7 +136,7 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
                               ),
                             ],
                           ),
-                          // 아랫줄 컨텐츠 2개
+                          // 아랫줄 컨텐츠 4개
                           Row(
                             children: [
                               HaniContents(

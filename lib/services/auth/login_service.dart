@@ -41,7 +41,7 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
         if (!isManager) {
-          // await getToken(id);
+          await getToken(id);
         }
         if (isAutoLoginChecked) {
           await storage.write(key: 'user_id', value: id);

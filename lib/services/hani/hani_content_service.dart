@@ -35,7 +35,7 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
       if (resultValue == "0000") {
         haniHomeController.setHaniHomeDataMap(resultList['data']);
         await totalStarService(keyCode);
-        if (keyCode.substring(3, 4) == '5') {
+        if (keyCode.substring(3, 4) == '5' || keyCode.substring(3, 4) == '0') {
           if (keyCode.substring(0, 1) == 'Y') {
             Get.to(() => HaniHomeScreenYoung(keyCode: keyCode));
             return;

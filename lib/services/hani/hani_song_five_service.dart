@@ -23,7 +23,7 @@ Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
     'yy': year,
     'hosu': hosu,
   };
-  Logger().d(requestData);
+  Logger().d("requestData=$requestData");
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
   Logger().d(response);
@@ -34,9 +34,9 @@ Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
 
       // 응답 결과가 있는 경우
       if (responseData['result'] == "0000") {
-        if(responseData['han'] != null){
+        if (responseData['han'] != null) {
           Get.to(
-                () => VideoScreen(
+            () => VideoScreen(
               content: 'han',
               videoId: responseData['han'],
               keyCode: keyCode,
