@@ -11,6 +11,7 @@ class UserData {
   final String parentTel;
   final String siblingCount;
   final String userType;
+  final String parentName;
 
   UserData({
     required this.id,
@@ -21,6 +22,7 @@ class UserData {
     required this.parentTel,
     required this.siblingCount,
     required this.userType,
+    required this.parentName,
   });
 
   UserData.fromJson(Map<String, dynamic> json, this.id)
@@ -30,7 +32,8 @@ class UserData {
         year = json['yy'] ?? '',
         parentTel = json['ptel'] ?? '',
         siblingCount = json['ptelcnt'] == '' ? '0' : json['ptelcnt'],
-        userType = json['user_gb'];
+        userType = json['user_gb'],
+        parentName = json['pname'] ?? '';
 
   UserData copyWith({
     String? id,
@@ -41,6 +44,7 @@ class UserData {
     String? parentTel,
     String? siblingCount,
     String? userType,
+    String? parentName,
   }) {
     return UserData(
       id: id ?? this.id,
@@ -51,6 +55,7 @@ class UserData {
       parentTel: parentTel ?? this.parentTel,
       siblingCount: siblingCount ?? this.siblingCount,
       userType: userType ?? this.userType,
+      parentName: parentName ?? this.parentName,
     );
   }
 }
@@ -92,6 +97,7 @@ class UserDataController extends GetxController {
         parentTel: '',
         siblingCount: '',
         userType: '',
+        parentName: '',
       );
     }
     update();

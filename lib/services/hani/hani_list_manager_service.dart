@@ -12,9 +12,9 @@ Future<void> haniListManagerService(schoolId, year) async {
   String url = dotenv.get('M_HANI_EBOOK_LIST_URL');
   final userHaniController = Get.put(UserHaniDataController(),permanent: true);
   final Map<String, dynamic> requestData = {
-    'schoolid': schoolId,
-    'yy': year,
+    'schoolid': schoolId,    'yy': year,
   };
+
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));

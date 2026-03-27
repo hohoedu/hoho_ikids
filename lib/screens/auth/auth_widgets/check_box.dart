@@ -20,11 +20,12 @@ class _JoinCheckBoxState extends State<JoinCheckBox> {
   bool isChecked1 = false;
   bool isChecked2 = false;
   bool isChecked3 = false;
+  bool isChecked4 = false;
 
   final JoinController joinController = Get.find<JoinController>();
 
   void updateJoinDTOCheckBoxes() {
-    joinController.updateCheckBoxes(isChecked1, isChecked2, isChecked3);
+    joinController.updateCheckBoxes(isChecked1, isChecked2, isChecked3, isChecked4);
   }
 
   @override
@@ -44,6 +45,7 @@ class _JoinCheckBoxState extends State<JoinCheckBox> {
                 isChecked1 = value;
                 isChecked2 = value;
                 isChecked3 = value;
+                isChecked4 = value;
               });
               updateJoinDTOCheckBoxes();
             },
@@ -51,7 +53,6 @@ class _JoinCheckBoxState extends State<JoinCheckBox> {
           ),
         ),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.3,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -64,7 +65,7 @@ class _JoinCheckBoxState extends State<JoinCheckBox> {
                         FocusScope.of(context).unfocus();
                         setState(() {
                           isChecked1 = value!;
-                          isAllChecked = isChecked1 && isChecked2 && isChecked3;
+                          isAllChecked = isChecked1 && isChecked2 && isChecked4;
                         });
                         updateJoinDTOCheckBoxes();
                       },
@@ -91,7 +92,7 @@ class _JoinCheckBoxState extends State<JoinCheckBox> {
                     onChanged: (value) {
                       setState(() {
                         isChecked2 = value!;
-                        isAllChecked = isChecked1 && isChecked2 && isChecked3;
+                        isAllChecked = isChecked1 && isChecked2 && isChecked4;
                       });
                       updateJoinDTOCheckBoxes();
                     },
@@ -114,12 +115,40 @@ class _JoinCheckBoxState extends State<JoinCheckBox> {
                 Padding(
                   padding: const EdgeInsets.only(left: 64.0),
                   child: CustomCheckBox(
+                    text: '개인정보 수집 및 이용에 관한 동의(필수)',
+                    isChecked: isChecked4,
+                    onChanged: (value) {
+                      setState(() {
+                        isChecked4 = value!;
+                        isAllChecked = isChecked1 && isChecked2 && isChecked4;
+                      });
+                      updateJoinDTOCheckBoxes();
+                    },
+                    onTap: (p0) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      showTermsDialog(
+                        context,
+                        title: '개인정보 수집 및 이용에 관한 동의',
+                        assetTextPath: 'assets/text/privacy_terms.txt',
+                        onConfirmed: () {
+                          setState(() {
+                            isChecked4 = true;
+                          });
+                          updateJoinDTOCheckBoxes();
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 64.0),
+                  child: CustomCheckBox(
                       text: '마케팅 활용에 대한 동의(선택)',
                       isChecked: isChecked3,
                       onChanged: (value) {
                         setState(() {
                           isChecked3 = value!;
-                          isAllChecked = isChecked1 && isChecked2 && isChecked3;
+                          isAllChecked = isChecked1 && isChecked2 && isChecked4;
                         });
                         updateJoinDTOCheckBoxes();
                       },

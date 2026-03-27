@@ -17,12 +17,10 @@ class JoinOnceVerificationScreen extends StatefulWidget {
   const JoinOnceVerificationScreen({super.key});
 
   @override
-  State<JoinOnceVerificationScreen> createState() =>
-      _JoinOnceVerificationScreenState();
+  State<JoinOnceVerificationScreen> createState() => _JoinOnceVerificationScreenState();
 }
 
-class _JoinOnceVerificationScreenState
-    extends State<JoinOnceVerificationScreen> {
+class _JoinOnceVerificationScreenState extends State<JoinOnceVerificationScreen> {
   final TextEditingController code1Controller = TextEditingController();
   final FocusNode code1FocusNode = FocusNode();
 
@@ -30,8 +28,7 @@ class _JoinOnceVerificationScreenState
 
   bool isCode1Verified = false;
 
-  Future<void> _verifyCode(
-      TextEditingController controller, bool isCode1) async {
+  Future<void> _verifyCode(TextEditingController controller, bool isCode1) async {
     FocusScope.of(context).unfocus();
     if (controller.text.isNotEmpty) {
       bool isVerified = await joinCodeService(controller);
@@ -85,7 +82,8 @@ class _JoinOnceVerificationScreenState
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        '기관에서 안내받으신 코드를 입력해 주세요',
+                        '기관에서 안내받으신\n가입코드를 입력해 주세요.',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: fontMain,
                           fontSize: 24,
@@ -100,11 +98,7 @@ class _JoinOnceVerificationScreenState
                       padding: EdgeInsets.all(4.0),
                       child: Text(
                         '',
-                        style: TextStyle(
-                            color: fontSub,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2),
+                        style: TextStyle(color: fontSub, fontSize: 12, fontWeight: FontWeight.bold, height: 1.2),
                       ),
                     ),
                   ),
@@ -162,8 +156,7 @@ class _JoinOnceVerificationScreenState
                         );
                       } else {
                         JoinController joinController = Get.find();
-                        joinController.updateClassCodes(
-                            code1Controller.text, '');
+                        joinController.updateClassCodes(code1Controller.text, '');
                         Get.to(() => JoinUserInfoScreen());
                       }
                     },

@@ -29,8 +29,7 @@ class _LegacyOnceUserScreenState extends State<LegacyOnceUserScreen> {
 
   bool isCode1Verified = false;
 
-  Future<void> _verifyCode(
-      TextEditingController controller, bool isCode1) async {
+  Future<void> _verifyCode(TextEditingController controller, bool isCode1) async {
     if (controller.text.isNotEmpty) {
       bool isVerified = await joinCodeService(controller);
       if (isVerified) {
@@ -81,7 +80,8 @@ class _LegacyOnceUserScreenState extends State<LegacyOnceUserScreen> {
                 children: [
                   const Center(
                     child: Text(
-                      '기관에서 안내받으신\n가입 코드를 입력해주세요',
+                      '기관에서 안내받으신\n가입 코드를 입력해주세요.',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: fontMain,
                         fontSize: 24,

@@ -4,7 +4,7 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/join_dto.dart';
 import 'package:hani_booki/_data/auth/join_user_data.dart';
 import 'package:hani_booki/screens/auth/auth_widgets/auth_button.dart';
-import 'package:hani_booki/screens/auth/join_widgets/join_phone_screen.dart';
+import 'package:hani_booki/screens/auth/join_widgets/join_parent_screen.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/custom_text_field.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -125,7 +125,7 @@ class JoinUserInfoScreen extends StatelessWidget {
                           ),
                           confirmOnTap: () {
                             Get.back();
-                            Get.to(() => const JoinPhoneScreen());
+                            Get.to(() => const JoinParentScreen());
                           },
                           cancelOnTap: () {},
                           confirmButtonText: '맞아요',

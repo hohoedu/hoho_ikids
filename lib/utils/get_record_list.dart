@@ -23,10 +23,14 @@ Future<void> getRecordList(String keyCode, String type) async {
 
   if (type == 'hani') {
     final haniData = Get.find<UserHaniDataController>();
-    section2 = haniData.userHaniDataList[0].section;
+    if (haniData.userHaniDataList.isNotEmpty) {
+      section2 = haniData.userHaniDataList.first.section;
+    }
   } else {
     final bookiData = Get.find<UserBookiDataController>();
-    section2 = bookiData.userBookiDataList[0].section;
+    if (bookiData.userBookiDataList.isNotEmpty) {
+      section2 = bookiData.userBookiDataList.first.section;
+    }
   }
 
   final Map<String, dynamic> requestData = {

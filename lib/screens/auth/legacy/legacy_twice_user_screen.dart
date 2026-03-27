@@ -32,8 +32,7 @@ class _LegacyTwiceUserScreenState extends State<LegacyTwiceUserScreen> {
   bool isCode1Verified = false;
   bool isCode2Verified = false;
 
-  Future<void> _verifyCode(
-      TextEditingController controller, bool isCode1) async {
+  Future<void> _verifyCode(TextEditingController controller, bool isCode1) async {
     if (controller.text.isNotEmpty) {
       bool isVerified = await joinCodeService(controller);
       if (isVerified) {
@@ -74,167 +73,173 @@ class _LegacyTwiceUserScreenState extends State<LegacyTwiceUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Scaffold(
-          extendBodyBehindAppBar: true,
-          backgroundColor: mBackAuth,
-          appBar: MainAppBar(
-            title: ' ',
-            isContent: false,
-          ),
-          body: Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: SingleChildScrollView(
-                physics: NeverScrollableScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Center(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: mBackAuth,
+        appBar: MainAppBar(
+          title: ' ',
+          isContent: false,
+        ),
+        body: Center(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.5,
+            child: SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: Text(
-                        '기관에서 안내받으신\n코드를 입력해주세요',
+                        '기관에서 안내받으신\n가입코드를 입력해 주세요.',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: fontMain,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          height: 1.2,
                         ),
                       ),
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 8,
-                          child: CustomTextField(
-                            controller: code1Controller,
-                            focusNode: code1FocusNode,
-                            hintText: '가입 코드',
-                            isObscure: false,
-                            suffix: isCode1Verified
-                                ? code1Controller.text.isNotEmpty
-                                    ? ' '
-                                    : null
-                                : null,
+                  ),
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(4.0),
+                      child: Text(
+                        '* 안내받으신 코드를 모두 입력해 주세요.',
+                        style: TextStyle(color: fontSub, fontSize: 12, fontWeight: FontWeight.bold, height: 1.2),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 8,
+                        child: CustomTextField(
+                          controller: code1Controller,
+                          focusNode: code1FocusNode,
+                          hintText: '가입 코드',
+                          isObscure: false,
+                          suffix: isCode1Verified
+                              ? code1Controller.text.isNotEmpty
+                                  ? ' '
+                                  : null
+                              : null,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: SizedBox(
+                            height: 50,
+                            child: VerifyButton(
+                              onTap: () async {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                if (code2Controller.text.isNotEmpty &&
+                                    code1Controller.text.substring(5, 6) == code2Controller.text.substring(5, 6)) {
+                                  oneButtonDialog(
+                                    title: '회원가입',
+                                    content: '가입 코드는 중복될 수 없습니다.',
+                                    onTap: () => Get.back(),
+                                    buttonText: '확인',
+                                  );
+                                  code1Controller.text = ''; // code1 초기화
+                                } else {
+                                  // 그렇지 않으면 code1을 검증한다.
+                                  await _verifyCode(code1Controller, true);
+                                }
+                              },
+                              text: '인증',
+                              controller: code1Controller,
+                            ),
                           ),
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: Center(
-                            child: SizedBox(
-                              height: 50,
-                              child: VerifyButton(
-                                onTap: () async {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  if (code2Controller.text.isNotEmpty &&
-                                      code1Controller.text.substring(5, 6) ==
-                                          code2Controller.text
-                                              .substring(5, 6)) {
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 8,
+                        child: CustomTextField(
+                          controller: code2Controller,
+                          focusNode: code2FocusNode,
+                          hintText: '가입 코드',
+                          isObscure: false,
+                          suffix: isCode2Verified
+                              ? code2Controller.text.isNotEmpty
+                                  ? ' '
+                                  : null
+                              : null,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: SizedBox(
+                            height: 50,
+                            child: VerifyButton(
+                              onTap: () async {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                if (code1Controller.text.isNotEmpty && code2Controller.text.isNotEmpty) {
+                                  if (code1Controller.text.substring(5, 6).toUpperCase() ==
+                                      code2Controller.text.substring(5, 6).toUpperCase()) {
                                     oneButtonDialog(
                                       title: '회원가입',
                                       content: '가입 코드는 중복될 수 없습니다.',
                                       onTap: () => Get.back(),
                                       buttonText: '확인',
                                     );
-                                    code1Controller.text = ''; // code1 초기화
-                                  } else {
-                                    // 그렇지 않으면 code1을 검증한다.
-                                    await _verifyCode(code1Controller, true);
-                                  }
-                                },
-                                text: '인증',
-                                controller: code1Controller,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 8,
-                          child: CustomTextField(
-                            controller: code2Controller,
-                            focusNode: code2FocusNode,
-                            hintText: '가입 코드',
-                            isObscure: false,
-                            suffix: isCode2Verified
-                                ? code2Controller.text.isNotEmpty
-                                    ? ' '
-                                    : null
-                                : null,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Center(
-                            child: SizedBox(
-                              height: 50,
-                              child: VerifyButton(
-                                onTap: () async {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-                                  if (code1Controller.text.isNotEmpty &&
-                                      code2Controller.text.isNotEmpty) {
-                                    if (code1Controller.text.substring(5, 6).toUpperCase() ==
-                                        code2Controller.text.substring(5, 6).toUpperCase()) {
-                                      oneButtonDialog(
-                                        title: '회원가입',
-                                        content: '가입 코드는 중복될 수 없습니다.',
-                                        onTap: () => Get.back(),
-                                        buttonText: '확인',
-                                      );
-                                      code2Controller.text = '';
-                                    } else {
-                                      await _verifyCode(code2Controller, false);
-                                    }
+                                    code2Controller.text = '';
                                   } else {
                                     await _verifyCode(code2Controller, false);
                                   }
-                                },
-                                text: '인증',
-                                controller: code2Controller,
-                              ),
+                                } else {
+                                  await _verifyCode(code2Controller, false);
+                                }
+                              },
+                              text: '인증',
+                              controller: code2Controller,
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                    AuthButton(
-                      onTap: () async {
-                        if (!isCode1Verified) {
-                          oneButtonDialog(
-                            title: '회원가입',
-                            content: '가입 코드를 입력하고 인증을 완료해주세요.',
-                            onTap: () => Get.back(),
-                            buttonText: '확인',
-                          );
-                        } else if (code2Controller.text.isNotEmpty &&
-                            !isCode2Verified) {
-                          oneButtonDialog(
-                            title: '회원가입',
-                            content: '인증을 완료해주세요.',
-                            onTap: () => Get.back(),
-                            buttonText: '확인',
-                          );
-                        } else {
-                          await legacyUserService(
-                            id: widget.id,
-                            classCode1: code1Controller.text,
-                            classCode2: code2Controller.text,
-                            isAutoLoginChecked: widget.isAutoLoginChecked,
-                          );
-                        }
-                      },
-                      text: '코드 등록하기',
-                    ),
-                  ],
-                ),
+                        ),
+                      )
+                    ],
+                  ),
+                  AuthButton(
+                    onTap: () async {
+                      if (!isCode1Verified) {
+                        oneButtonDialog(
+                          title: '회원가입',
+                          content: '가입 코드를 입력하고 인증을 완료해주세요.',
+                          onTap: () => Get.back(),
+                          buttonText: '확인',
+                        );
+                      } else if (code2Controller.text.isNotEmpty && !isCode2Verified) {
+                        oneButtonDialog(
+                          title: '회원가입',
+                          content: '인증을 완료해주세요.',
+                          onTap: () => Get.back(),
+                          buttonText: '확인',
+                        );
+                      } else {
+                        await legacyUserService(
+                          id: widget.id,
+                          classCode1: code1Controller.text,
+                          classCode2: code2Controller.text,
+                          isAutoLoginChecked: widget.isAutoLoginChecked,
+                        );
+                      }
+                    },
+                    text: '코드 등록하기',
+                  ),
+                ],
               ),
             ),
           ),

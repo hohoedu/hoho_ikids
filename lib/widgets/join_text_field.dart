@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hani_booki/_core/colors.dart';
 
-class CustomTextField extends StatefulWidget {
+class JoinTextField extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final String hintText;
@@ -17,7 +18,7 @@ class CustomTextField extends StatefulWidget {
   final bool? isKoreanOnly;
   final bool? isUserId;
 
-  const CustomTextField({
+  const JoinTextField({
     super.key,
     required this.controller,
     required this.focusNode,
@@ -34,15 +35,16 @@ class CustomTextField extends StatefulWidget {
   });
 
   @override
-  State<CustomTextField> createState() => _CustomTextFieldState();
+  State<JoinTextField> createState() => _JoinTextFieldState();
 }
 
-class _CustomTextFieldState extends State<CustomTextField> {
-  String? _errorText;
-
+class _JoinTextFieldState extends State<JoinTextField> {
   @override
   void initState() {
     super.initState();
+    if (widget.isNumberField == true) {
+      widget.controller.text = "010";
+    }
   }
 
   String formatPhoneNumber(String input) {
@@ -54,7 +56,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
       });
     }
     if (numbers.length > 8) {
-      numbers = numbers.replaceFirstMapped(RegExp(r'(\d{3})-(\d{4})(\d+)'), (match) {
+      numbers =
+          numbers.replaceFirstMapped(RegExp(r'(\d{3})-(\d{4})(\d+)'), (match) {
         return '${match[1]}-${match[2]}-${match[3]}';
       });
     }
@@ -69,24 +72,31 @@ class _CustomTextFieldState extends State<CustomTextField> {
         children: [
           Center(
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
+              width: MediaQuery.of(context).size.width * 0.35,
               height: 50,
               child: TextField(
                 controller: widget.controller,
                 focusNode: widget.focusNode,
                 cursorColor: fontMain,
-                maxLength: widget.isNumberField == true ? 11 : (widget.hintText == '아이디' ? 50 : 50),
-                keyboardType: widget.isNumberField == true ? TextInputType.number : TextInputType.text,
+                maxLength: widget.isNumberField == true
+                    ? 11
+                    : (widget.hintText == '아이디' ? 50 : 50),
+                keyboardType: widget.isNumberField == true
+                    ? TextInputType.number
+                    : TextInputType.text,
                 inputFormatters: widget.isNumberField == true
                     ? [FilteringTextInputFormatter.digitsOnly]
                     : widget.isKoreanOnly == true
                         ? [
-                            FilteringTextInputFormatter.allow(
-                                RegExp(r'[ㄱ-ㅎㅏ-ㅣ가-힣\u3130-\u318F\uAC00-\uD7A3\u119E\u119E\u11A2\u11A2]'))
+                            FilteringTextInputFormatter.allow(RegExp(
+                                r'[ㄱ-ㅎㅏ-ㅣ가-힣\u3130-\u318F\uAC00-\uD7A3\u119E\u119E\u11A2\u11A2]'))
                           ]
-                        // : widget.isUserId == true
-                        //     ? [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]'))]
-                        : [],
+                        : widget.isUserId == true
+                            ? [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-Z0-9]'))
+                              ]
+                            : [],
                 decoration: InputDecoration(
                   hintText: widget.hintText,
                   hintStyle: const TextStyle(color: fontGrey),
@@ -118,25 +128,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     String formattedText = formatPhoneNumber(text);
                     widget.controller.value = TextEditingValue(
                       text: formattedText,
-                      selection: TextSelection.collapsed(offset: formattedText.length),
+                      selection:
+                          TextSelection.collapsed(offset: formattedText.length),
                     );
                   }
-
-                  if (widget.isUserId == true) {
-                    final hasInvalidChar = text.contains(RegExp(r'[^a-zA-Z0-9]'));
-                    setState(() {
-                      _errorText = hasInvalidChar ? '영어와 숫자만 입력해주세요.' : null;
-                    });
-                    // 한글 입력 시 제거
-                    if (hasInvalidChar) {
-                      final cleaned = text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
-                      widget.controller.value = TextEditingValue(
-                        text: cleaned,
-                        selection: TextSelection.collapsed(offset: cleaned.length),
-                      );
-                    }
-                  }
-
                   if (text.isNotEmpty) {
                     widget.onFocusLost?.call('');
                   }
@@ -145,20 +140,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
               ),
             ),
           ),
-          if (_errorText != null)
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                '* $_errorText',
-                style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-            )
-          else if (widget.completeText != null && widget.completeText!.isNotEmpty)
+          if (widget.completeText != null && widget.completeText!.isNotEmpty)
             Align(
               alignment: Alignment.bottomLeft,
               child: Text(
                 '* ${widget.completeText}',
-                style: TextStyle(color: widget.messageColor, fontSize: 12, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: widget.messageColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold),
               ),
             ),
         ],

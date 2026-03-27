@@ -96,7 +96,7 @@ class _JoinTwiceVerificationScreenState extends State<JoinTwiceVerificationScree
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        '기관에서 안내받으신 코드를 입력해 주세요',
+                        '기관에서 안내받으신 가입코드를 입력해 주세요.',
                         style: TextStyle(
                           color: fontMain,
                           fontSize: 24,
@@ -152,7 +152,8 @@ class _JoinTwiceVerificationScreenState extends State<JoinTwiceVerificationScree
                                           code2Controller.text.substring(5, 6).toUpperCase()) {
                                     oneButtonDialog(
                                       title: '회원가입',
-                                      content: '가입 코드는 중복될 수 없습니다.',
+                                      content: '형제·자매가 함께 이용할 경우 아이마다 각각 가입이 필요합니다.\n'
+                                          '또한 동일한 과목 코드는 한 계정에 중복 등록이 불가능합니다.',
                                       onTap: () => Get.back(),
                                       buttonText: '확인',
                                     );
@@ -203,7 +204,8 @@ class _JoinTwiceVerificationScreenState extends State<JoinTwiceVerificationScree
                                         code2Controller.text.substring(5, 6).toUpperCase()) {
                                       oneButtonDialog(
                                         title: '회원가입',
-                                        content: '가입 코드는 중복될 수 없습니다.',
+                                        content: '형제·자매가 함께 이용할 경우 아이마다 각각 가입이 필요합니다.\n'
+                                            '또한 동일한 과목 코드는 한 계정에 중복 등록이 불가능합니다.',
                                         onTap: () => Get.back(),
                                         buttonText: '확인',
                                       );

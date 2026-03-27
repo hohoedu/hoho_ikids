@@ -26,7 +26,6 @@ class JoinSelectVerificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger().d('loginCode = $loginCode');
     return Scaffold(
       backgroundColor: mBackAuth,
       extendBodyBehindAppBar: true,

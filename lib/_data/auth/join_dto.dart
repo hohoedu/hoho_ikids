@@ -7,7 +7,9 @@ class JoinDTO {
   final String password;
   final String? classCode1;
   final String? classCode2;
+  final String parentName;
   final String parentTel;
+  final String relation;
   final String? className;
   final String check1;
   final String check2;
@@ -20,7 +22,9 @@ class JoinDTO {
     this.password = '',
     this.classCode1,
     this.classCode2,
-    this.parentTel='',
+    this.parentTel = '',
+    this.parentName = '',
+    this.relation = '0',
     this.className,
     this.check1 = 'N',
     this.check2 = 'N',
@@ -35,7 +39,9 @@ class JoinDTO {
     String? classCode1,
     String? classCode2,
     String? className,
+    String? parentName,
     String? parentTel,
+    String? relation,
     String? check1,
     String? check2,
     String? check3,
@@ -48,7 +54,9 @@ class JoinDTO {
       classCode1: classCode1 ?? this.classCode1,
       classCode2: classCode2 ?? this.classCode2,
       className: className ?? this.className,
+      parentName: parentName ?? this.parentName,
       parentTel: parentTel ?? this.parentTel,
+      relation: relation ?? this.relation,
       check1: check1 ?? this.check1,
       check2: check2 ?? this.check2,
       check3: check3 ?? this.check3,
@@ -64,7 +72,9 @@ class JoinDTO {
       'pin': classCode1,
       'pin2': classCode2,
       'classname': className,
+      'pname': parentName,
       'ptel': parentTel,
+      'relationship': relation,
       'chk1': check1,
       'chk2': check2,
       'chk3': check3,
@@ -74,7 +84,9 @@ class JoinDTO {
 
   @override
   String toString() {
-    return 'JoinDto(id: $id, password: $password, username: $username, classCode1: $classCode1, classCode2: $classCode2, className: $className, parentTel: $parentTel, check1: $check1, check2: $check2, check3: $check3, check4: $check4)';
+    return 'JoinDto(id: $id, password: $password, username: $username, classCode1: $classCode1, classCode2: '
+        '$classCode2, className: $className, parentName: $parentName, parentTel: $parentTel, relation: $relation, '
+        'check1: $check1, check2: $check2, check3: $check3, check4: $check4)';
   }
 }
 
@@ -86,23 +98,23 @@ class JoinController extends GetxController {
   }
 
   void updateClassCodes(String classCode1, String classCode2) {
-    joinDTO.value =
-        joinDTO.value.copyWith(classCode1: classCode1, classCode2: classCode2);
+    joinDTO.value = joinDTO.value.copyWith(classCode1: classCode1, classCode2: classCode2);
   }
 
   void updateUsernameAndClassName(String username, String className) {
     joinDTO.value = joinDTO.value.copyWith(username: username, className: className);
   }
 
-  void updateParentTel(String parentTel) {
-    joinDTO.value = joinDTO.value.copyWith(parentTel: parentTel);
+  void updateParentInfo(String parentName, String parentTel, String relation) {
+    joinDTO.value = joinDTO.value.copyWith(parentName: parentName, parentTel: parentTel, relation: relation);
   }
 
-  void updateCheckBoxes(bool check1, bool check2, bool check3) {
+  void updateCheckBoxes(bool check1, bool check2, bool check3, bool check4) {
     joinDTO.value = joinDTO.value.copyWith(
       check1: check1 == true ? "Y" : "N",
       check2: check2 == true ? "Y" : "N",
       check3: check3 == true ? "Y" : "N",
+      check4: check4 == true ? "Y" : "N",
     );
   }
 }

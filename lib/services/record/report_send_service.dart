@@ -6,13 +6,16 @@ import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:logger/logger.dart';
 
-Future<Map<String, dynamic>?> reportReadService(String keyCode) async {
+// 학습 기록 상태
+Future<void> reportSendService(String keyCode, String hosu) async {
   final userData = Get.find<UserDataController>();
-  String url = dotenv.get('REPORT_READ_URL');
+  String url = dotenv.get('REPORT_SEND_URL');
+
   final Map<String, dynamic> requestData = {
     'id': userData.userData!.id,
-    'gamok': keyCode.substring(0, 1),
-    'yy': userData.userData!.year
+    'gamok': keyCode.substring(keyCode.length - 1),
+    'yy': userData.userData!.year,
+    'hosu': hosu
   };
 
   // HTTP POST 요청
@@ -20,12 +23,9 @@ Future<Map<String, dynamic>?> reportReadService(String keyCode) async {
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
-      final Map<String, dynamic> resultData = json.decode(response.data);
-
-      return {
-        'read_yn': resultData['read_yn'],
-        'hosu': resultData['hosu'],
-      };
+      final Map<String, dynamic> resultList = json.decode(response.data);
+      final resultValue = resultList['result'];
+      return;
     }
   }
 

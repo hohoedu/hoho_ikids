@@ -74,10 +74,14 @@ class _MainDrawerState extends State<MainDrawer> {
     bool isManager = userData.userData!.userType == 'M';
     String keyCode = '';
     if (widget.type == 'hani') {
-      keyCode = haniData.userHaniDataList[0].keyCode;
+      if (haniData.userHaniDataList.isNotEmpty) {
+        keyCode = haniData.userHaniDataList.first.keyCode;
+      }
     }
     if (widget.type == 'booki') {
-      keyCode = bookiData.userBookiDataList[0].keyCode;
+      if (bookiData.userBookiDataList.isNotEmpty) {
+        keyCode = bookiData.userBookiDataList.first.keyCode;
+      }
     }
 
     return Drawer(
@@ -145,6 +149,16 @@ class _MainDrawerState extends State<MainDrawer> {
                     GestureDetector(
                       onTap: () async {
                         Navigator.pop(context);
+                        if (keyCode.isEmpty) {
+                          oneButtonDialog(
+                            title: '학습기록',
+                            content: '확인 가능한 학습기록이 없습니다.',
+                            onTap: () {
+                              Get.back();
+                            },
+                            buttonText: '확인',
+                          );
+                        }
                         await getRecordList(keyCode, widget.type);
                         await contentStarService(keyCode, widget.type);
                         Get.to(() => RecordScreen(keyCode: keyCode, type: widget.type));
