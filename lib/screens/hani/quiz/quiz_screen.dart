@@ -4,10 +4,12 @@ import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_quiz_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/hani/hani_quiz_service.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/loading_screen.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -22,7 +24,7 @@ class QuizScreen extends StatefulWidget {
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateMixin {
+class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, StarEventMixin<QuizScreen> {
   final userData = Get.find<UserDataController>().userData;
   late List<String> answer;
   final bgmController = Get.find<BgmController>();
@@ -61,6 +63,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _preloadAllImages();
     });
+    initStarEventFromServer(btype: 'H', hosu: widget.keyCode.substring(2, 4), gb: 'quiz');
   }
 
   Future<void> _preloadAllImages() async {
@@ -123,11 +126,17 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
       _arrivedImage = true;
     });
 
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 1), () async {
       final lastIndex = quizData.haniQuizDataList.length - 1;
 
       if (currentIndex >= lastIndex) {
         starUpdateService('quiz', widget.keyCode);
+        final result = await missionSaveService(missionNum: 2, gb: 'quiz', keycode: widget.keyCode);
+
+        if (result.success) {
+          await showStampDialog(widget.keyCode);
+        }
+
         lottieDialog(
           onMain: () {
             Get.back();
@@ -170,8 +179,7 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
 
     _moveAnimation = Tween<Offset>(
       begin: Offset(startOffset.dx, startOffset.dy),
-      end: Offset(
-          endOffset.dx + (sizeTo.width - sizeFrom.width) / 2, endOffset.dy + (sizeTo.height - sizeFrom.height) / 2),
+      end: Offset(endOffset.dx + (sizeTo.width - sizeFrom.width) / 2, endOffset.dy + (sizeTo.height - sizeFrom.height) / 2),
     ).animate(CurvedAnimation(parent: _moveController, curve: Curves.easeInOut))
       ..addListener(animationListener);
 
@@ -270,88 +278,91 @@ class _QuizScreenState extends State<QuizScreen> with SingleTickerProviderStateM
         ),
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: Center(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: Column(
-            children: [
-              Spacer(flex: 1),
-              Expanded(
-                flex: 12,
-                child: AnimatedSwitcher(
-                  duration: Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Row(
-                      key: ValueKey(currentIndex),
-                      children: [
-                        Expanded(
-                          flex: screenWidth >= 1000 ? 3 : 2,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFCD55),
-                              borderRadius: BorderRadius.circular(25),
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: Column(
+                children: [
+                  Spacer(flex: 1),
+                  Expanded(
+                    flex: 12,
+                    child: AnimatedSwitcher(
+                      duration: Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Row(
+                          key: ValueKey(currentIndex),
+                          children: [
+                            Expanded(
+                              flex: screenWidth >= 1000 ? 3 : 2,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFCD55),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(2, (rowIndex) {
+                                      return Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                          child: Row(
+                                            children: List.generate(2, (colIndex) {
+                                              final idx = rowIndex * 2 + colIndex;
+                                              return Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                  child: (idx == 3) ? Container(key: _targetKey, child: _buildLeftGridCell(idx)) : _buildLeftGridCell(idx),
+                                                ),
+                                              );
+                                            }),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                            Expanded(
+                              flex: 1,
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(2, (rowIndex) {
+                                children: List.generate(2, (idx) {
+                                  if (_answeredCorrect) {
+                                    return const Expanded(child: SizedBox.shrink());
+                                  }
                                   return Expanded(
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                      child: Row(
-                                        children: List.generate(2, (colIndex) {
-                                          final idx = rowIndex * 2 + colIndex;
-                                          return Expanded(
-                                            child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                              child: (idx == 3)
-                                                  ? Container(key: _targetKey, child: _buildLeftGridCell(idx))
-                                                  : _buildLeftGridCell(idx),
-                                            ),
-                                          );
-                                        }),
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      child: GestureDetector(
+                                        onTap: () => _onAnswerTap(idx),
+                                        child: Image.network(
+                                          answer[idx],
+                                          key: _answerKeys[idx],
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     ),
                                   );
                                 }),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: List.generate(2, (idx) {
-                              if (_answeredCorrect) {
-                                return const Expanded(child: SizedBox.shrink());
-                              }
-                              return Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                  child: GestureDetector(
-                                    onTap: () => _onAnswerTap(idx),
-                                    child: Image.network(
-                                      answer[idx],
-                                      key: _answerKeys[idx],
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
-        ),
+          ...buildStarWidgets(),
+        ],
       ),
     );
   }

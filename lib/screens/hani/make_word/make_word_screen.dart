@@ -6,10 +6,12 @@ import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_make_word_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/hani/hani_make_word_service.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/loading_screen.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -26,7 +28,7 @@ class MakeWordScreen extends StatefulWidget {
   State<MakeWordScreen> createState() => _MakeWordScreenState();
 }
 
-class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStateMixin {
+class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStateMixin, StarEventMixin<MakeWordScreen> {
   final bgmController = Get.find<BgmController>();
   final makeWord = Get.find<HaniMakeWordDataController>();
   final userData = Get.find<UserDataController>().userData;
@@ -60,6 +62,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStat
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _preloadAllImages();
     });
+    initStarEventFromServer(btype: 'H', hosu: widget.keyCode.substring(2, 4), gb: 'workbook');
   }
 
   Future<void> _playSound(String url) async {
@@ -157,6 +160,12 @@ class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStat
       });
     } else {
       await starUpdateService('workbook', widget.keyCode);
+      final result = await missionSaveService(missionNum: 2, gb: 'workbook', keycode: widget.keyCode);
+
+      if (result.success) {
+        await showStampDialog(widget.keyCode);
+      }
+
       lottieDialog(
         onMain: () {
           Get.back();
@@ -225,182 +234,185 @@ class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStat
           ),
           onTapBackIcon: () => showBackDialog(false),
         ),
-        body: Center(
-          child: SizedBox(
-            width: screenWidth >= 1000
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.85,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Spacer(flex: 1),
-                Expanded(
-                  flex: 8,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        flex: 10,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 24.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 24.0, left: 16.0, right: 16.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: GestureDetector(
-                                        behavior: HitTestBehavior.translucent,
-                                        onTapDown: (details) {
-                                          setState(() {
-                                            _isPressed = true;
-                                          });
-                                        },
-                                        onTapUp: (details) {
-                                          setState(() {
-                                            _isPressed = false;
-                                          });
-                                        },
-                                        onTapCancel: () {
-                                          setState(() {
-                                            _isPressed = false;
-                                          });
-                                        },
-                                        onTap: () {
-                                          _playSound(makeWord.makeWordDataList[currentIndex].voice);
-                                        },
-                                        child: AnimatedScale(
-                                          scale: _isPressed ? 0.9 : 1.0,
-                                          duration: const Duration(milliseconds: 100),
-                                          curve: Curves.easeOut,
-                                          child: Image.asset('assets/images/icons/sound.png'),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 10,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 16.0),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(25),
-                                          child: Container(
-                                            color: Color(0xFFFEFACD),
-                                            child: Center(
-                                              child: Text(
-                                                makeWord.makeWordDataList[currentIndex].title,
-                                                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                                                textAlign: TextAlign.center,
-                                              ),
+        body: Stack(
+          children: [
+            Center(
+              child: SizedBox(
+                width: screenWidth >= 1000 ? MediaQuery.of(context).size.width * 0.9 : MediaQuery.of(context).size.width * 0.85,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Spacer(flex: 1),
+                    Expanded(
+                      flex: 8,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            flex: 10,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 24.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 24.0, left: 16.0, right: 16.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: GestureDetector(
+                                            behavior: HitTestBehavior.translucent,
+                                            onTapDown: (details) {
+                                              setState(() {
+                                                _isPressed = true;
+                                              });
+                                            },
+                                            onTapUp: (details) {
+                                              setState(() {
+                                                _isPressed = false;
+                                              });
+                                            },
+                                            onTapCancel: () {
+                                              setState(() {
+                                                _isPressed = false;
+                                              });
+                                            },
+                                            onTap: () {
+                                              _playSound(makeWord.makeWordDataList[currentIndex].voice);
+                                            },
+                                            child: AnimatedScale(
+                                              scale: _isPressed ? 0.9 : 1.0,
+                                              duration: const Duration(milliseconds: 100),
+                                              curve: Curves.easeOut,
+                                              child: Image.asset('assets/images/icons/sound.png'),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Stack(
-                                children: [
-                                  Align(
-                                    alignment: Alignment.center,
-                                    child: LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        return Row(
-                                          children: [
-                                            Expanded(
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(16.0),
-                                                child: ClipRRect(
-                                                  key: _firstPlaceholderKey,
-                                                  borderRadius: BorderRadius.circular(15),
-                                                  child: LayoutBuilder(
-                                                    builder: (context, constraints) {
-                                                      return firstIsPic
-                                                          ? _buildQuestionMarkContainer()
-                                                          : Image.network(
-                                                              firstUrl,
-                                                              fit: BoxFit.contain,
-                                                            );
-                                                    },
+                                        Expanded(
+                                          flex: 10,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 16.0),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(25),
+                                              child: Container(
+                                                color: Color(0xFFFEFACD),
+                                                child: Center(
+                                                  child: Text(
+                                                    makeWord.makeWordDataList[currentIndex].title,
+                                                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                                                    textAlign: TextAlign.center,
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                            Expanded(
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(16.0),
-                                                child: ClipRRect(
-                                                  key: _secondPlaceholderKey,
-                                                  borderRadius: BorderRadius.circular(15),
-                                                  child: secondIsPic
-                                                      ? _buildQuestionMarkContainer()
-                                                      : Image.network(
-                                                          secondUrl,
-                                                          fit: BoxFit.contain,
-                                                        ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Stack(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.center,
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            return Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(16.0),
+                                                    child: ClipRRect(
+                                                      key: _firstPlaceholderKey,
+                                                      borderRadius: BorderRadius.circular(15),
+                                                      child: LayoutBuilder(
+                                                        builder: (context, constraints) {
+                                                          return firstIsPic
+                                                              ? _buildQuestionMarkContainer()
+                                                              : Image.network(
+                                                                  firstUrl,
+                                                                  fit: BoxFit.contain,
+                                                                );
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
+                                                Expanded(
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(16.0),
+                                                    child: ClipRRect(
+                                                      key: _secondPlaceholderKey,
+                                                      borderRadius: BorderRadius.circular(15),
+                                                      child: secondIsPic
+                                                          ? _buildQuestionMarkContainer()
+                                                          : Image.network(
+                                                              secondUrl,
+                                                              fit: BoxFit.contain,
+                                                            ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        child: Image.asset(
+                                          'assets/images/icons/plus.png',
+                                          scale: 3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          !_hideChoices
+                              ? Expanded(
+                                  flex: 6,
+                                  child: GridView.count(
+                                    shrinkWrap: true,
+                                    crossAxisCount: 2,
+                                    padding: EdgeInsets.zero,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    children: List.generate(
+                                      choices.length,
+                                      (index) {
+                                        final choice = choices[index];
+                                        return KeyedSubtree(
+                                          key: _choiceKeys[index],
+                                          child: GestureDetector(
+                                            onTap: () => _onChoiceTap(index),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(25),
+                                                child: Image.network(choice['url']!, fit: BoxFit.cover),
                                               ),
                                             ),
-                                          ],
+                                          ),
                                         );
                                       },
                                     ),
                                   ),
-                                  Positioned(
-                                    top: 0,
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    child: Image.asset(
-                                      'assets/images/icons/plus.png',
-                                      scale: 3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                                )
+                              : Spacer(flex: 6),
+                        ],
                       ),
-                      !_hideChoices
-                          ? Expanded(
-                              flex: 6,
-                              child: GridView.count(
-                                shrinkWrap: true,
-                                crossAxisCount: 2,
-                                padding: EdgeInsets.zero,
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: List.generate(
-                                  choices.length,
-                                  (index) {
-                                    final choice = choices[index];
-                                    return KeyedSubtree(
-                                      key: _choiceKeys[index],
-                                      child: GestureDetector(
-                                        onTap: () => _onChoiceTap(index),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(25),
-                                            child: Image.network(choice['url']!, fit: BoxFit.cover),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            )
-                          : Spacer(flex: 6),
-                    ],
-                  ),
-                )
-              ],
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
+            ...buildStarWidgets(),
+          ],
         ),
       ),
     );
@@ -490,6 +502,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStat
   void dispose() {
     imageCache.clear();
     imageCache.clearLiveImages();
+    disposeStarEvent();
     super.dispose();
   }
 }

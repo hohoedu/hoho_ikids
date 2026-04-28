@@ -12,6 +12,7 @@ class UserData {
   final String siblingCount;
   final String userType;
   final String parentName;
+  final String character;
 
   UserData({
     required this.id,
@@ -23,6 +24,7 @@ class UserData {
     required this.siblingCount,
     required this.userType,
     required this.parentName,
+    this.character = 'hani',
   });
 
   UserData.fromJson(Map<String, dynamic> json, this.id)
@@ -33,7 +35,8 @@ class UserData {
         parentTel = json['ptel'] ?? '',
         siblingCount = json['ptelcnt'] == '' ? '0' : json['ptelcnt'],
         userType = json['user_gb'],
-        parentName = json['pname'] ?? '';
+        parentName = json['pname'] ?? '',
+        character = json['character'] ?? 'hani';
 
   UserData copyWith({
     String? id,
@@ -45,6 +48,7 @@ class UserData {
     String? siblingCount,
     String? userType,
     String? parentName,
+    String? character,
   }) {
     return UserData(
       id: id ?? this.id,
@@ -56,6 +60,7 @@ class UserData {
       siblingCount: siblingCount ?? this.siblingCount,
       userType: userType ?? this.userType,
       parentName: parentName ?? this.parentName,
+      character: character ?? this.character,
     );
   }
 }
@@ -69,6 +74,12 @@ class UserDataController extends GetxController {
   }
 
   UserData? get userData => _userData.value;
+
+  void updateCharacter(String character) {
+    if (_userData.value == null) return;
+    _userData.value = _userData.value!.copyWith(character: character);
+    update();
+  }
 
   void updateUserData({
     required String id,
@@ -89,16 +100,16 @@ class UserDataController extends GetxController {
     } else {
       // 기존 데이터가 없으면 새로 생성 (parentTel, siblingCount는 기본값으로 처리)
       _userData.value = UserData(
-        id: id,
-        username: username,
-        schoolId: schoolId,
-        schoolName: schoolName,
-        year: year,
-        parentTel: '',
-        siblingCount: '',
-        userType: '',
-        parentName: '',
-      );
+          id: id,
+          username: username,
+          schoolId: schoolId,
+          schoolName: schoolName,
+          year: year,
+          parentTel: '',
+          siblingCount: '',
+          userType: '',
+          parentName: '',
+          character: 'hani');
     }
     update();
   }

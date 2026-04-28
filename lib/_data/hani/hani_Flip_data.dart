@@ -19,8 +19,6 @@ class HaniFlipData {
     String backImagePath = frontImagePath.replaceFirst(RegExp(r'/f_card_'), '/b_card_');
     String frontVoicePath = json['voicepath'];
     String backVoicePath = frontVoicePath.replaceFirst(".mp3", "_2.mp3");
-    Logger().d('frontVoice $frontVoicePath');
-    Logger().d('backVoice $backVoicePath');
 
     return HaniFlipData(
         frontImagePath: frontImagePath,

@@ -2,7 +2,7 @@ name: hani_booki
 description: "호호하니&호호부키"
 publish_to: 'none'
 # 현재 버전
-version: 1.0.32+46
+version: 1.0.35+50
 
 environment:
   sdk: ^3.5.4
@@ -83,6 +83,9 @@ flutter:
     - assets/images/records/
     - assets/images/temp/
     - assets/images/svg/
+    - assets/images/rank/
+    - assets/images/star/
+    - assets/images/mission/
 
     - assets/lottie/
 

@@ -6,8 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/booki/booki_goldenbell_data.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -22,9 +24,8 @@ class BookiGoldenbellScreen extends StatefulWidget {
   State<BookiGoldenbellScreen> createState() => _BookiGoldenbellScreenState();
 }
 
-class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
-  final bookiGoldenbellDataController =
-      Get.find<BookiGoldenbellDataController>();
+class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> with TickerProviderStateMixin, StarEventMixin<BookiGoldenbellScreen> {
+  final bookiGoldenbellDataController = Get.find<BookiGoldenbellDataController>();
 
   int currentIndex = 0;
   int? selectedAnswerIndex;
@@ -39,12 +40,12 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
     _audioPlayer = AudioPlayer();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final bookiGoldenbell =
-          bookiGoldenbellDataController.bookiGoldenbellDataList[0];
+      final bookiGoldenbell = bookiGoldenbellDataController.bookiGoldenbellDataList[0];
       if (bookiGoldenbell.voicePath.isNotEmpty) {
         _playSound(bookiGoldenbell.voicePath);
       }
     });
+    initStarEventFromServer(btype: 'B', hosu: widget.keyCode.substring(2, 4), gb: 'bell');
   }
 
   Future<void> _playSound(List<String> url) async {
@@ -59,28 +60,29 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
       setState(() {
         currentIndex--;
         resetQuestionState();
-        _playSound(
-            bookiGoldenbellDataController.bookiGoldenbellDataList[0].voicePath);
+        _playSound(bookiGoldenbellDataController.bookiGoldenbellDataList[0].voicePath);
       });
     }
   }
 
   void nextQuestion() {
-    if (currentIndex <
-        bookiGoldenbellDataController
-                .bookiGoldenbellDataList[0].questions.length -
-            1) {
+    if (currentIndex < bookiGoldenbellDataController.bookiGoldenbellDataList[0].questions.length - 1) {
       setState(() {
         currentIndex++;
         resetQuestionState();
-        _playSound(
-            bookiGoldenbellDataController.bookiGoldenbellDataList[0].voicePath);
+        _playSound(bookiGoldenbellDataController.bookiGoldenbellDataList[0].voicePath);
       });
     }
   }
 
   void endQuestion() async {
     await starUpdateService('bell', widget.keyCode);
+    final result = await missionSaveService(missionNum: 2, gb: 'bell', keycode: widget.keyCode);
+
+    if (result.success) {
+      await showStampDialog(widget.keyCode);
+    }
+
     lottieDialog(
       onMain: () {
         Get.back();
@@ -99,8 +101,7 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
   void checkAnswer(int answerIndex) {
     _resetTimer?.cancel();
 
-    int correctAnswer = int.parse(bookiGoldenbellDataController
-        .bookiGoldenbellDataList[0].correctAnswer[currentIndex]);
+    int correctAnswer = int.parse(bookiGoldenbellDataController.bookiGoldenbellDataList[0].correctAnswer[currentIndex]);
 
     bool tappedAnswerIsCorrect = (answerIndex + 1) == correctAnswer;
 
@@ -129,15 +130,11 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final questions =
-        bookiGoldenbellDataController.bookiGoldenbellDataList[0].questions;
+    final questions = bookiGoldenbellDataController.bookiGoldenbellDataList[0].questions;
     final answers = [
-      bookiGoldenbellDataController
-          .bookiGoldenbellDataList[0].answer_1[currentIndex],
-      bookiGoldenbellDataController
-          .bookiGoldenbellDataList[0].answer_2[currentIndex],
-      bookiGoldenbellDataController
-          .bookiGoldenbellDataList[0].answer_3[currentIndex],
+      bookiGoldenbellDataController.bookiGoldenbellDataList[0].answer_1[currentIndex],
+      bookiGoldenbellDataController.bookiGoldenbellDataList[0].answer_2[currentIndex],
+      bookiGoldenbellDataController.bookiGoldenbellDataList[0].answer_3[currentIndex],
     ];
 
     return Scaffold(
@@ -148,101 +145,99 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: Center(
-        child: SizedBox(
-          width: Platform.isIOS
-              ? MediaQuery.of(context).size.width * 0.85
-              : double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Image.network(questions[currentIndex]),
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Image.network(questions[currentIndex]),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Row(
-                    children: [
-                      if (currentIndex > 0)
-                        Expanded(
-                          flex: 1,
-                          child: GestureDetector(
-                            onTap: prevQuestion,
-                            child: Icon(
-                              Icons.navigate_before,
-                              size: 30.sp,
-                              color: Colors.black26,
-                            ),
-                          ),
-                        )
-                      else
-                        const Spacer(flex: 1),
-                      ...answers.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        String answer = entry.value;
-
-                        return Expanded(
-                          flex: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => checkAnswer(index),
-                                  child: Image.network(answer),
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        children: [
+                          if (currentIndex > 0)
+                            Expanded(
+                              flex: 1,
+                              child: GestureDetector(
+                                onTap: prevQuestion,
+                                child: Icon(
+                                  Icons.navigate_before,
+                                  size: 30.sp,
+                                  color: Colors.black26,
                                 ),
-                                if (selectedAnswerIndex != null &&
-                                    selectedAnswerIndex == index)
-                                  Icon(
-                                    isCorrect == true
-                                        ? Icons.circle_outlined
-                                        : Icons.close,
-                                    color: isCorrect == true
-                                        ? Colors.green
-                                        : Colors.red,
-                                    size: 40.sp,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      if (isCorrect == true)
-                        Expanded(
-                          flex: 1,
-                          child: GestureDetector(
-                            onTap: () {
-                              if (currentIndex < questions.length - 1) {
-                                nextQuestion();
-                              } else {
-                                endQuestion();
-                              }
-                            },
-                            child: Icon(
-                              Icons.navigate_next,
-                              size: 30.sp,
-                              color: Colors.black26,
-                            ),
-                          ),
-                        )
-                      else
-                        const Spacer(flex: 1),
-                    ],
-                  ),
-                )
-              ],
+                              ),
+                            )
+                          else
+                            const Spacer(flex: 1),
+                          ...answers.asMap().entries.map((entry) {
+                            int index = entry.key;
+                            String answer = entry.value;
+
+                            return Expanded(
+                              flex: 3,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => checkAnswer(index),
+                                      child: Image.network(answer),
+                                    ),
+                                    if (selectedAnswerIndex != null && selectedAnswerIndex == index)
+                                      Icon(
+                                        isCorrect == true ? Icons.circle_outlined : Icons.close,
+                                        color: isCorrect == true ? Colors.green : Colors.red,
+                                        size: 40.sp,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          if (isCorrect == true)
+                            Expanded(
+                              flex: 1,
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (currentIndex < questions.length - 1) {
+                                    nextQuestion();
+                                  } else {
+                                    endQuestion();
+                                  }
+                                },
+                                child: Icon(
+                                  Icons.navigate_next,
+                                  size: 30.sp,
+                                  color: Colors.black26,
+                                ),
+                              ),
+                            )
+                          else
+                            const Spacer(flex: 1),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+          ...buildStarWidgets(),
+        ],
       ),
     );
   }
@@ -250,6 +245,7 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> {
   @override
   void dispose() {
     _resetTimer?.cancel();
+    disposeStarEvent();
     super.dispose();
   }
 }

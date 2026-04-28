@@ -6,8 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_su_data.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -22,7 +24,7 @@ class HaniGoldenbellSuScreen extends StatefulWidget {
   State<HaniGoldenbellSuScreen> createState() => _HaniGoldenbellSuScreenState();
 }
 
-class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
+class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> with TickerProviderStateMixin, StarEventMixin<HaniGoldenbellSuScreen> {
   final haniGoldenbellDataController = Get.find<HaniGoldenbellSuDataController>();
 
   int currentIndex = 0;
@@ -43,6 +45,11 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
         _playSound(haniGoldenbell.voicePath);
       }
     });
+    initStarEventFromServer(
+      btype: 'B',
+      hosu: widget.keyCode.substring(2, 4),
+      gb: 'bell',
+    );
   }
 
   Future<void> _playSound(String url) async {
@@ -75,6 +82,10 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
 
   void endQuestion() async {
     await starUpdateService('bell', widget.keyCode);
+    final result = await missionSaveService(missionNum: 2, gb: 'bell', keycode: widget.keyCode);
+    if (result.success) {
+      await showStampDialog(widget.keyCode);
+    }
     lottieDialog(
       onMain: () {
         Get.back();
@@ -198,11 +209,11 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> {
                                   //     fit: BoxFit.contain,
                                   //   ),
                                   // )
-                                Icon(
-                                  isCorrect == true ? Icons.circle_outlined : Icons.close,
-                                  color: isCorrect == true ? Colors.green : Colors.red,
-                                  size: 40.sp,
-                                ),
+                                  Icon(
+                                    isCorrect == true ? Icons.circle_outlined : Icons.close,
+                                    color: isCorrect == true ? Colors.green : Colors.red,
+                                    size: 40.sp,
+                                  ),
                               ],
                             ),
                           ),

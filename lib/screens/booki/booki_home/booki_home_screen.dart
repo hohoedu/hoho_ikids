@@ -1,25 +1,31 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/user_booki_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/booki/booki_home_data.dart';
+import 'package:hani_booki/_data/mission/mission_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_widgets/booki_bottom_contents.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_widgets/booki_top_contents.dart';
+import 'package:hani_booki/services/mission/mission_list_service.dart';
 import 'package:hani_booki/services/booki/booki_find_diff_service.dart';
 import 'package:hani_booki/services/booki/booki_goldenbell_service.dart';
 import 'package:hani_booki/services/booki/booki_match_service.dart';
 import 'package:hani_booki/services/booki/booki_song_service.dart';
 import 'package:hani_booki/services/booki/booki_story_service.dart';
 import 'package:hani_booki/services/booki/booki_stroke_service.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/total_star_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/kidok_button.dart';
+import 'package:hani_booki/widgets/mission/mission_button.dart';
 import 'package:hani_booki/widgets/new_kidok_button.dart';
 import 'package:hani_booki/widgets/new_star_count.dart';
 import 'package:hani_booki/widgets/star_count.dart';
@@ -46,6 +52,18 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     playBgm(widget.keyCode);
+    _initMission();
+  }
+
+  Future<void> _initMission() async {
+    if (!Get.isRegistered<MissionController>()) {
+      Get.put(MissionController());
+    }
+    await missionListService(widget.keyCode);
+    final result = await missionSaveService(missionNum: 1, gb: 'attendance', keycode: widget.keyCode);
+    if (result.success) {
+      showStampDialog(widget.keyCode, isAttendance: true);
+    }
   }
 
   void playBgm(String keyCode) {
@@ -206,12 +224,13 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
               ),
               Expanded(
                 child: Padding(
-                  padding: screenWidth >= 1000 ? EdgeInsets.zero : EdgeInsets.only(bottom: 8),
+                  padding: screenWidth >= 1000 ? EdgeInsets.zero : EdgeInsets.only(bottom: 16),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: screenWidth >= 1000 ? MainAxisAlignment.center : MainAxisAlignment.end,
                         children: [
+                          MissionButton(keycode: widget.keyCode),
                           NewKidokButton(
                             type: 'booki',
                             keycode: widget.keyCode,

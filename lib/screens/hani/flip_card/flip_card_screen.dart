@@ -9,8 +9,10 @@ import 'package:hani_booki/_data/hani/hani_Flip_data.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_sindong.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_default.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_soojae.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -25,7 +27,7 @@ class FlipCardScreen extends StatefulWidget {
   State<FlipCardScreen> createState() => _FlipCardScreenState();
 }
 
-class _FlipCardScreenState extends State<FlipCardScreen> {
+class _FlipCardScreenState extends State<FlipCardScreen> with TickerProviderStateMixin, StarEventMixin<FlipCardScreen> {
   final haniFlipDataController = Get.find<HaniFlipDataController>();
   final bgmController = Get.find<BgmController>();
   late GlobalKey<FlipCardState> _cardKey;
@@ -44,6 +46,11 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
 
     _frontImage = haniFlipDataController.haniFlipDataList[0].frontImagePath;
     _backImage = haniFlipDataController.haniFlipDataList[0].backImagePath;
+    initStarEventFromServer(
+      btype: 'H',
+      hosu: widget.keyCode.substring(2, 4),
+      gb: 'card',
+    );
   }
 
   void _updateSelectedCard(int index) {
@@ -79,6 +86,12 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
 
   void completeGame() async {
     await starUpdateService('card', widget.keyCode);
+    final result = await missionSaveService(missionNum: 2, gb: 'card', keycode: widget.keyCode);
+
+    if (result.success) {
+      await showStampDialog(widget.keyCode);
+    }
+
     Future.delayed(
       Duration(seconds: 1),
       () {
@@ -106,47 +119,53 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: Center(
-        child: Container(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
-          child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-              child: widget.keyCode.substring(0, 1) == 'Y'
-                  ? FlipDefault(
-                      haniFlipDataList: haniFlipDataController.haniFlipDataList,
-                      cardKey: _cardKey,
-                      updateSelectedCard: _updateSelectedCard,
-                      frontImage: _buildCardImage(_frontImage),
-                      backImage: _buildCardImage(_backImage),
-                      playSound: _playSound,
-                      currentIndex: _currentIndex,
-                      flippedIndices: flippedIndices,
-                      completeGame: completeGame,
-                    )
-                  : widget.keyCode.substring(0, 1) == 'G'
-                      ? FlipSoojae(
-                          haniFlipDataList: haniFlipDataController.haniFlipDataList,
-                          cardKey: _cardKey,
-                          updateSelectedCard: _updateSelectedCard,
-                          frontImage: _buildCardImage(_frontImage),
-                          backImage: _buildCardImage(_backImage),
-                          playSound: _playSound,
-                          currentIndex: _currentIndex,
-                          flippedIndices: flippedIndices,
-                          completeGame: completeGame,
-                        )
-                      : FlipSindong(
-                          haniFlipDataList: haniFlipDataController.haniFlipDataList,
-                          cardKey: _cardKey,
-                          updateSelectedCard: _updateSelectedCard,
-                          frontImage: _buildCardImage(_frontImage),
-                          backImage: _buildCardImage(_backImage),
-                          playSound: _playSound,
-                          currentIndex: _currentIndex,
-                          flippedIndices: flippedIndices,
-                          completeGame: completeGame,
-                        )),
-        ),
+      body: Stack(
+        children: [
+          Center(
+            child: Container(
+              width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                child: widget.keyCode.substring(0, 1) == 'Y'
+                    ? FlipDefault(
+                        haniFlipDataList: haniFlipDataController.haniFlipDataList,
+                        cardKey: _cardKey,
+                        updateSelectedCard: _updateSelectedCard,
+                        frontImage: _buildCardImage(_frontImage),
+                        backImage: _buildCardImage(_backImage),
+                        playSound: _playSound,
+                        currentIndex: _currentIndex,
+                        flippedIndices: flippedIndices,
+                        completeGame: completeGame,
+                      )
+                    : widget.keyCode.substring(0, 1) == 'G'
+                        ? FlipSoojae(
+                            haniFlipDataList: haniFlipDataController.haniFlipDataList,
+                            cardKey: _cardKey,
+                            updateSelectedCard: _updateSelectedCard,
+                            frontImage: _buildCardImage(_frontImage),
+                            backImage: _buildCardImage(_backImage),
+                            playSound: _playSound,
+                            currentIndex: _currentIndex,
+                            flippedIndices: flippedIndices,
+                            completeGame: completeGame,
+                          )
+                        : FlipSindong(
+                            haniFlipDataList: haniFlipDataController.haniFlipDataList,
+                            cardKey: _cardKey,
+                            updateSelectedCard: _updateSelectedCard,
+                            frontImage: _buildCardImage(_frontImage),
+                            backImage: _buildCardImage(_backImage),
+                            playSound: _playSound,
+                            currentIndex: _currentIndex,
+                            flippedIndices: flippedIndices,
+                            completeGame: completeGame,
+                          ),
+              ),
+            ),
+          ),
+          ...buildStarWidgets(),
+        ],
       ),
     );
   }
@@ -164,6 +183,7 @@ class _FlipCardScreenState extends State<FlipCardScreen> {
   @override
   void dispose() {
     _audioPlayer.dispose();
+    disposeStarEvent();
     super.dispose();
   }
 }

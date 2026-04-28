@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/services/mission/mission_clear_service.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/services/video_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:logger/logger.dart';
 
 class VideoScreen extends StatefulWidget {
   final String content;
@@ -24,7 +29,7 @@ class VideoScreen extends StatefulWidget {
   State<VideoScreen> createState() => _VideoScreenState();
 }
 
-class _VideoScreenState extends State<VideoScreen> {
+class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin, StarEventMixin<VideoScreen> {
   InAppWebViewController? _controller;
   String accessToken = '';
   bool isLoading = true;
@@ -34,6 +39,19 @@ class _VideoScreenState extends State<VideoScreen> {
     super.initState();
     Get.find<BgmController>().pauseBgm();
     _fetchAccessToken();
+    Logger().d('widget.content = ${widget.content}');
+    Logger().d('widget.keyCode = ${widget.keyCode}');
+
+    initStarEventFromServer(
+      btype: () {
+        final first = widget.keyCode.substring(0, 1);
+        if (['Y', 'G', 'S'].contains(first)) return 'H';
+        if (['K', 'D', 'J'].contains(first)) return 'B';
+        return '';
+      }(),
+      hosu: widget.keyCode.substring(2, 4),
+      gb: widget.content,
+    );
   }
 
   Future<void> _fetchAccessToken() async {
@@ -71,36 +89,37 @@ class _VideoScreenState extends State<VideoScreen> {
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri(accessToken),
-          headers: {"Referer": "https://hohoedu.co.kr"},
-        ),
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            javaScriptEnabled: true,
-            mediaPlaybackRequiresUserGesture: false,
-          ),
-        ),
-        // 콘솔 메시지 확인 (디버그 콘솔에 출력됨)
-        onConsoleMessage: (controller, consoleMessage) {
-          debugPrint("Console Message: ${consoleMessage.message}");
-        },
-        onWebViewCreated: (controller) {
-          _controller = controller;
-          _controller?.addJavaScriptHandler(
-            handlerName: 'videoEnded',
-            callback: (args) {
-              debugPrint("videoEnded 핸들러 호출됨");
-              _showResultDialog();
-              return;
+      body: Stack(
+        children: [
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(accessToken),
+              headers: {"Referer": "https://hohoedu.co.kr"},
+            ),
+            initialOptions: InAppWebViewGroupOptions(
+              crossPlatform: InAppWebViewOptions(
+                javaScriptEnabled: true,
+                mediaPlaybackRequiresUserGesture: false,
+              ),
+            ),
+            // 콘솔 메시지 확인 (디버그 콘솔에 출력됨)
+            onConsoleMessage: (controller, consoleMessage) {
+              debugPrint("Console Message: ${consoleMessage.message}");
             },
-          );
-        },
+            onWebViewCreated: (controller) {
+              _controller = controller;
+              _controller?.addJavaScriptHandler(
+                handlerName: 'videoEnded',
+                callback: (args) {
+                  debugPrint("videoEnded 핸들러 호출됨");
+                  _showResultDialog();
+                  return;
+                },
+              );
+            },
 
-        onLoadStop: (controller, url) async {
-          await controller.evaluateJavascript(
-              source: '''function mergeTimeRanges(timeRanges, tolerance = 0.1) {
+            onLoadStop: (controller, url) async {
+              await controller.evaluateJavascript(source: '''function mergeTimeRanges(timeRanges, tolerance = 0.1) {
   let ranges = [];
   for (let i = 0; i < timeRanges.length; i++) {
     ranges.push([timeRanges.start(i), timeRanges.end(i)]);
@@ -168,13 +187,22 @@ var observer = new MutationObserver(function(mutations) {
 });
 observer.observe(document.body, { childList: true, subtree: true });
 ''');
-        },
+            },
+          ),
+          ...buildStarWidgets(),
+        ],
       ),
     );
   }
 
   void _showResultDialog() async {
     await starUpdateService(widget.content, widget.keyCode);
+    final result = await missionSaveService(missionNum: 2, gb: widget.content, keycode: widget.keyCode);
+
+    if (result.success) {
+      await showStampDialog(widget.keyCode);
+    }
+
     lottieDialog(
       onMain: () {
         Get.back();
@@ -186,9 +214,11 @@ observer.observe(document.body, { childList: true, subtree: true });
       },
     );
   }
+
   @override
   void dispose() {
     Get.find<BgmController>().resumeBgm();
+    disposeStarEvent();
     super.dispose();
   }
 }

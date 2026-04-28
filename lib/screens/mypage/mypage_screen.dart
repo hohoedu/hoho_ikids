@@ -12,6 +12,7 @@ import 'package:hani_booki/screens/mypage/mypage_widgets/user_info_box.dart';
 import 'package:hani_booki/services/auth/join_code_service.dart';
 import 'package:hani_booki/services/auth/keycode_service.dart';
 import 'package:hani_booki/services/auth/update_password_service.dart';
+import 'package:hani_booki/services/auth/user_count_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/del_user_code.dart';
 import 'package:hani_booki/utils/encryption.dart';
@@ -315,7 +316,10 @@ class _MypageScreenState extends State<MypageScreen> {
                                               onFocusLost: (_) {
                                                 codeVerifyController.resetValidationMessage(codeIndex: 1);
                                                 codeVerifyController.checkClassCode(
-                                                    code: code1Controller.text, codeIndex: 1);
+                                                  code: code1Controller.text, codeIndex: 1,
+                                                  phone: userData.userData!.parentTel, // ✅
+                                                  cname: userData.userData!.username,
+                                                );
                                               },
                                               completeText: codeVerifyController.code1Message.value,
                                               messageColor: codeVerifyController.messageColor1.value,
@@ -369,7 +373,11 @@ class _MypageScreenState extends State<MypageScreen> {
                                               onFocusLost: (_) {
                                                 codeVerifyController.resetValidationMessage(codeIndex: 2);
                                                 codeVerifyController.checkClassCode(
-                                                    code: code2Controller.text, codeIndex: 2);
+                                                  code: code2Controller.text,
+                                                  codeIndex: 2,
+                                                  phone: userData.userData!.parentTel, // ✅
+                                                  cname: userData.userData!.username,
+                                                );
                                               },
                                               completeText: codeVerifyController.code2Message.value,
                                               messageColor: codeVerifyController.messageColor2.value,
@@ -393,7 +401,6 @@ class _MypageScreenState extends State<MypageScreen> {
                                   Get.back();
                                   return;
                                 }
-
 
                                 bool isCodeChanged = false;
 

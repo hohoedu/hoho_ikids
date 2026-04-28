@@ -6,9 +6,11 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/booki/booki_match_data.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_screen.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
@@ -22,11 +24,9 @@ class MatchScreen extends StatefulWidget {
   State<MatchScreen> createState() => _MatchScreenState();
 }
 
-class _MatchScreenState extends State<MatchScreen>
-    with SingleTickerProviderStateMixin {
-  final bookiMatchDataController =
-      Get.find<BookiMatchDataController>();
-final bgmController = Get.find<BgmController>();
+class _MatchScreenState extends State<MatchScreen> with TickerProviderStateMixin, StarEventMixin<MatchScreen> {
+  final bookiMatchDataController = Get.find<BookiMatchDataController>();
+  final bgmController = Get.find<BgmController>();
   late List<String> images;
   late Map<int, int> pairs;
   int? firstSelectedIndex;
@@ -39,11 +39,11 @@ final bgmController = Get.find<BgmController>();
     super.initState();
     bgmController.playBgm('match');
     _initializeGameData();
+    initStarEventFromServer(btype: 'B', hosu: widget.keyCode.substring(2, 4), gb: 'img');
   }
 
   void _initializeGameData() {
-    final backImages =
-        bookiMatchDataController.bookiMatchDataList[0].backImagePairs;
+    final backImages = bookiMatchDataController.bookiMatchDataList[0].backImagePairs;
 
     final random = Random();
     final selectedIndices = <int>{};
@@ -52,8 +52,7 @@ final bgmController = Get.find<BgmController>();
       selectedIndices.add(random.nextInt(8));
     }
 
-    final selectedPairs =
-        selectedIndices.map((index) => backImages[index]).toList();
+    final selectedPairs = selectedIndices.map((index) => backImages[index]).toList();
 
     images = [];
     pairs = {};
@@ -83,8 +82,7 @@ final bgmController = Get.find<BgmController>();
     images = shuffledImages;
     pairs = newPairs;
 
-    cardKeys =
-        List.generate(images.length, (index) => GlobalKey<FlipCardState>());
+    cardKeys = List.generate(images.length, (index) => GlobalKey<FlipCardState>());
   }
 
   void _resetGame() {
@@ -98,9 +96,7 @@ final bgmController = Get.find<BgmController>();
 
   void _handleTap(int index) async {
     // 애니메이션 진행 중이거나 이미 맞춘 카드, 또는 같은 카드 탭 시 무시
-    if (isAnimating ||
-        matchedCards.contains(index) ||
-        firstSelectedIndex == index) return;
+    if (isAnimating || matchedCards.contains(index) || firstSelectedIndex == index) return;
 
     // 첫 번째 카드 선택
     if (firstSelectedIndex == null) {
@@ -154,6 +150,12 @@ final bgmController = Get.find<BgmController>();
     // 모든 카드가 맞춰졌다면
     if (matchedCards.length == images.length) {
       await starUpdateService('img', widget.keyCode);
+      final result = await missionSaveService(missionNum: 2, gb: 'img', keycode: widget.keyCode);
+
+      if (result.success) {
+        await showStampDialog(widget.keyCode);
+      }
+
       lottieDialog(
         onReset: () {
           _resetGame();
@@ -170,8 +172,7 @@ final bgmController = Get.find<BgmController>();
 
   @override
   Widget build(BuildContext context) {
-    final frontImages =
-        bookiMatchDataController.bookiMatchDataList[0].frontImages;
+    final frontImages = bookiMatchDataController.bookiMatchDataList[0].frontImages;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -181,55 +182,62 @@ final bgmController = Get.find<BgmController>();
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: Center(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.85,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40.0),
-            child: Center(
-              // AbsorbPointer로 전체 입력을 제어합니다.
-              child: AbsorbPointer(
-                absorbing: isAnimating, // isAnimating이 true이면 터치 입력을 무시
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  itemCount: images.length,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 12.0,
-                    mainAxisSpacing: 12.0,
-                    childAspectRatio: 1.0,
-                  ),
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => _handleTap(index),
-                      child: FlipCard(
-                        key: cardKeys[index],
-                        flipOnTouch: false,
-                        front: Image.network(
-                          frontImages[index],
-                          fit: BoxFit.contain,
-                        ),
-                        back: Center(
-                          child: Image.network(
-                            images[index],
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.85,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: Center(
+                  // AbsorbPointer로 전체 입력을 제어합니다.
+                  child: AbsorbPointer(
+                    absorbing: isAnimating, // isAnimating이 true이면 터치 입력을 무시
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: images.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 12.0,
+                        mainAxisSpacing: 12.0,
+                        childAspectRatio: 1.0,
                       ),
-                    );
-                  },
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () => _handleTap(index),
+                          child: FlipCard(
+                            key: cardKeys[index],
+                            flipOnTouch: false,
+                            front: Image.network(
+                              frontImages[index],
+                              fit: BoxFit.contain,
+                            ),
+                            back: Center(
+                              child: Image.network(
+                                images[index],
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+          ...buildStarWidgets(),
+        ],
       ),
     );
   }
+
   @override
   void dispose() {
+    disposeStarEvent();
     super.dispose();
   }
 }

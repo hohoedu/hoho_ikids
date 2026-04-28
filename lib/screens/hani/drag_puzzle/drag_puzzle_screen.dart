@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/hani/hani_drag_puzzle_data.dart';
 import 'package:hani_booki/main.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/loading_screen.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/contents_appbar.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
@@ -24,7 +26,7 @@ class DragPuzzleScreen extends StatefulWidget {
   State<DragPuzzleScreen> createState() => _DragPuzzleScreenState();
 }
 
-class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
+class _DragPuzzleScreenState extends State<DragPuzzleScreen> with TickerProviderStateMixin, StarEventMixin<DragPuzzleScreen> {
   final dragPuzzleData = Get.find<HaniDragPuzzleDataController>();
   final bgmController = Get.find<BgmController>();
 
@@ -47,6 +49,11 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _preloadAllImages();
     });
+    initStarEventFromServer(
+      btype: 'H',
+      hosu: widget.keyCode.substring(2, 4),
+      gb: 'puz',
+    );
   }
 
   Future<void> _preloadAllImages() async {
@@ -79,6 +86,10 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
       });
     } else {
       await starUpdateService('puz', widget.keyCode);
+      final result = await missionSaveService(missionNum: 2, gb: 'puz', keycode: widget.keyCode);
+      if (result.success) {
+        await showStampDialog(widget.keyCode);
+      }
       lottieDialog(
         onMain: () {
           Get.back();
@@ -156,224 +167,228 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> {
         ),
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: Center(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Spacer(flex: 1),
-              Expanded(
-                flex: 12,
-                child: Row(
-                  children: [
-                    // 왼쪽 Board 이미지 + DropTargets
-                    Expanded(
-                      flex: 55,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            // 실제 영역의 크기를 constraints로 받아옴
-                            final boardWidth = constraints.maxWidth;
-                            final boardHeight =
-                                screenWidth > 1000 ? boardWidth / (baseWidth / baseHeight) : constraints.maxHeight;
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Spacer(flex: 1),
+                  Expanded(
+                    flex: 12,
+                    child: Row(
+                      children: [
+                        // 왼쪽 Board 이미지 + DropTargets
+                        Expanded(
+                          flex: 55,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                // 실제 영역의 크기를 constraints로 받아옴
+                                final boardWidth = constraints.maxWidth;
+                                final boardHeight = screenWidth > 1000 ? boardWidth / (baseWidth / baseHeight) : constraints.maxHeight;
 
-                            // 기준 크기 대비 스케일 계산
-                            final scaleX = boardWidth / baseWidth;
-                            final scaleY = boardHeight / baseHeight;
+                                // 기준 크기 대비 스케일 계산
+                                final scaleX = boardWidth / baseWidth;
+                                final scaleY = boardHeight / baseHeight;
 
-                            scaleSize = Size(scaleX, scaleY);
-                            return Stack(
-                              fit: StackFit.loose,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.network(
-                                    boardImage,
-                                    width: boardWidth,
-                                    height: boardHeight,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
+                                scaleSize = Size(scaleX, scaleY);
+                                return Stack(
+                                  fit: StackFit.loose,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(25),
+                                      child: Image.network(
+                                        boardImage,
+                                        width: boardWidth,
+                                        height: boardHeight,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
 
-                                // 8개의 DropTarget을 배치
-                                if (constraints.maxWidth > 0 && constraints.maxHeight > 0)
-                                  ...List.generate(8, (index) {
-                                    double top = 0;
-                                    double left = 0;
+                                    // 8개의 DropTarget을 배치
+                                    if (constraints.maxWidth > 0 && constraints.maxHeight > 0)
+                                      ...List.generate(8, (index) {
+                                        double top = 0;
+                                        double left = 0;
 
-                                    // if (index < 2) {
-                                    //   top = 40;
-                                    //   left = 70.0 + index * 90.0;
-                                    // } else if (index < 5) {
-                                    //   top = 140;
-                                    //   left = 20.0 + (index - 2) * 95.0;
-                                    // } else {
-                                    //   top = 230;
-                                    //   left = 20.0 + (index - 5) * 95.0;
-                                    // }
-                                    final bool tablet = screenWidth >= 1000;
-                                    if (index == 0) {
-                                      // index 0 위치
-                                      top = tablet ? 62.5 : 40;
-                                      left = tablet ? 72 : 70;
-                                    } else if (index == 1) {
-                                      // index 1 위치
-                                      top = tablet ? 62 : 40;
-                                      left = tablet ? 165 : 161;
-                                    } else if (index == 2) {
-                                      // index 2 위치
-                                      top = tablet ? 144.6 : 140;
-                                      left = tablet ? 25.3 : 20;
-                                    } else if (index == 3) {
-                                      // index 3 위치
-                                      top = tablet ? 144.6 : 140;
-                                      left = tablet ? 118.8 : 115;
-                                    } else if (index == 4) {
-                                      // index 4 위치
-                                      top = tablet ? 141.5 : 138;
-                                      left = tablet ? 210 : 205;
-                                    } else if (index == 5) {
-                                      // index 5 위치
-                                      top = tablet ? 222 : 230;
-                                      left = tablet ? 27 : 23;
-                                    } else if (index == 6) {
-                                      // index 6 위치
-                                      top = tablet ? 223 : 230;
-                                      left = tablet ? 120 : 115;
-                                    } else if (index == 7) {
-                                      // index 7 위치
-                                      top = tablet ? 225 : 235;
-                                      left = tablet ? 210 : 205;
-                                    }
+                                        // if (index < 2) {
+                                        //   top = 40;
+                                        //   left = 70.0 + index * 90.0;
+                                        // } else if (index < 5) {
+                                        //   top = 140;
+                                        //   left = 20.0 + (index - 2) * 95.0;
+                                        // } else {
+                                        //   top = 230;
+                                        //   left = 20.0 + (index - 5) * 95.0;
+                                        // }
+                                        final bool tablet = screenWidth >= 1000;
+                                        if (index == 0) {
+                                          // index 0 위치
+                                          top = tablet ? 62.5 : 40;
+                                          left = tablet ? 72 : 70;
+                                        } else if (index == 1) {
+                                          // index 1 위치
+                                          top = tablet ? 62 : 40;
+                                          left = tablet ? 165 : 161;
+                                        } else if (index == 2) {
+                                          // index 2 위치
+                                          top = tablet ? 144.6 : 140;
+                                          left = tablet ? 25.3 : 20;
+                                        } else if (index == 3) {
+                                          // index 3 위치
+                                          top = tablet ? 144.6 : 140;
+                                          left = tablet ? 118.8 : 115;
+                                        } else if (index == 4) {
+                                          // index 4 위치
+                                          top = tablet ? 141.5 : 138;
+                                          left = tablet ? 210 : 205;
+                                        } else if (index == 5) {
+                                          // index 5 위치
+                                          top = tablet ? 222 : 230;
+                                          left = tablet ? 27 : 23;
+                                        } else if (index == 6) {
+                                          // index 6 위치
+                                          top = tablet ? 223 : 230;
+                                          left = tablet ? 120 : 115;
+                                        } else if (index == 7) {
+                                          // index 7 위치
+                                          top = tablet ? 225 : 235;
+                                          left = tablet ? 210 : 205;
+                                        }
 
-                                    return Positioned(
-                                      top: top * scaleY,
-                                      left: left * scaleX,
-                                      child: AnimatedOpacity(
-                                        opacity: isSolved[index] ? 0 : 1,
-                                        duration: const Duration(milliseconds: 200),
-                                        child: DragTarget<int>(
-                                          onAccept: (data) async {
-                                            if (data == index) {
-                                              await _playSound(set.voices[index]);
-                                              setState(() {
-                                                isSolved[index] = true;
-                                                if (isSolved.every((e) => e)) {
-                                                  Future.delayed(
-                                                    const Duration(milliseconds: 100),
-                                                    () {
-                                                      goToNextPuzzle();
-                                                    },
-                                                  );
+                                        return Positioned(
+                                          top: top * scaleY,
+                                          left: left * scaleX,
+                                          child: AnimatedOpacity(
+                                            opacity: isSolved[index] ? 0 : 1,
+                                            duration: const Duration(milliseconds: 200),
+                                            child: DragTarget<int>(
+                                              onAccept: (data) async {
+                                                if (data == index) {
+                                                  await _playSound(set.voices[index]);
+                                                  setState(() {
+                                                    isSolved[index] = true;
+                                                    if (isSolved.every((e) => e)) {
+                                                      Future.delayed(
+                                                        const Duration(milliseconds: 100),
+                                                        () {
+                                                          goToNextPuzzle();
+                                                        },
+                                                      );
+                                                    }
+                                                  });
+                                                } else {
+                                                  setState(() {});
+                                                  SoundManager.playNo();
                                                 }
-                                              });
-                                            } else {
-                                              setState(() {});
-                                              SoundManager.playNo();
-                                            }
-                                          },
-                                          builder: (context, candidateData, rejectedData) {
-                                            return SizedBox(
-                                              width: screenWidth >= 1000 ? 70 * scaleX : 80 * scaleX,
-                                              height: screenWidth >= 1000 ? 70 * scaleY : 80 * scaleY,
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Image.network(
-                                                  questionImages[index],
-                                                  fit: BoxFit.contain,
-                                                ),
-                                              ),
-                                            );
-                                          },
+                                              },
+                                              builder: (context, candidateData, rejectedData) {
+                                                return SizedBox(
+                                                  width: screenWidth >= 1000 ? 70 * scaleX : 80 * scaleX,
+                                                  height: screenWidth >= 1000 ? 70 * scaleY : 80 * scaleY,
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    child: Image.network(
+                                                      questionImages[index],
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+
+                        // 오른쪽 Draggable Grid
+                        Expanded(
+                          flex: 45,
+                          child: Padding(
+                            padding: EdgeInsets.zero,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFFBEEBFA),
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              padding: const EdgeInsets.all(16.0),
+                              child: GridView.count(
+                                padding: EdgeInsets.zero,
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
+                                physics: NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                children: List.generate(8, (index) {
+                                  final item = shuffledCards[index];
+                                  final realIndex = item['index'];
+                                  final imageUrl = item['img'];
+
+                                  if (isSolved[realIndex]) return const SizedBox.shrink();
+
+                                  final RxSet<int> draggingIndices = <int>{}.obs;
+
+                                  return Obx(() {
+                                    final isDragging = draggingIndices.contains(realIndex);
+                                    final isSolvedNow = isSolved[realIndex];
+
+                                    if (isSolvedNow || isDragging) return SizedBox.shrink();
+
+                                    return Draggable<int>(
+                                      data: realIndex,
+                                      onDragStarted: () {
+                                        draggingIndices.add(realIndex);
+                                      },
+                                      onDraggableCanceled: (_, __) {
+                                        draggingIndices.remove(realIndex);
+                                      },
+                                      onDragEnd: (_) {
+                                        draggingIndices.remove(realIndex);
+                                      },
+                                      feedback: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          imageUrl,
+                                          width: screenWidth >= 1000 ? 70 * scaleSize.width : 80 * scaleSize.width,
+                                          height: screenWidth >= 1000 ? 70 * scaleSize.height : 80 * scaleSize.height,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                      childWhenDragging: const SizedBox.shrink(),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          imageUrl,
+                                          width: screenWidth >= 1000 ? 70 * scaleSize.width : 80 * scaleSize.width,
+                                          height: screenWidth >= 1000 ? 70 * scaleSize.height : 80 * scaleSize.height,
+                                          fit: BoxFit.contain,
                                         ),
                                       ),
                                     );
-                                  }),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-
-                    // 오른쪽 Draggable Grid
-                    Expanded(
-                      flex: 45,
-                      child: Padding(
-                        padding: EdgeInsets.zero,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Color(0xFFBEEBFA),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          padding: const EdgeInsets.all(16.0),
-                          child: GridView.count(
-                            padding: EdgeInsets.zero,
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                            physics: NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            children: List.generate(8, (index) {
-                              final item = shuffledCards[index];
-                              final realIndex = item['index'];
-                              final imageUrl = item['img'];
-
-                              if (isSolved[realIndex]) return const SizedBox.shrink();
-
-                              final RxSet<int> draggingIndices = <int>{}.obs;
-
-                              return Obx(() {
-                                final isDragging = draggingIndices.contains(realIndex);
-                                final isSolvedNow = isSolved[realIndex];
-
-                                if (isSolvedNow || isDragging) return SizedBox.shrink();
-
-                                return Draggable<int>(
-                                  data: realIndex,
-                                  onDragStarted: () {
-                                    draggingIndices.add(realIndex);
-                                  },
-                                  onDraggableCanceled: (_, __) {
-                                    draggingIndices.remove(realIndex);
-                                  },
-                                  onDragEnd: (_) {
-                                    draggingIndices.remove(realIndex);
-                                  },
-                                  feedback: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      imageUrl,
-                                      width: screenWidth >= 1000 ? 70 * scaleSize.width : 80 * scaleSize.width,
-                                      height: screenWidth >= 1000 ? 70 * scaleSize.height : 80 * scaleSize.height,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                  childWhenDragging: const SizedBox.shrink(),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      imageUrl,
-                                      width: screenWidth >= 1000 ? 70 * scaleSize.width : 80 * scaleSize.width,
-                                      height: screenWidth >= 1000 ? 70 * scaleSize.height : 80 * scaleSize.height,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                );
-                              });
-                            }),
+                                  });
+                                }),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
-        ),
+          ...buildStarWidgets()
+        ],
       ),
     );
   }

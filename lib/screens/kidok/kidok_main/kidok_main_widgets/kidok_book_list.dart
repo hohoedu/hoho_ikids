@@ -23,21 +23,25 @@ class _KidokBookListState extends State<KidokBookList> {
 
   @override
   Widget build(BuildContext context) {
+    bool isTablet = MediaQuery.of(context).size.width > 1000;
     return Expanded(
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 24.0),
+          Padding(
+            padding: EdgeInsets.only(top: 12.0),
             child: Text(
               '나의 도서 목록',
-              style: TextStyle(fontSize: 20, fontFamily: 'BMJUA'),
+              style: TextStyle(fontSize: 7.sp, fontFamily: 'BMJUA', color: Color(0xFF968B52)),
             ),
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16.0),
               child: Container(
-                decoration: BoxDecoration(color: Color(0xFFF7F5EA), borderRadius: BorderRadius.circular(15)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return Column(
@@ -72,12 +76,13 @@ class _KidokBookListState extends State<KidokBookList> {
                                                 autoWrapText(
                                                     kidokSublistController.kidokSublistDataList[index].bookName, 10),
                                                 style: TextStyle(
-                                                    fontSize: 7.sp,
+                                                    fontSize: 6.sp,
                                                     color:
                                                         kidokSublistController.kidokSublistDataList[index].isCompleted
                                                             ? fontMain
                                                             : Colors.redAccent,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight: FontWeight.bold,
+                                                height: 1.2),
                                               ),
                                             ),
                                           ],

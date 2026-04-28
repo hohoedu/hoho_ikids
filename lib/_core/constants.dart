@@ -49,7 +49,6 @@ const Map<String, Color> kidoSubColors = {
   '끈기': Color(0xFF3FCA94),
 };
 
-
 final Map<String, String> haniCategory = {
   'song': '동요',
   'story': '동화',
@@ -69,6 +68,23 @@ final Map<String, String> bookiCategory = {
   'img': '그림 맞추기',
   'find': '다른 그림 찾기',
 };
+
+const missionStyles = [
+  {
+    'label': 'MISSION. 1',
+    'labelColor': Color(0xFFCB778F),
+    'cardColor': Color(0xFFFFD8E3),
+    'footerColor': Color(0xFFEDA8BC),
+    'completedAsset': 'assets/images/mission/complete_pink.png',
+  },
+  {
+    'label': 'MISSION. 2',
+    'labelColor': Color(0xFF6EA997),
+    'cardColor': Color(0xFFC8ECE1),
+    'footerColor': Color(0xFF9BCABC),
+    'completedAsset': 'assets/images/mission/complete_green.png',
+  },
+];
 
 final List<Color> strokeColors = [
   haniColor,
@@ -101,6 +117,13 @@ final Map<String, String> noticeIcon = {
   '8': 'assets/images/icons/board_type1.png', // 호호스타 콘텐츠
 };
 
+// 한자를 맞춰요 => card
+// 퀴즈 그림 사전 => quiz
+
+// 어휘사전 => workbook
+// 어휘 맞추기 => quiz
+// 골든벨 => bell
+
 final List<String> pentagons = [
   'assets/images/icons/blue.png',
   'assets/images/icons/orange.png',
@@ -129,3 +152,21 @@ final List<String> loadingText = [
   '공부 요정이 마법 가루를 뿌리는 중이에요~',
   '두근두근! 알쏭달쏭 퀴즈를 섞는 중이에요~',
 ];
+
+final Map<String, String> tendencyIcon = {
+  '예리한 인간로봇': 'assets/images/kidok/report_ico01.png',
+  '직관형 독서가': 'assets/images/kidok/report_ico02.png',
+  '표현의 연금술사': 'assets/images/kidok/report_ico03.png',
+  '표현의 마술사': 'assets/images/kidok/report_ico04.png',
+  '걸어 다니는 어휘사전': 'assets/images/kidok/report_ico05.png',
+  '똑똑한 어휘박사': 'assets/images/kidok/report_ico06.png',
+  '감성적인 독서가': 'assets/images/kidok/report_ico07.png',
+  '따뜻한 공감주의자': 'assets/images/kidok/report_ico08.png',
+  '주제를 찾는 탐구자': 'assets/images/kidok/report_ico09.png',
+  '깊이 생각하는 사색가': 'assets/images/kidok/report_ico10.png',
+  '냉철한 분석가': 'assets/images/kidok/report_ico11.png',
+  '꼼꼼한 논리주의자': 'assets/images/kidok/report_ico12.png',
+  '호기심 많은 지식인': 'assets/images/kidok/report_ico13.png',
+  '사려 깊은 추론가': 'assets/images/kidok/report_ico14.png',
+  '완벽한 독서가': 'assets/images/kidok/report_ico15.png',
+};

@@ -9,10 +9,11 @@ import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
+import 'user_count_service.dart';
+
 // 가입 코드 확인
 Future<bool> joinCodeService(TextEditingController classCode) async {
-  final JoinUserDataController joinUserDataController =
-      Get.put(JoinUserDataController(), permanent: true);
+  final JoinUserDataController joinUserDataController = Get.put(JoinUserDataController(), permanent: true);
   String url = dotenv.get('JOIN_CODE_URL');
 
   final Map<String, dynamic> requestData = {
@@ -113,10 +114,14 @@ class CodeVerifyController extends GetxController {
   RxBool isComplete2 = false.obs;
   Rx<Color> messageColor2 = Colors.red.obs;
 
-  // codeIndex: 1이면 가입코드 1, 2이면 가입코드 2를 의미
-  Future<void> checkClassCode(
-      {required String code, required int codeIndex}) async {
+  Future<void> checkClassCode({
+    required String code,
+    required int codeIndex,
+    String? phone,
+    String? cname,
+  }) async {
     final validation = await codeVerifyService(code);
+
     if (codeIndex == 1) {
       if (code.isEmpty || code.length != 7) {
         code1Message.value = '가입코드를 입력해주세요';
@@ -124,9 +129,33 @@ class CodeVerifyController extends GetxController {
         isComplete1.value = false;
       } else {
         if (validation) {
-          code1Message.value = '인증되었습니다.';
-          messageColor1.value = Colors.green;
-          isComplete1.value = true;
+          // ✅ phone 있으면 중복/초과 체크 추가
+          if (phone != null && phone.isNotEmpty) {
+            final result = await userCountService(phone, pin1: code, cname: cname);
+            switch (result) {
+              case PhoneCheckResult.available:
+                code1Message.value = '인증되었습니다.';
+                messageColor1.value = Colors.green;
+                isComplete1.value = true;
+              case PhoneCheckResult.duplicate:
+                code1Message.value = '이미 해당 가입코드로 가입이 완료된 전화번호입니다.';
+                messageColor1.value = Colors.red;
+                isComplete1.value = false;
+              case PhoneCheckResult.exceeded:
+                code1Message.value = '더이상 등록하실 수 없습니다.';
+                messageColor1.value = Colors.red;
+                isComplete1.value = false;
+              case PhoneCheckResult.error:
+                code1Message.value = '오류가 발생했습니다.';
+                messageColor1.value = Colors.red;
+                isComplete1.value = false;
+            }
+          } else {
+            // 회원가입 - 코드 유효성만 통과
+            code1Message.value = '인증되었습니다.';
+            messageColor1.value = Colors.green;
+            isComplete1.value = true;
+          }
         } else {
           code1Message.value = '기관에서 발송한 가입코드와 일치하지 않습니다.';
           messageColor1.value = Colors.red;
@@ -140,9 +169,33 @@ class CodeVerifyController extends GetxController {
         isComplete2.value = false;
       } else {
         if (validation) {
-          code2Message.value = '인증되었습니다.';
-          messageColor2.value = Colors.green;
-          isComplete2.value = true;
+          // ✅ phone 있으면 중복/초과 체크 추가
+          if (phone != null && phone.isNotEmpty) {
+            final result = await userCountService(phone, pin1: code, cname: cname);
+            switch (result) {
+              case PhoneCheckResult.available:
+                code2Message.value = '인증되었습니다.';
+                messageColor2.value = Colors.green;
+                isComplete2.value = true;
+              case PhoneCheckResult.duplicate:
+                code2Message.value = '이미 해당 가입코드로 가입이 완료된 전화번호입니다.';
+                messageColor2.value = Colors.red;
+                isComplete2.value = false;
+              case PhoneCheckResult.exceeded:
+                code2Message.value = '더이상 등록하실 수 없습니다.';
+                messageColor2.value = Colors.red;
+                isComplete2.value = false;
+              case PhoneCheckResult.error:
+                code2Message.value = '오류가 발생했습니다.';
+                messageColor2.value = Colors.red;
+                isComplete2.value = false;
+            }
+          } else {
+            // 회원가입 - 코드 유효성만 통과
+            code2Message.value = '인증되었습니다.';
+            messageColor2.value = Colors.green;
+            isComplete2.value = true;
+          }
         } else {
           code2Message.value = '기관에서 발송한 가입코드와 일치하지 않습니다.';
           messageColor2.value = Colors.red;

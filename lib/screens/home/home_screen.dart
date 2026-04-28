@@ -8,11 +8,16 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_ebook_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
+import 'package:hani_booki/_data/mission/mission_data.dart';
 import 'package:hani_booki/_data/notice/notice_list_data.dart';
+import 'package:hani_booki/_data/rank/rank_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/home/home_widgets/home_carousel_slider.dart';
+import 'package:hani_booki/screens/rank/rank_screen.dart';
+import 'package:hani_booki/services/auth/character_list_service.dart';
 import 'package:hani_booki/services/content_star_service.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
+import 'package:hani_booki/services/rank/rank_service.dart';
 import 'package:hani_booki/services/record/report_read_service.dart';
 import 'package:hani_booki/utils/badge_controller.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -21,6 +26,7 @@ import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
+import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
 import 'package:badges/badges.dart' as badges;
@@ -36,7 +42,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   UserHaniDataController haniData = UserHaniDataController();
   UserBookiDataController bookiData = UserBookiDataController();
   final bgmController = Get.find<BgmController>();
@@ -48,6 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final BadgeController badgeController = Get.put(BadgeController());
   final GlobalKey logoKey = GlobalKey();
   final GlobalKey carouselKey = GlobalKey();
+
+  late AnimationController _floatController;
+  late Animation<double> _floatAnimation;
+
   String type = '';
   String keyCode = '';
 
@@ -72,12 +82,28 @@ class _HomeScreenState extends State<HomeScreen> {
       bookiData = Get.put(UserBookiDataController());
     }
 
+    _floatController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _floatAnimation = Tween<double>(begin: -6.0, end: 6.0).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
+
+    characterListService();
+
     Future.delayed(Duration(milliseconds: 500), () {
       setState(() {
         _currentIndex = 0; // 3에서 0으로 변경
       });
       _checkAndShowDialog();
     });
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkAndShowDialog() async {
@@ -105,16 +131,13 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         child: Container(
-          width: screenWidth > 1000
-              ? MediaQuery.of(context).size.width * 0.15.w
-              : MediaQuery.of(context).size.width * 0.25.w,
-          height: screenWidth > 1000
-              ? MediaQuery.of(context).size.height * 0.5.h
-              : MediaQuery.of(context).size.height * 0.75.h,
+          width: screenWidth > 1000 ? MediaQuery.of(context).size.width * 0.15.w : MediaQuery.of(context).size.width * 0.25.w,
+          height: screenWidth > 1000 ? MediaQuery.of(context).size.height * 0.5.h : MediaQuery.of(context).size.height * 0.75.h,
           padding: EdgeInsets.all(8),
           child: Stack(
             children: [
@@ -169,8 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             padding: EdgeInsets.symmetric(horizontal: 100, vertical: 12),
                           ),
-                          child: Text('보러가기',
-                              style: TextStyle(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.bold)),
+                          child: Text('보러가기', style: TextStyle(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       SizedBox(height: 40.h),
@@ -301,9 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: SizedBox(
                                             height: constraints.maxWidth * 0.15,
                                             child: Image.asset(
-                                              _currentIndex == 0
-                                                  ? 'assets/images/hani/hani_logo_co.png'
-                                                  : 'assets/images/hani/hani_logo_co.png',
+                                              _currentIndex == 0 ? 'assets/images/hani/hani_logo_co.png' : 'assets/images/hani/hani_logo_co.png',
                                             ),
                                           ),
                                         ),
@@ -360,9 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           height: constraints.maxWidth * 0.15,
                                           alignment: Alignment.center,
                                           child: Image.asset(
-                                            _currentIndex == 1
-                                                ? 'assets/images/booki/booki_logo_co.png'
-                                                : 'assets/images/booki/booki_logo_co.png',
+                                            _currentIndex == 1 ? 'assets/images/booki/booki_logo_co.png' : 'assets/images/booki/booki_logo_co.png',
                                             fit: BoxFit.contain,
                                           ),
                                         ),
@@ -377,9 +395,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           flex: 1,
                           child: GestureDetector(
-                            // onTap: () {
-                            // _showRecordDialog("08");
-                            // },
                             onTap: () async {
                               if (keyCode.isEmpty) {
                                 oneButtonDialog(
@@ -401,9 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Center(
                               child: SizedBox(
                                   height: screenHeight * 0.25,
-                                  child: Image.asset(_currentIndex == 1
-                                      ? 'assets/images/icons/main_report2.png'
-                                      : 'assets/images/icons/main_report1.png')),
+                                  child: Image.asset(_currentIndex == 1 ? 'assets/images/icons/main_report2.png' : 'assets/images/icons/main_report1.png')),
                             ),
                           ),
                         )
@@ -415,8 +428,39 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 flex: 3,
                 child: Center(
-                  child: Lottie.asset(_currentIndex == 1 ? 'assets/lottie/booki.json' : 'assets/lottie/hani.json',
-                      fit: BoxFit.contain),
+                  child: Stack(
+                    children: [
+                      Lottie.asset(_currentIndex == 1 ? 'assets/lottie/booki.json' : 'assets/lottie/hani.json', fit: BoxFit.contain),
+                      // SizedBox(width: double.infinity, child: Image.asset('assets/images/hani.png', scale: 2)),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: AnimatedBuilder(
+                          animation: _floatAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(0, _floatAnimation.value),
+                              child: child,
+                            );
+                          },
+                          child: GestureDetector(
+                            onTap: () async {
+                              String hosu = keyCode.substring(2, 4);
+                              if (!Get.isRegistered<RankDataController>()) {
+                                Get.put(RankDataController());
+                              }
+                              await rankService(hosu);
+                              Get.to(() => RankScreen(hosu: hosu));
+                            },
+                            child: Image.asset(
+                              'assets/images/rank/rank.png',
+                              scale: screenWidth > 1000 ? 7 : 10,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
               Expanded(

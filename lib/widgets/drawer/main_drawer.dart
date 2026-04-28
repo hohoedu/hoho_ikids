@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/character_data.dart';
 import 'package:hani_booki/_data/auth/user_booki_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
@@ -11,6 +13,8 @@ import 'package:hani_booki/screens/record/record_home_school/record_home_school_
 import 'package:hani_booki/screens/record/record_screen.dart';
 import 'package:hani_booki/screens/setting/setting_screen.dart';
 import 'package:hani_booki/screens/setting/setting_widgets/setting_terms.dart';
+import 'package:hani_booki/services/auth/character_list_service.dart';
+import 'package:hani_booki/services/auth/character_select_service.dart';
 import 'package:hani_booki/services/auth/logout.dart';
 import 'package:hani_booki/services/content_star_service.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
@@ -19,6 +23,7 @@ import 'package:hani_booki/services/record/hani/hani_record_home_service.dart';
 import 'package:hani_booki/utils/badge_controller.dart';
 import 'package:hani_booki/utils/get_record_list.dart';
 import 'package:hani_booki/utils/get_user_code.dart';
+import 'package:hani_booki/widgets/character_select_dialog.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
 import 'package:logger/logger.dart';
@@ -44,6 +49,7 @@ class _MainDrawerState extends State<MainDrawer> {
   UserBookiDataController bookiData = UserBookiDataController();
   final userDataController = Get.find<UserDataController>();
   final BadgeController badgeController = Get.put(BadgeController());
+  ScaffoldState? _scaffoldState;
 
   String truncateUsername(String username, int maxLength) {
     if (username.length <= maxLength) {
@@ -65,12 +71,18 @@ class _MainDrawerState extends State<MainDrawer> {
     }
 
     badgeController.initHive(userDataController.userData!.id);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _scaffoldState = Scaffold.maybeOf(context);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final userData = Get.find<UserDataController>();
-
+    _scaffoldState = Scaffold.maybeOf(context);
     bool isManager = userData.userData!.userType == 'M';
     String keyCode = '';
     if (widget.type == 'hani') {
@@ -95,12 +107,35 @@ class _MainDrawerState extends State<MainDrawer> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      child: widget.type == 'hani'
-                          ? Image.asset('assets/images/icons/hani.png')
-                          : Image.asset('assets/images/icons/booki.png'),
+                    GestureDetector(
+                      onTap: () async {
+                        Navigator.pop(context);
+                        if (!mounted) return;
+                        await characterListService();
+
+                        final characterController = Get.find<CharacterDataController>();
+
+                        final selected = await showCharacterSelectDialog(
+                          Get.context!,
+                          initialCharacter: characterController.myCharacter.value,
+                        );
+                        if (selected != null) {
+                          await characterSaveService(selected);
+                        } else {
+                          _scaffoldState?.openEndDrawer();
+                        }
+                      },
+                      child: GetBuilder<CharacterDataController>(
+                        builder: (ctrl) {
+                          final character = ctrl.myCharacter;
+                          Logger().d(character);
+                          return SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: Image.network('https://hohoeduimg.speedgabia.com/hohoeduapp/character/$character.png'),
+                          );
+                        },
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -108,9 +143,7 @@ class _MainDrawerState extends State<MainDrawer> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            !isManager
-                                ? '${userData.userData!.username} 어린이'
-                                : truncateUsername('${userData.userData!.username} 어린이', 6),
+                            !isManager ? '${userData.userData!.username} 어린이' : truncateUsername('${userData.userData!.username} 어린이', 6),
                             style: TextStyle(color: fontMain, fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           Text(

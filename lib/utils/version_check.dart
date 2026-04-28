@@ -70,7 +70,7 @@ class _EntryPointState extends State<EntryPoint> {
         } else if (snapshot.hasError) {
           return Scaffold(
             body: Center(
-              child: Text('버전 확인 중 오류 발생'),
+              child: Text('네트워크를 확인 후 다시 시도해주세요.'),
             ),
           );
         } else {

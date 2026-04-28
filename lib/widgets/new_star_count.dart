@@ -30,7 +30,7 @@ class NewStarCount extends StatelessWidget {
       },
       child: Container(
         width: screenWidth >= 1000 ? constraints.maxWidth * 0.75 : constraints.maxWidth * 0.83,
-        height: screenWidth >= 1000 ? constraints.maxHeight * 0.15 : constraints.maxHeight * 0.28,
+        height: screenWidth >= 1000 ? constraints.maxHeight * 0.15 : constraints.maxHeight * 0.28 ,
         decoration: BoxDecoration(
           color: Color(0xFFFFDE00),
           borderRadius: BorderRadius.circular(15),

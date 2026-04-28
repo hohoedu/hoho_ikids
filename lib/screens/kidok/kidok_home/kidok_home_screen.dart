@@ -17,6 +17,7 @@ import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/custom_text.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
+import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
 class KidokHomeScreen extends StatefulWidget {
@@ -55,6 +56,54 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
     super.initState();
     bgmController.playBgm('kidok');
     getType(widget.keyCode);
+    _checkFirstVisit();
+  }
+
+  Future<void> _checkFirstVisit() async {
+    final box = Hive.box('settings');
+    final bool hasVisited = box.get('kidok_home_visited', defaultValue: false);
+
+    if (!hasVisited) {
+      await box.put('kidok_home_visited', true);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showWelcomePopup();
+      });
+    }
+  }
+
+  void _showWelcomePopup() {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.1,
+          ),
+          backgroundColor: Colors.transparent,
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/kidok/kidok_desc_radius.png',
+                fit: BoxFit.contain,
+              ),
+              Positioned(
+                top: 20.h,
+                right: 10.w,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Image.asset(
+                    'assets/images/rank/rank_cancel.png',
+                    scale: 6,
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -104,18 +153,14 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
                               ? MediaQuery.of(context).size.height * 0.12
                               : MediaQuery.of(context).size.height * 0.3,
                           decoration: BoxDecoration(
-                            color: Color(kidokThemeController
-                                .kidokThemeData!.subjectColor),
+                            color: Color(kidokThemeController.kidokThemeData!.subjectColor),
                             borderRadius: BorderRadius.circular(100),
                           ),
                           child: Center(
                             child: Text(
                               kidokThemeController.kidokThemeData!.subject,
                               style: TextStyle(
-                                  fontSize: 8.sp,
-                                  color: fontWhite,
-                                  fontFamily: 'BMJUA',
-                                  fontWeight: FontWeight.bold),
+                                  fontSize: 8.sp, color: fontWhite, fontFamily: 'BMJUA', fontWeight: FontWeight.bold),
                               softWrap: false,
                             ),
                           ),
@@ -132,13 +177,10 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final cardWidth = constraints.maxWidth * 0.2;
-                      final cardLength =
-                          kidokMainController.kidokMainDataList.length;
+                      final cardLength = kidokMainController.kidokMainDataList.length;
                       return Stack(
                         children: [
                           Positioned(
-                            top: 0,
-                            bottom: 0,
                             right: cardLength == 2
                                 ? cardWidth * 1.5 + cardWidth
                                 : cardLength == 3
@@ -149,97 +191,87 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
                                 : cardLength == 3
                                     ? cardWidth / 2
                                     : 0,
-                            child: Container(
-                              width: constraints.maxWidth * 0.3,
-                              decoration: BoxDecoration(
-                                color: Color(kidokThemeController
-                                    .kidokThemeData!.boxColor),
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 24.0,
-                                  horizontal: 16.0,
-                                ),
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        OutlinedText(
-                                          text: '이번 달의',
-                                          fillColor: Color(kidokThemeController
-                                              .kidokThemeData!.textColor),
-                                          outlineColor: fontWhite,
-                                          outlineWidth: 2.sp,
-                                          fontSize: 11.sp,
-                                        ),
-                                        OutlinedText(
-                                          text: '키독활동',
-                                          fillColor: Color(kidokThemeController
-                                              .kidokThemeData!.textColor),
-                                          outlineColor: fontWhite,
-                                          outlineWidth: 2.sp,
-                                          fontSize: 11.sp,
-                                        ),
-                                        OutlinedText(
-                                          text: kidokThemeController
-                                              .kidokThemeData!.goal,
-                                          fillColor: Color(kidokThemeController
-                                              .kidokThemeData!.goalTextColor),
-                                          outlineColor: fontWhite,
-                                          outlineWidth: 2.sp,
-                                          fontSize: 5.sp,
-                                        ),
-                                      ],
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.7,
+                                child: Container(
+                                  width: constraints.maxWidth * 0.3,
+                                  decoration: BoxDecoration(
+                                    color: Color(kidokThemeController.kidokThemeData!.boxColor),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 24.0,
+                                      horizontal: 16.0,
                                     ),
-                                    Row(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Expanded(
-                                          flex: 1,
-                                          child: GestureDetector(
-                                            onTap: () async {
-                                              int lastIndex =
-                                                  kidokBookcaseController
-                                                          .kidokBookcaseDataList
-                                                          .length -
-                                                      1;
-                                              await kidokSublistService(
-                                                kidokBookcaseController
-                                                    .kidokBookcaseDataList[
-                                                        lastIndex]
-                                                    .volume,
-                                                widget.keyCode,
-                                              );
-                                              await kidokChartService(
-                                                kidokBookcaseController
-                                                    .kidokBookcaseDataList[
-                                                        lastIndex]
-                                                    .volume,
-                                                widget.keyCode,
-                                              );
-                                              Get.to(
-                                                () => KidokMainScreen(
-                                                  type: type,
-                                                  keyCode: widget.keyCode,
-                                                  isSibling: widget.isSibling,
-                                                ),
-                                              );
-                                            },
-                                            child: Image.asset(
-                                              'assets/images/kidok.png',
-                                              fit: BoxFit.contain,
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            OutlinedText(
+                                              text: '이번 달의',
+                                              fillColor: Color(kidokThemeController.kidokThemeData!.textColor),
+                                              outlineColor: fontWhite,
+                                              outlineWidth: 2.sp,
+                                              fontSize: 11.sp,
                                             ),
-                                          ),
+                                            OutlinedText(
+                                              text: '키독활동',
+                                              fillColor: Color(kidokThemeController.kidokThemeData!.textColor),
+                                              outlineColor: fontWhite,
+                                              outlineWidth: 2.sp,
+                                              fontSize: 11.sp,
+                                            ),
+                                            OutlinedText(
+                                              text: kidokThemeController.kidokThemeData!.goal,
+                                              fillColor: Color(kidokThemeController.kidokThemeData!.goalTextColor),
+                                              outlineColor: fontWhite,
+                                              outlineWidth: 2.sp,
+                                              fontSize: 5.sp,
+                                            ),
+                                          ],
                                         ),
-                                        Spacer(flex: 1),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: GestureDetector(
+                                                onTap: () async {
+                                                  int lastIndex =
+                                                      kidokBookcaseController.kidokBookcaseDataList.length - 1;
+                                                  await kidokSublistService(
+                                                    kidokBookcaseController.kidokBookcaseDataList[lastIndex].volume,
+                                                    widget.keyCode,
+                                                  );
+                                                  await kidokChartService(
+                                                    kidokBookcaseController.kidokBookcaseDataList[lastIndex].volume,
+                                                    widget.keyCode,
+                                                  );
+                                                  Get.to(
+                                                    () => KidokMainScreen(
+                                                      type: type,
+                                                      keyCode: widget.keyCode,
+                                                      isSibling: widget.isSibling,
+                                                    ),
+                                                  );
+                                                },
+                                                child: Image.asset(
+                                                  'assets/images/kidok.png',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                            Spacer(flex: 1),
+                                          ],
+                                        ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -258,14 +290,18 @@ class _KidokHomeScreenState extends State<KidokHomeScreen> {
                                 children: kidokMainController.kidokMainDataList
                                     .asMap()
                                     .entries
-                                    .map((entry) => SizedBox(
-                                          width: constraints.maxWidth * 0.2,
-                                          height: constraints.maxHeight * 0.8,
-                                          child: KidokMainCard(
-                                            index: entry.key,
-                                            keycode: widget.keyCode,
-                                          ),
-                                        ))
+                                    .map(
+                                      (entry) => SizedBox(
+                                        width: constraints.maxWidth * 0.2,
+                                        height: constraints.maxHeight * 0.9,
+                                        child: KidokMainCard(
+                                          index: entry.key,
+                                          keycode: widget.keyCode,
+                                          boxColor: Color(kidokThemeController.kidokThemeData!.boxColor),
+                                          isLast: entry.key == kidokMainController.kidokMainDataList.length - 1,
+                                        ),
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),

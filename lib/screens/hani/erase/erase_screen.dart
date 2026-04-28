@@ -5,8 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/hani/hani_erase_data.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -22,7 +24,7 @@ class EraseScreen extends StatefulWidget {
   State<EraseScreen> createState() => _EraseScreenState();
 }
 
-class _EraseScreenState extends State<EraseScreen> {
+class _EraseScreenState extends State<EraseScreen> with TickerProviderStateMixin, StarEventMixin<EraseScreen> {
   final bgmController = Get.find<BgmController>();
   final eraseData = Get.find<HaniEraseDataController>();
   bool _isScratched = false;
@@ -43,14 +45,18 @@ class _EraseScreenState extends State<EraseScreen> {
     _audioPlayer = AudioPlayer();
     remainingGroups = List.from(eraseData.getGroupedData());
     getRandomGroup();
+    initStarEventFromServer(
+      btype: 'H',
+      hosu: widget.keyCode.substring(2, 4),
+      gb: 'clean',
+    );
   }
 
   Future<void> _playSoundAndTransition(String url) async {
     try {
       await _audioPlayer.setUrl(url);
       await _audioPlayer.play();
-      await _audioPlayer.processingStateStream
-          .firstWhere((state) => state == ProcessingState.completed);
+      await _audioPlayer.processingStateStream.firstWhere((state) => state == ProcessingState.completed);
     } catch (e) {
       Logger().e('음성 재생 중 오류 발생: $e');
     }
@@ -79,6 +85,12 @@ class _EraseScreenState extends State<EraseScreen> {
     if (remainingGroups.isEmpty) {
       await Future.delayed(Duration(milliseconds: 300));
       await starUpdateService('clean', widget.keyCode);
+      final result = await missionSaveService(missionNum: 2, gb: 'clean', keycode: widget.keyCode);
+
+      if (result.success) {
+        await showStampDialog(widget.keyCode);
+      }
+
       lottieDialog(
         onMain: () {
           Get.back();
@@ -127,53 +139,58 @@ class _EraseScreenState extends State<EraseScreen> {
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 16.0),
-          child: AnimatedSwitcher(
-            duration: Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: Scratcher(
-              key: _scratcherKey,
-              brushSize: 30.sp,
-              threshold: 80,
-              onChange: (value) {
-                setState(() {
-                  _scratchPercentage = value;
-                });
-                if (value >= 80 && !_isScratched) {
-                  setState(() {
-                    _isScratched = true;
-                  });
-                  _playSoundAndTransition(currentGroup[currentIndex].voicePath);
-                }
-              },
-              onThreshold: () async {
-                if (!_isScratched) {
-                  setState(() {
-                    _isScratched = true;
-                  });
-                  _playSoundAndTransition(currentGroup[currentIndex].voicePath);
-                }
-              },
-              color: Colors.transparent,
-              image: _isScratched
-                  ? null
-                  : Image.asset(
-                      'assets/images/hani/erase_front.png',
-                      fit: BoxFit.contain,
-                    ),
-              child: currentGroup.isNotEmpty
-                  ? Image.network(
-                      currentGroup[currentIndex].imagePath,
-                      fit: BoxFit.contain,
-                    )
-                  : Container(),
+      body: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 16.0),
+              child: AnimatedSwitcher(
+                duration: Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: Scratcher(
+                  key: _scratcherKey,
+                  brushSize: 30.sp,
+                  threshold: 80,
+                  onChange: (value) {
+                    setState(() {
+                      _scratchPercentage = value;
+                    });
+                    if (value >= 80 && !_isScratched) {
+                      setState(() {
+                        _isScratched = true;
+                      });
+                      _playSoundAndTransition(currentGroup[currentIndex].voicePath);
+                    }
+                  },
+                  onThreshold: () async {
+                    if (!_isScratched) {
+                      setState(() {
+                        _isScratched = true;
+                      });
+                      _playSoundAndTransition(currentGroup[currentIndex].voicePath);
+                    }
+                  },
+                  color: Colors.transparent,
+                  image: _isScratched
+                      ? null
+                      : Image.asset(
+                          'assets/images/hani/erase_front.png',
+                          fit: BoxFit.contain,
+                        ),
+                  child: currentGroup.isNotEmpty
+                      ? Image.network(
+                          currentGroup[currentIndex].imagePath,
+                          fit: BoxFit.contain,
+                        )
+                      : Container(),
+                ),
+              ),
             ),
           ),
-        ),
+          ...buildStarWidgets(),
+        ],
       ),
     );
   }

@@ -19,7 +19,6 @@ Future<void> totalStarService(keyCode) async {
     'keycode': keyCode,
     'yy': userData.userData!.year,
   };
-  Logger().d(requestData);
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));

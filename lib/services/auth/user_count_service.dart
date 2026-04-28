@@ -4,47 +4,62 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
+import 'package:hani_booki/_data/auth/join_dto.dart';
 import 'package:hani_booki/utils/text_format.dart';
 import 'package:logger/logger.dart';
 
-// 전화번호에 가입된 유저 수
-Future<String> userCountService(String phone) async {
-  String url = dotenv.get('USER_COUNT_URL');
+enum PhoneCheckResult {
+  available,
+  duplicate,
+  exceeded,
+  error,
+}
 
-  final currentYear = DateTime
-      .now()
-      .year;
+// 전화번호에 가입된 유저 수
+Future<PhoneCheckResult> userCountService(String phone, {String? pin1, String? pin2, String? cname}) async {
+  String url = dotenv.get('USER_COUNT_URL');
+  final currentYear = DateTime.now().year;
+
+  if (pin1 == null || cname == null) {
+    JoinController joinController = Get.find();
+    pin1 = joinController.joinDTO.value.classCode1;
+    pin2 = joinController.joinDTO.value.classCode2;
+    cname = joinController.joinDTO.value.username;
+  }
 
   final Map<String, dynamic> requestData = {
     'yy': currentYear,
     'ptel': removeHyphen(phone),
+    'pin1': pin1,
+    'pin2': pin2 ?? '',
+    'cname': cname,
   };
   Logger().d(requestData);
   // HTTP POST 요청
-  final response = await dio.post(url, data: jsonEncode(requestData));
   try {
-    // 응답을 성공적으로 받았을 때
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> result = json.decode(response.data);
-      final resultValue = result['result'];
-      Logger().d(result['telcount']);
-      // 응답 데이터가 오류일 때("9999": 오류)
-      if (resultValue == "9999") {
-        final String message = result['message'];
-        return message;
-      }
-      Logger().d(result['telcount']);
-      return result['telcount'];
-    }
-    Logger().d('message');
-    return '응답완료';
-  }
+    final response = await dio.post(url, data: jsonEncode(requestData));
 
-  // 예외처리
-  catch (e) {
-    Logger().d('e = $e');
+    Logger().d(response);
+
+    if (response.statusCode != 200) return PhoneCheckResult.error;
+
+    final Map<String, dynamic> result = json.decode(response.data);
+
+    if (result['result'] == "9999") return PhoneCheckResult.error;
+
+    if (result['result'] == "0000") {
+      final int telCount = int.tryParse(result['telcount'].toString()) ?? 0;
+
+      if (result['keydouble'] == '1') return PhoneCheckResult.duplicate;
+      if (telCount >= 4) return PhoneCheckResult.exceeded;
+      return PhoneCheckResult.available;
+    }
+
+    return PhoneCheckResult.error;
+  } catch (e) {
+    Logger().e('userCountService Error: $e');
+    return PhoneCheckResult.error;
   }
-  return '';
 }
 
 class UserCountController extends GetxController {
@@ -58,15 +73,25 @@ class UserCountController extends GetxController {
       messageColor.value = Colors.red;
       return;
     }
-    final validationMessage = await userCountService(phone);
-    if (int.parse(validationMessage) < 4) {
-      message.value = '사용 가능한 전화번호입니다.';
-      messageColor.value = Colors.green;
-      isComplete.value = true;
-    } else {
-      message.value = '더이상 등록하실 수 없습니다.';
-      messageColor.value = Colors.red;
-      isComplete.value = false;
+    final result = await userCountService(phone);
+    Logger().d('result = $result');
+    switch (result) {
+      case PhoneCheckResult.available:
+        message.value = '사용 가능한 전화번호입니다.';
+        messageColor.value = Colors.green;
+        isComplete.value = true;
+      case PhoneCheckResult.duplicate:
+        message.value = '이미 해당 가입코드로 가입이 완료된 전화번호입니다.';
+        messageColor.value = Colors.red;
+        isComplete.value = false;
+      case PhoneCheckResult.exceeded:
+        message.value = '더이상 등록하실 수 없습니다.';
+        messageColor.value = Colors.red;
+        isComplete.value = false;
+      case PhoneCheckResult.error:
+        message.value = '오류가 발생했습니다.';
+        messageColor.value = Colors.red;
+        isComplete.value = false;
     }
   }
 

@@ -8,8 +8,10 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/booki/booki_stroke_data.dart';
 import 'package:hani_booki/screens/booki/booki_stroke/booki_stroke_widgets/booki_stroke_word.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -24,7 +26,7 @@ class BookiStrokeScreen extends StatefulWidget {
   State<BookiStrokeScreen> createState() => _BookiStrokeScreenState();
 }
 
-class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
+class _BookiStrokeScreenState extends State<BookiStrokeScreen> with TickerProviderStateMixin, StarEventMixin<BookiStrokeScreen> {
   final bgmController = Get.find<BgmController>();
   final strokeData = Get.find<BookiStrokeDataController>();
   final ValueNotifier<bool> resetNotifier = ValueNotifier(false);
@@ -51,6 +53,7 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
     bgmController.playBgm('booki_write');
     _audioPlayer = AudioPlayer();
     _updateNote();
+    initStarEventFromServer(btype: 'B', hosu: widget.keyCode.substring(2, 4), gb: 'write');
   }
 
   Future<void> _playSound(String url) async {
@@ -93,7 +96,11 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
     totalCompletedIndex++;
 
     if (totalCompletedIndex >= strokeData.bookiStrokeDataList.length) {
-      starUpdateService('write', widget.keyCode);
+      await starUpdateService('write', widget.keyCode);
+      final result = await missionSaveService(missionNum: 2, gb: 'write', keycode: widget.keyCode);
+      if (result.success) {
+        await showStampDialog(widget.keyCode);
+      }
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {
           isDialogShown = true;
@@ -155,118 +162,120 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
       ),
       body: isDialogShown
           ? Container()
-          : Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(color: Color(0xFFE7610B), fontSize: 32, fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: '$totalCompletedIndex',
-                            ),
-                            TextSpan(
-                                text: ' / ${strokeData.bookiStrokeDataList.length}', style: TextStyle(color: fontMain)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 8,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: ClipRect(
-                        child: Center(
-                          child: AspectRatio(
-                            aspectRatio: 3 / 5,
-                            child: BookiStrokeWord(
-                              strokeController: strokeData,
-                              currentIndex: currentIndex,
-                              resetNotifier: resetNotifier,
-                              onComplete: _completeWord,
-                              isPointerShown: isPointerShown,
-                              strokeColor: bookiStrokeColors[strokeIndex],
+          : Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(color: Color(0xFFE7610B), fontSize: 32, fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                  text: '$totalCompletedIndex',
+                                ),
+                                TextSpan(text: ' / ${strokeData.bookiStrokeDataList.length}', style: TextStyle(color: fontMain)),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    // child: Container(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(color: Color(0xFFE7610B), borderRadius: BorderRadius.circular(10)),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                            child: Text(
-                              strokeData.bookiStrokeDataList[currentIndex].phonetic,
-                              style: TextStyle(
-                                color: fontWhite,
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
+                      Expanded(
+                        flex: 8,
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: ClipRect(
+                            child: Center(
+                              child: AspectRatio(
+                                aspectRatio: 3 / 5,
+                                child: BookiStrokeWord(
+                                  strokeController: strokeData,
+                                  currentIndex: currentIndex,
+                                  resetNotifier: resetNotifier,
+                                  onComplete: _completeWord,
+                                  isPointerShown: isPointerShown,
+                                  strokeColor: bookiStrokeColors[strokeIndex],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                _onPrevWord();
-                              },
-                              child: currentIndex > 0
-                                  ? Icon(
-                                      Icons.skip_previous,
-                                      size: 50,
-                                      color: fontWhite,
-                                    )
-                                  : SizedBox.shrink(),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                _onResetTracing();
-                              },
-                              child: Icon(Icons.refresh, size: 50, color: fontWhite),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                _onNextWord();
-                              },
-                              child: strokeData.bookiStrokeDataList.length - 1 > currentIndex
-                                  ? Icon(Icons.skip_next, size: 50, color: fontWhite)
-                                  : SizedBox.shrink(),
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                  )
-                ],
-              ),
+                      Expanded(
+                        flex: 1,
+                        // child: Container(),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(color: Color(0xFFE7610B), borderRadius: BorderRadius.circular(10)),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                child: Text(
+                                  strokeData.bookiStrokeDataList[currentIndex].phonetic,
+                                  style: TextStyle(
+                                    color: fontWhite,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _onPrevWord();
+                                  },
+                                  child: currentIndex > 0
+                                      ? Icon(
+                                          Icons.skip_previous,
+                                          size: 50,
+                                          color: fontWhite,
+                                        )
+                                      : SizedBox.shrink(),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _onResetTracing();
+                                  },
+                                  child: Icon(Icons.refresh, size: 50, color: fontWhite),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _onNextWord();
+                                  },
+                                  child: strokeData.bookiStrokeDataList.length - 1 > currentIndex ? Icon(Icons.skip_next, size: 50, color: fontWhite) : SizedBox.shrink(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                ...buildStarWidgets(),
+              ],
             ),
     );
   }
@@ -283,6 +292,7 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> {
         DeviceOrientation.landscapeLeft,
       ]);
     }
+    disposeStarEvent();
     super.dispose();
   }
 }

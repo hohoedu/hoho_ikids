@@ -8,8 +8,10 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/hani/hani_stroke_data.dart';
 import 'package:hani_booki/screens/hani/hani_stroke/hani_stroke_widgets/hani_stroke_word.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -24,7 +26,7 @@ class HaniStrokeScreen extends StatefulWidget {
   State<HaniStrokeScreen> createState() => _HaniStrokeScreenState();
 }
 
-class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
+class _HaniStrokeScreenState extends State<HaniStrokeScreen> with TickerProviderStateMixin, StarEventMixin<HaniStrokeScreen> {
   final bgmController = Get.find<BgmController>();
   final strokeData = Get.find<HaniStrokeDataController>();
   final ValueNotifier<bool> resetNotifier = ValueNotifier(false);
@@ -51,6 +53,8 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
     bgmController.playBgm('hani_write');
     _audioPlayer = AudioPlayer();
     _updateNote();
+
+    initStarEventFromServer(btype: 'H', hosu: widget.keyCode.substring(2, 4), gb: 'write');
   }
 
   Future<void> _playSound(String url) async {
@@ -93,7 +97,11 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
     _playSound(strokeData.haniStrokeDataList[currentIndex].voicePath);
 
     if (totalCompletedIndex >= strokeData.haniStrokeDataList.length) {
-      starUpdateService('write', widget.keyCode);
+      await starUpdateService('write', widget.keyCode);
+      final result = await missionSaveService(missionNum: 2, gb: 'write', keycode: widget.keyCode);
+      if (result.success) {
+        await showStampDialog(widget.keyCode);
+      }
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {
           isDialogShown = true;
@@ -155,124 +163,125 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
       ),
       body: isDialogShown
           ? Container()
-          : Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(color: Color(0xFFE7610B), fontSize: 32, fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: '$totalCompletedIndex',
-                            ),
-                            TextSpan(
-                                text: ' / ${strokeData.haniStrokeDataList.length}', style: TextStyle(color: fontMain)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 8,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: ClipRect(
-                        child: Center(
-                          child: AspectRatio(
-                            aspectRatio: 3 / 5,
-                            child: HaniStrokeWord(
-                              strokeController: strokeData,
-                              currentIndex: currentIndex,
-                              resetNotifier: resetNotifier,
-                              onComplete: _completeWord,
-                              isPointerShown: isPointerShown,
-                              strokeColor: strokeColors[strokeIndex],
+          : Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(color: Color(0xFFE7610B), fontSize: 32, fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                  text: '$totalCompletedIndex',
+                                ),
+                                TextSpan(text: ' / ${strokeData.haniStrokeDataList.length}', style: TextStyle(color: fontMain)),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          strokeData.haniStrokeDataList[currentIndex].meaning,
-                          // 독 (의미) 표시
-                          style: TextStyle(
-                            color: fontMain,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Container(
-                          decoration: BoxDecoration(color: Color(0xFFE7610B), borderRadius: BorderRadius.circular(10)),
-                          child: Padding(
-                            padding: EdgeInsets.all(2),
-                            child: Text(
-                              strokeData.haniStrokeDataList[currentIndex].phonetic,
-                              // 음 (발음) 표시
-                              style: TextStyle(
-                                color: fontWhite,
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
+                      Expanded(
+                        flex: 8,
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: ClipRect(
+                            child: Center(
+                              child: AspectRatio(
+                                aspectRatio: 3 / 5,
+                                child: HaniStrokeWord(
+                                  strokeController: strokeData,
+                                  currentIndex: currentIndex,
+                                  resetNotifier: resetNotifier,
+                                  onComplete: _completeWord,
+                                  isPointerShown: isPointerShown,
+                                  strokeColor: strokeColors[strokeIndex],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                _onPrevWord();
-                              },
-                              child: currentIndex > 0
-                                  ? Icon(
-                                      Icons.skip_previous,
-                                      size: 50,
-                                      color: fontWhite,
-                                    )
-                                  : SizedBox.shrink(),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                                onTap: _onResetTracing, child: Icon(Icons.refresh, size: 50, color: fontWhite)),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                _onNextWord();
-                              },
-                              child: strokeData.haniStrokeDataList.length - 1 > currentIndex
-                                  ? Icon(Icons.skip_next, size: 50, color: fontWhite)
-                                  : SizedBox.shrink(),
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                  )
-                ],
-              ),
+                      Expanded(
+                        flex: 1,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              strokeData.haniStrokeDataList[currentIndex].meaning,
+                              // 독 (의미) 표시
+                              style: TextStyle(
+                                color: fontMain,
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Container(
+                              decoration: BoxDecoration(color: Color(0xFFE7610B), borderRadius: BorderRadius.circular(10)),
+                              child: Padding(
+                                padding: EdgeInsets.all(2),
+                                child: Text(
+                                  strokeData.haniStrokeDataList[currentIndex].phonetic,
+                                  // 음 (발음) 표시
+                                  style: TextStyle(
+                                    color: fontWhite,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _onPrevWord();
+                                  },
+                                  child: currentIndex > 0
+                                      ? Icon(
+                                          Icons.skip_previous,
+                                          size: 50,
+                                          color: fontWhite,
+                                        )
+                                      : SizedBox.shrink(),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(onTap: _onResetTracing, child: Icon(Icons.refresh, size: 50, color: fontWhite)),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _onNextWord();
+                                  },
+                                  child: strokeData.haniStrokeDataList.length - 1 > currentIndex ? Icon(Icons.skip_next, size: 50, color: fontWhite) : SizedBox.shrink(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                ...buildStarWidgets(),
+              ],
             ),
     );
   }
@@ -289,6 +298,7 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> {
         DeviceOrientation.landscapeLeft,
       ]);
     }
+    disposeStarEvent();
     super.dispose();
   }
 }

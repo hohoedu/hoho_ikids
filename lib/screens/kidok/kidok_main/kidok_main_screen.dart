@@ -1,14 +1,19 @@
 import 'dart:io';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/kidok/kidok_bookcase.data.dart';
 import 'package:hani_booki/_data/kidok/kidok_chart_data.dart';
+import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/bubble_data.dart';
 import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_book_list.dart';
+import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_bubble.dart';
 import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_graph.dart';
 import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_list_view.dart';
+import 'package:hani_booki/screens/kidok/kidok_main/kidok_main_widgets/kidok_tendency.dart';
 import 'package:hani_booki/services/kidok/kidok_chart_service.dart';
 import 'package:hani_booki/services/kidok/kidok_sublist_service.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
@@ -35,7 +40,64 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   List<bool> isSelectedList = [];
   final kidokBookcaseController = Get.find<KidokBookcaseDataController>();
+  final kidokChartController = Get.find<KidokChartDataController>();
   final userData = Get.find<UserDataController>();
+  String currentPage = '1';
+
+  List<BubbleData> getDummyBubbleData() {
+    return [
+      BubbleData(
+        label: '논리',
+        value: kidokChartController.kidokChartDataList[0].knowledge,
+        color: Color(0xFFFFDAD6),
+        textColor: Color(0xFF8B3A3A),
+      ),
+      BubbleData(
+        label: '어휘',
+        value: kidokChartController.kidokChartDataList[0].vocabulary,
+        color: Color(0xFFE0D4F5),
+        textColor: Color(0xFF6A3FA0),
+      ),
+      BubbleData(
+        label: '감정',
+        value: kidokChartController.kidokChartDataList.first.emotion,
+        color: Color(0xFFFFF5C2),
+        textColor: Color(0xFF8B7320),
+      ),
+      BubbleData(
+        label: '사고',
+        value: kidokChartController.kidokChartDataList.first.thought,
+        color: Color(0xFFBEEDD8),
+        textColor: Color(0xFF2E7D5E),
+      ),
+      BubbleData(
+        label: '이해',
+        value: kidokChartController.kidokChartDataList.first.understanding,
+        color: Color(0xFFD4F0C0),
+        textColor: Color(0xFF3A7A2A),
+      ),
+      BubbleData(
+        label: '표현',
+        value: kidokChartController.kidokChartDataList.first.expression,
+        color: Color(0xFFBFE9F5),
+        textColor: Color(0xFF1A6E8A),
+      ),
+    ];
+  }
+
+  List<TopItem> getTendency() {
+    return [
+      kidokChartController.kidokChartDataList.first.top1,
+      kidokChartController.kidokChartDataList.first.top2,
+      kidokChartController.kidokChartDataList.first.top3,
+    ];
+  }
+
+  List<FlSpot> getHosuSpots() {
+    if (kidokChartController.kidokChartDataList.isEmpty) return [];
+    final hosuBooks = kidokChartController.kidokChartDataList.first.hosuBooks;
+    return hosuBooks.map((e) => FlSpot(double.parse(e.hosu), e.count.toDouble())).toList();
+  }
 
   @override
   void initState() {
@@ -45,9 +107,9 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isTablet = MediaQuery.of(context).size.width > 1000;
     return Scaffold(
       key: scaffoldKey,
-      extendBodyBehindAppBar: true,
       endDrawerEnableOpenDragGesture: false,
       backgroundColor: const Color(0xFFF7FFD9),
       appBar: MainAppBar(
@@ -63,7 +125,7 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
       ),
       body: Center(
         child: SizedBox(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
+          width: MediaQuery.of(context).size.width * 0.85,
           child: Row(
             children: [
               Expanded(
@@ -74,7 +136,6 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Column(
                         children: [
-                          SizedBox(height: kToolbarHeight),
                           Expanded(
                             child: ListView.builder(
                               padding: EdgeInsets.zero,
@@ -85,17 +146,15 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
 
                                 return GestureDetector(
                                   onTap: () async {
-                                    Get.delete<KidokChartDataController>();
-                                    await kidokSublistService(
-                                        kidokBookcaseController.kidokBookcaseDataList[reversedIndex].volume,
-                                        widget.keyCode);
+                                    kidokChartController.isLoading.value = true;
+                                    kidokChartController.kidokChartDataList.clear();
+                                    await kidokSublistService(kidokBookcaseController.kidokBookcaseDataList[reversedIndex].volume, widget.keyCode);
                                     await kidokChartService(
                                       kidokBookcaseController.kidokBookcaseDataList[reversedIndex].volume,
                                       widget.keyCode,
                                     );
                                     setState(() {
-                                      isSelectedList = List.generate(kidokBookcaseController.kidokBookcaseDataList.length, (i) => i ==
-                                          index);
+                                      isSelectedList = List.generate(kidokBookcaseController.kidokBookcaseDataList.length, (i) => i == index);
                                     });
                                   },
                                   child: KidokListView(
@@ -122,16 +181,20 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Image.asset(
-                      'assets/images/icons/book.png',
-                      fit: BoxFit.cover,
-                    ),
+                    isTablet
+                        ? Image.asset('assets/images/icons/book.png', fit: BoxFit.cover)
+                        : Row(
+                            children: [
+                              _tabButton('읽은 도서 목록', '1'),
+                              _tabButton('영역별 이해 & 성향', '0'),
+                            ],
+                          ),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
+                        padding: const EdgeInsets.only(bottom: 16.0),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Color(0xFFF7F4EA),
                             borderRadius: BorderRadius.circular(15),
                             boxShadow: [
                               BoxShadow(
@@ -142,12 +205,73 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
                               ),
                             ],
                           ),
-                          child: Row(
-                            children: [
-                              KidokBookList(),
-                              KidokGraph(),
-                            ],
-                          ),
+                          child: isTablet
+                              ? Column(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          KidokBookList(),
+                                          KidokGraph(spots: getHosuSpots()),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Obx(() {
+                                        if (kidokChartController.isLoading.value) {
+                                          return Center(child: CircularProgressIndicator());
+                                        }
+                                        if (kidokChartController.kidokChartDataList.isEmpty) {
+                                          return Center(
+                                            child: Text(
+                                              '학습 데이터가 없습니다.',
+                                              style: TextStyle(fontSize: 7.sp, fontFamily: 'BMJUA'),
+                                            ),
+                                          );
+                                        }
+
+                                        final bubbleData = getDummyBubbleData();
+                                        final isPerfect = bubbleData.every((b) => b.value == 100);
+
+                                        return Row(
+                                          children: [
+                                            KidokBubble(bubbleData: bubbleData),
+                                            KidokTendency(tendency: getTendency(), isPerfect: isPerfect),
+                                          ],
+                                        );
+                                      }),
+                                    ),
+                                  ],
+                                )
+                              : currentPage == '1'
+                                  ? Row(
+                                      children: [
+                                        KidokBookList(),
+                                        KidokGraph(spots: getHosuSpots()),
+                                      ],
+                                    )
+                                  : Obx(() {
+                                      if (kidokChartController.isLoading.value) {
+                                        return const Center(child: CircularProgressIndicator());
+                                      }
+                                      if (kidokChartController.kidokChartDataList.isEmpty) {
+                                        return Center(
+                                          child: Text(
+                                            '학습 데이터가 없습니다.',
+                                            style: TextStyle(fontSize: 7.sp, fontFamily: 'BMJUA'),
+                                          ),
+                                        );
+                                      }
+                                      final bubbleData = getDummyBubbleData();
+                                      final isPerfect = bubbleData.every((b) => b.value == 100);
+
+                                      return Row(
+                                        children: [
+                                          KidokBubble(bubbleData: bubbleData),
+                                          KidokTendency(tendency: getTendency(), isPerfect: isPerfect),
+                                        ],
+                                      );
+                                    }),
                         ),
                       ),
                     ),
@@ -155,6 +279,34 @@ class _KidokMainScreenState extends State<KidokMainScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _tabButton(String label, String page) {
+    final isSelected = currentPage == page;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => currentPage = page),
+        child: Container(
+          height: 40,
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? Color(0xFF3F8F00) : Color(0xFFBAD942),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 7.sp,
+                fontFamily: 'BMJUA',
+                color: isSelected ? Color(0xFFFBFF00) : Colors.white,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ),
         ),
       ),

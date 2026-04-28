@@ -8,9 +8,11 @@ import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_data/booki/booki_find_diff_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_screen.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 
@@ -23,7 +25,7 @@ class FindDiffScreen extends StatefulWidget {
   State<FindDiffScreen> createState() => _FindDiffScreenState();
 }
 
-class _FindDiffScreenState extends State<FindDiffScreen> {
+class _FindDiffScreenState extends State<FindDiffScreen> with TickerProviderStateMixin, StarEventMixin<FindDiffScreen> {
   final bgmController = Get.find<BgmController>();
   final bookiFindDiffController = Get.find<BookiFindDiffDataController>();
 
@@ -40,9 +42,10 @@ class _FindDiffScreenState extends State<FindDiffScreen> {
 
   @override
   void initState() {
+    super.initState();
     SoundManager.playFind();
     bgmController.playBgm('find_diff');
-    super.initState();
+    initStarEventFromServer(btype: 'B', hosu: widget.keyCode.substring(2, 4), gb: 'find');
   }
 
   List<Rect> computeCorrectRegions(double containerWidth, double containerHeight, {required bool isLeft}) {
@@ -100,6 +103,12 @@ class _FindDiffScreenState extends State<FindDiffScreen> {
         if (currentIndex == bookiFindDiffController.bookiFindDiffDataList.length - 1) {
           Future.delayed(const Duration(milliseconds: 500), () async {
             await starUpdateService('find', widget.keyCode);
+            final result = await missionSaveService(missionNum: 2, gb: 'find', keycode: widget.keyCode);
+
+            if (result.success) {
+              await showStampDialog(widget.keyCode);
+            }
+
             lottieDialog(
               onReset: () {
                 Get.back();
@@ -178,306 +187,299 @@ class _FindDiffScreenState extends State<FindDiffScreen> {
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
-      body: Center(
-        child: SizedBox(
-          width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final double containerWidth = constraints.maxWidth / 2 - 16;
-              final double containerHeight = constraints.maxHeight - 16;
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: Platform.isIOS ? MediaQuery.of(context).size.width * 0.85 : double.infinity,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double containerWidth = constraints.maxWidth / 2 - 16;
+                  final double containerHeight = constraints.maxHeight - 16;
 
-              final leftRegions = computeCorrectRegions(containerWidth, containerHeight, isLeft: true);
-              final rightRegions = computeCorrectRegions(containerWidth - 24, containerHeight, isLeft: false);
+                  final leftRegions = computeCorrectRegions(containerWidth, containerHeight, isLeft: true);
+                  final rightRegions = computeCorrectRegions(containerWidth - 24, containerHeight, isLeft: false);
 
-              return Column(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.65,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.65,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Container(
-                                  height: double.infinity,
-                                  width: 50.w,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
-                                      color: Colors.yellow),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/images/icons/search'
-                                        '.png',
-                                        scale: screenWidth >= 1000 ? 1.5 : 2,
+                                Row(
+                                  children: [
+                                    Container(
+                                      height: double.infinity,
+                                      width: 50.w,
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.horizontal(left: Radius.circular(5)), color: Colors.yellow),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/icons/search'
+                                            '.png',
+                                            scale: screenWidth >= 1000 ? 1.5 : 2,
+                                          ),
+                                          Text(
+                                            ' 찾은 개수',
+                                            style: TextStyle(fontSize: 6.5.sp, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        ' 찾은 개수',
-                                        style: TextStyle(fontSize: 6.5.sp, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  height: double.infinity,
-                                  width: 25.w,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-                                      color: Colors.orange),
-                                  child: Center(
-                                    child: Text(
-                                      '$foundCount / '
-                                      '$totalFinds',
-                                      style: TextStyle(color: fontWhite, fontSize: 6.5.sp, fontWeight: FontWeight.bold),
                                     ),
-                                  ),
+                                    Container(
+                                      height: double.infinity,
+                                      width: 25.w,
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.horizontal(right: Radius.circular(5)), color: Colors.orange),
+                                      child: Center(
+                                        child: Text(
+                                          '$foundCount / '
+                                          '$totalFinds',
+                                          style: TextStyle(color: fontWhite, fontSize: 6.5.sp, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      height: double.infinity,
+                                      width: 50.w,
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.horizontal(left: Radius.circular(5)), color: Colors.yellow),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset('assets/images/icons/wrong.png', scale: screenWidth >= 1000 ? 1.5 : 2),
+                                          Text(
+                                            ' 틀린 횟수',
+                                            style: TextStyle(fontSize: 6.5.sp, fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      height: double.infinity,
+                                      width: 25.w,
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.horizontal(right: Radius.circular(5)), color: Colors.pinkAccent),
+                                      child: Center(
+                                        child: Text(
+                                          '$wrongIndex',
+                                          style: TextStyle(color: fontWhite, fontSize: 6.5.sp, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                            Row(
-                              children: [
-                                Container(
-                                  height: double.infinity,
-                                  width: 50.w,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
-                                      color: Colors.yellow),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset('assets/images/icons/wrong.png',
-                                          scale: screenWidth >= 1000 ? 1.5 : 2),
-                                      Text(
-                                        ' 틀린 횟수',
-                                        style: TextStyle(fontSize: 6.5.sp, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  height: double.infinity,
-                                  width: 25.w,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-                                      color: Colors.pinkAccent),
-                                  child: Center(
-                                    child: Text(
-                                      '$wrongIndex',
-                                      style: TextStyle(color: fontWhite, fontSize: 6.5.sp, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 9,
-                    child: LayoutBuilder(
-                      builder: (context, innerConstraints) {
-                        double iconSize = 25.sp;
-                        return Row(
-                          children: [
-                            // 왼쪽 이미지 영역
-                            Expanded(
-                              flex: 10,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: GestureDetector(
-                                  onTapUp: (details) {
-                                    handleTouch(
-                                      details.localPosition,
-                                      isLeft: true,
-                                      regions: leftRegions,
-                                      containerWidth: containerWidth,
-                                      containerHeight: containerHeight,
-                                    );
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Image.network(
-                                          bookiFindDiffController.bookiFindDiffDataList[currentIndex].image_1,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                      // 디버그용: 정답 영역 표시
-                                      // ...leftRegions
-                                      //     .asMap()
-                                      //     .entries
-                                      //     .map((entry) {
-                                      //   final idx = entry.key;
-                                      //   final rect = entry.value;
-                                      //   return Positioned(
-                                      //     left: rect.left,
-                                      //     top: rect.top,
-                                      //     child: Container(
-                                      //       width: rect.width,
-                                      //       height: rect.height,
-                                      //       decoration: BoxDecoration(
-                                      //         border: Border.all(
-                                      //             color: Colors.red, width: 1),
-                                      //       ),
-                                      //       child: Center(
-                                      //         child: Text(
-                                      //           '$idx',
-                                      //           style: TextStyle(
-                                      //               color: Colors.red,
-                                      //               fontSize: 10.sp),
-                                      //         ),
-                                      //       ),
-                                      //     ),
-                                      //   );
-                                      // }).toList(),
-                                      // 정답 영역
-                                      ...foundCorrectIndexes.map((index) {
-                                        double rawLeft = leftRegions[index].center.dx - iconSize / 2;
-                                        double rawTop = leftRegions[index].center.dy - iconSize / 2;
-                                        double leftPos = rawLeft.clamp(0.0, containerWidth - iconSize);
-                                        double topPos = rawTop.clamp(0.0, containerHeight - iconSize);
-                                        return Positioned(
-                                          left: leftPos,
-                                          top: topPos,
-                                          child: SizedBox(
-                                            width: iconSize,
-                                            child: Image.asset(
-                                              'assets/images/icons/correct.png',
+                      Expanded(
+                        flex: 9,
+                        child: LayoutBuilder(
+                          builder: (context, innerConstraints) {
+                            double iconSize = 25.sp;
+                            return Row(
+                              children: [
+                                // 왼쪽 이미지 영역
+                                Expanded(
+                                  flex: 10,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      onTapUp: (details) {
+                                        handleTouch(
+                                          details.localPosition,
+                                          isLeft: true,
+                                          regions: leftRegions,
+                                          containerWidth: containerWidth,
+                                          containerHeight: containerHeight,
+                                        );
+                                      },
+                                      child: Stack(
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Image.network(
+                                              bookiFindDiffController.bookiFindDiffDataList[currentIndex].image_1,
                                               fit: BoxFit.contain,
                                             ),
                                           ),
-                                        );
-                                      }).toList(),
-                                      // 오답 터치 시 빨간 X 아이콘
-                                      if (temporaryWrongOffsetLeft != null)
-                                        Positioned(
-                                          left: (temporaryWrongOffsetLeft!.dx - iconSize / 2)
-                                              .clamp(0.0, containerWidth - iconSize),
-                                          top: (temporaryWrongOffsetLeft!.dy - iconSize / 2)
-                                              .clamp(0.0, containerHeight - iconSize),
-                                          child: Icon(
-                                            Icons.close,
-                                            color: Colors.red,
-                                            size: iconSize,
-                                          ),
-                                        ),
-                                    ],
+                                          // 디버그용: 정답 영역 표시
+                                          // ...leftRegions
+                                          //     .asMap()
+                                          //     .entries
+                                          //     .map((entry) {
+                                          //   final idx = entry.key;
+                                          //   final rect = entry.value;
+                                          //   return Positioned(
+                                          //     left: rect.left,
+                                          //     top: rect.top,
+                                          //     child: Container(
+                                          //       width: rect.width,
+                                          //       height: rect.height,
+                                          //       decoration: BoxDecoration(
+                                          //         border: Border.all(
+                                          //             color: Colors.red, width: 1),
+                                          //       ),
+                                          //       child: Center(
+                                          //         child: Text(
+                                          //           '$idx',
+                                          //           style: TextStyle(
+                                          //               color: Colors.red,
+                                          //               fontSize: 10.sp),
+                                          //         ),
+                                          //       ),
+                                          //     ),
+                                          //   );
+                                          // }).toList(),
+                                          // 정답 영역
+                                          ...foundCorrectIndexes.map((index) {
+                                            double rawLeft = leftRegions[index].center.dx - iconSize / 2;
+                                            double rawTop = leftRegions[index].center.dy - iconSize / 2;
+                                            double leftPos = rawLeft.clamp(0.0, containerWidth - iconSize);
+                                            double topPos = rawTop.clamp(0.0, containerHeight - iconSize);
+                                            return Positioned(
+                                              left: leftPos,
+                                              top: topPos,
+                                              child: SizedBox(
+                                                width: iconSize,
+                                                child: Image.asset(
+                                                  'assets/images/icons/correct.png',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          // 오답 터치 시 빨간 X 아이콘
+                                          if (temporaryWrongOffsetLeft != null)
+                                            Positioned(
+                                              left: (temporaryWrongOffsetLeft!.dx - iconSize / 2).clamp(0.0, containerWidth - iconSize),
+                                              top: (temporaryWrongOffsetLeft!.dy - iconSize / 2).clamp(0.0, containerHeight - iconSize),
+                                              child: Icon(
+                                                Icons.close,
+                                                color: Colors.red,
+                                                size: iconSize,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            const Spacer(flex: 1),
-                            // 오른쪽 이미지 영역 (Align: centerLeft)
-                            Expanded(
-                              flex: 10,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: GestureDetector(
-                                  onTapUp: (details) {
-                                    handleTouch(
-                                      details.localPosition,
-                                      isLeft: false,
-                                      regions: rightRegions,
-                                      containerWidth: containerWidth,
-                                      containerHeight: containerHeight,
-                                    );
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Image.network(
-                                          bookiFindDiffController.bookiFindDiffDataList[currentIndex].image_2,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                      // 디버그용: 정답 영역 표시
-                                      // ...rightRegions
-                                      //     .asMap()
-                                      //     .entries
-                                      //     .map((entry) {
-                                      //   final idx = entry.key;
-                                      //   final rect = entry.value;
-                                      //   return Positioned(
-                                      //     left: rect.left,
-                                      //     top: rect.top,
-                                      //     child: Container(
-                                      //       width: rect.width,
-                                      //       height: rect.height,
-                                      //       decoration: BoxDecoration(
-                                      //         border: Border.all(
-                                      //             color: Colors.red, width: 1),
-                                      //       ),
-                                      //       child: Center(
-                                      //         child: Text(
-                                      //           '$idx',
-                                      //           style: TextStyle(
-                                      //               color: Colors.red,
-                                      //               fontSize: 10.sp),
-                                      //         ),
-                                      //       ),
-                                      //     ),
-                                      //   );
-                                      // }).toList(),
-                                      // 정답 영역
-                                      ...foundCorrectIndexes.map((index) {
-                                        double rawLeft = rightRegions[index].center.dx - iconSize / 2;
-                                        double rawTop = rightRegions[index].center.dy - iconSize / 2;
-                                        double leftPos = rawLeft.clamp(0.0, containerWidth - iconSize);
-                                        double topPos = rawTop.clamp(0.0, containerHeight - iconSize);
-                                        return Positioned(
-                                          left: leftPos,
-                                          top: topPos,
-                                          child: SizedBox(
-                                            width: iconSize,
-                                            child: Image.asset(
-                                              'assets/images/icons/correct.png',
+                                const Spacer(flex: 1),
+                                // 오른쪽 이미지 영역 (Align: centerLeft)
+                                Expanded(
+                                  flex: 10,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      onTapUp: (details) {
+                                        handleTouch(
+                                          details.localPosition,
+                                          isLeft: false,
+                                          regions: rightRegions,
+                                          containerWidth: containerWidth,
+                                          containerHeight: containerHeight,
+                                        );
+                                      },
+                                      child: Stack(
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Image.network(
+                                              bookiFindDiffController.bookiFindDiffDataList[currentIndex].image_2,
                                               fit: BoxFit.contain,
                                             ),
                                           ),
-                                        );
-                                      }).toList(),
-                                      // 오답 터치 시 빨간 X 아이콘
-                                      if (temporaryWrongOffsetRight != null)
-                                        Positioned(
-                                          left: (temporaryWrongOffsetRight!.dx - iconSize / 2)
-                                              .clamp(0.0, containerWidth - iconSize),
-                                          top: (temporaryWrongOffsetRight!.dy - iconSize / 2)
-                                              .clamp(0.0, containerHeight - iconSize),
-                                          child: Icon(
-                                            Icons.close,
-                                            color: Colors.red,
-                                            size: iconSize,
-                                          ),
-                                        ),
-                                    ],
+                                          // 디버그용: 정답 영역 표시
+                                          // ...rightRegions
+                                          //     .asMap()
+                                          //     .entries
+                                          //     .map((entry) {
+                                          //   final idx = entry.key;
+                                          //   final rect = entry.value;
+                                          //   return Positioned(
+                                          //     left: rect.left,
+                                          //     top: rect.top,
+                                          //     child: Container(
+                                          //       width: rect.width,
+                                          //       height: rect.height,
+                                          //       decoration: BoxDecoration(
+                                          //         border: Border.all(
+                                          //             color: Colors.red, width: 1),
+                                          //       ),
+                                          //       child: Center(
+                                          //         child: Text(
+                                          //           '$idx',
+                                          //           style: TextStyle(
+                                          //               color: Colors.red,
+                                          //               fontSize: 10.sp),
+                                          //         ),
+                                          //       ),
+                                          //     ),
+                                          //   );
+                                          // }).toList(),
+                                          // 정답 영역
+                                          ...foundCorrectIndexes.map((index) {
+                                            double rawLeft = rightRegions[index].center.dx - iconSize / 2;
+                                            double rawTop = rightRegions[index].center.dy - iconSize / 2;
+                                            double leftPos = rawLeft.clamp(0.0, containerWidth - iconSize);
+                                            double topPos = rawTop.clamp(0.0, containerHeight - iconSize);
+                                            return Positioned(
+                                              left: leftPos,
+                                              top: topPos,
+                                              child: SizedBox(
+                                                width: iconSize,
+                                                child: Image.asset(
+                                                  'assets/images/icons/correct.png',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          // 오답 터치 시 빨간 X 아이콘
+                                          if (temporaryWrongOffsetRight != null)
+                                            Positioned(
+                                              left: (temporaryWrongOffsetRight!.dx - iconSize / 2).clamp(0.0, containerWidth - iconSize),
+                                              top: (temporaryWrongOffsetRight!.dy - iconSize / 2).clamp(0.0, containerHeight - iconSize),
+                                              child: Icon(
+                                                Icons.close,
+                                                color: Colors.red,
+                                                size: iconSize,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              );
-            },
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
-        ),
+          ...buildStarWidgets(),
+        ],
       ),
     );
   }
 
   @override
   void dispose() {
+    disposeStarEvent();
     super.dispose();
   }
 }

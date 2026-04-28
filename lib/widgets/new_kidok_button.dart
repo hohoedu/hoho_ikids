@@ -23,106 +23,73 @@ class NewKidokButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isSibling = userData.userData!.siblingCount == '1' ? false : true;
-    return Stack(
-      children: [
-        GestureDetector(
-          onTap: () async {
-            await kidokMainService(
-              userData.userData!.year,
-              keycode,
-              isSibling,
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Container(
-              decoration: BoxDecoration(color: Colors.transparent),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Align(
-                      alignment: const Alignment(0.0, 0.5),
-                      child: Column(
-                        children: [
-                          Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()..scale(-1.0, 1.0),
-                            child: Image.asset(
-                              'assets/images/kido.png',
-                              scale: screenWidth >= 1000 ? 1.3 : 2,
+    return GestureDetector(
+      onTap: () async {
+        await kidokMainService(
+          userData.userData!.year,
+          keycode,
+          isSibling,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: Container(
+          decoration: BoxDecoration(color: Colors.transparent),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 16.0),
+                child: Align(
+                  alignment: const Alignment(0.0, 0.5),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: screenWidth >= 1000 ? constraints.maxWidth * 0.75 : constraints.maxWidth * 0.83,
+                        height: screenWidth >= 1000 ? constraints.maxHeight * 0.35 : constraints.maxHeight * 0.35,
+                        decoration: BoxDecoration(
+                          color: Color(kidokThemeController.kidokThemeData!.boxColor),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Image.asset('assets/images/kido_logo_vertical.png'),
                             ),
-                          ),
-                          Container(
-                            width: screenWidth >= 1000 ? constraints.maxWidth * 0.75 : constraints.maxWidth * 0.83,
-                            height: screenWidth >= 1000 ? constraints.maxHeight * 0.35 : constraints.maxHeight * 0.38,
-                            decoration: BoxDecoration(
-                              color: Color(kidokThemeController.kidokThemeData!.boxColor),
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(50),
-                                bottomRight: Radius.circular(50),
+                            Align(
+                              alignment: screenWidth >= 1000 ? Alignment.center : Alignment.bottomCenter,
+                              child: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    color: fontMain,
+                                    fontFamily: 'Cookie',
+                                    fontSize: screenWidth >= 1000 ? 30 : 20,
+                                    height: 1.2,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          type == 'hani' ? '${kidokThemeController.kidokThemeData!.subject}' : '지식\n확장',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                type == 'hani' ? SizedBox.shrink() : Spacer(),
-                                Expanded(
-                                  flex: screenWidth >= 1000 ? 10 : 4,
-                                  child: Align(
-                                    alignment: screenWidth >= 1000 ? Alignment.center : Alignment.bottomCenter,
-                                    child: RichText(
-                                      textAlign: TextAlign.center,
-                                      text: TextSpan(
-                                        style: TextStyle(
-                                          color: fontMain,
-                                          fontFamily: 'Cookie',
-                                          fontSize: screenWidth >= 1000 ? 30 : 20,
-                                          height: 1.2,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                              text: type == 'hani'
-                                                  ? '${kidokThemeController.kidokThemeData!.subject}'
-                                                  : '지식\n확장',
-                                              style: TextStyle(color: Colors.black)),
-                                          TextSpan(
-                                            text: '\n독서활동',
-                                            style: TextStyle(
-                                                color: Color(kidokThemeController.kidokThemeData!.subjectColor),
-                                                // color: Colors.red,
-                                                fontSize: screenWidth >= 1000 ? 25 : 15,
-                                                height: 1.4),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Spacer()
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  Positioned(
-                    bottom: MediaQuery.of(context).size.height * 0.27,
-                    left: 0,
-                    right: 0,
-                    child: Image.asset(
-                      'assets/images/kido_logo_vertical.png',
-                      scale: screenWidth >= 1000 ? 1.5 : 2,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

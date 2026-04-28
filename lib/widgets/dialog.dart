@@ -11,6 +11,7 @@ import 'package:hani_booki/screens/auth/join_widgets/join_once_verification_scre
 import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
 import 'package:hani_booki/services/auth/withdraw_service.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
+import 'package:hani_booki/utils/stamp_effect.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -454,6 +455,342 @@ void showCodeErrorDialog({
   );
 }
 
+Future<void> missionClearDialog() async {
+  await Get.generalDialog(
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black.withOpacity(0.7),
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(flex: 1, child: SizedBox()),
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Text(
+                      '미션을 완료했어요!',
+                      style: TextStyle(fontSize: 9.sp, color: fontWhite, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 10,
+                  child: Image.asset(
+                    'assets/images/star/after_star.png',
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () => Get.back(),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            height: MediaQuery.of(context).size.height * 0.4,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF141414),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '닫기',
+                                style: TextStyle(color: fontWhite, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(flex: 1, child: SizedBox()),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+  Future.delayed(const Duration(seconds: 3), () {
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+  });
+}
+
+Future<void> findStarDialog({required int remainCnt, required int currentCnt}) async {
+  final int totalStars = currentCnt + remainCnt;
+  final int collectedCount = currentCnt;
+
+  await Get.generalDialog(
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(flex: 1, child: SizedBox()),
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Text(
+                      '숨어있는 호호스타를\n발견했어요!',
+                      style: TextStyle(fontSize: 9.sp, color: fontWhite, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 9,
+                  child: Image.asset(
+                    'assets/images/star/after_star.png',
+                    height: MediaQuery.of(context).size.height *0.7,
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () => Get.back(),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height: MediaQuery.of(context).size.height * 0.4,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF141414),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: StampEffect(
+                              totalStars: totalStars,
+                              collectedCount: collectedCount,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(flex: 1, child: SizedBox()),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+  Future.delayed(const Duration(seconds: 3), () {
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+  });
+}
+
+Future<void> findVerticalStarDialog({required int remainCnt, required int currentCnt}) async {
+  final int totalStars = currentCnt + remainCnt;
+  final int collectedCount = currentCnt;
+
+  await Get.generalDialog(
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black26,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(flex: 1, child: SizedBox()),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Text(
+                      '숨어있는 호호스타를\n발견했어요!',
+                      style: TextStyle(fontSize: 32.sp, color: fontWhite, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 5,
+                  child: Image.asset(
+                    'assets/images/star/after_star.png',
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () => Get.back(),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: 65.h,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF141414),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: StampEffect(
+                              totalStars: totalStars,
+                              collectedCount: collectedCount,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(flex: 1, child: SizedBox()),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+  Future.delayed(const Duration(seconds: 3), () {
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+  });
+}
+
+Future<void> showStampDialog(String keycode, {bool isAttendance = false}) async {
+  final bool isHType = ['Y', 'G', 'S'].contains(keycode[0]);
+
+  final String clearImage = isHType ? 'assets/images/mission/mission_clear_h.png' : 'assets/images/mission/mission_clear_b.png';
+
+  final String titleImage = isAttendance
+      ? (isHType ? 'assets/images/mission/title_attendance_h.png' : 'assets/images/mission/title_attendance_b.png')
+      : (isHType ? 'assets/images/mission/title_h.png' : 'assets/images/mission/title_b.png');
+
+  await Get.generalDialog(
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black.withOpacity(0.7),
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Expanded(flex: 1, child: SizedBox()),
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Image.asset(titleImage),
+                  ),
+                ),
+                Expanded(
+                  flex: 9,
+                  child: Image.asset(
+                    clearImage,
+                    height: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ),
+                Spacer(),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () => Get.back(),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.15,
+                            height: MediaQuery.of(context).size.height * 0.1,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF141414),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                                child: Text(
+                              '받기',
+                              style: TextStyle(fontSize: 7.sp, color: fontWhite, fontWeight: FontWeight.bold),
+                            )),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(flex: 1, child: SizedBox()),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+  if (!isAttendance) {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+    });
+  }
+}
+
 void lottieDialog({required VoidCallback onMain, required VoidCallback onReset}) {
   Get.generalDialog(
     // barrierDismissible: true,
@@ -476,8 +813,7 @@ void lottieDialog({required VoidCallback onMain, required VoidCallback onReset})
               children: [
                 Expanded(
                   flex: 7,
-                  child:
-                      Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
+                  child: Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
                 ),
                 Expanded(
                   flex: 1,
@@ -591,8 +927,7 @@ void verticalLottieDialog({required VoidCallback onMain, required VoidCallback o
               children: [
                 Expanded(
                   flex: 5,
-                  child:
-                      Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
+                  child: Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
                 ),
                 Expanded(
                   flex: 1,
@@ -958,11 +1293,7 @@ void showDeleteProtectDialog(BuildContext context, VoidCallback onDeleteConfirme
   );
 }
 
-void showTermsDialog(BuildContext context,
-    {required String title,
-    required String assetTextPath,
-    required VoidCallback onConfirmed,
-    bool useZeroButtonPadding = false}) {
+void showTermsDialog(BuildContext context, {required String title, required String assetTextPath, required VoidCallback onConfirmed, bool useZeroButtonPadding = false}) {
   Future<String> loadText() async {
     return await rootBundle.loadString(assetTextPath);
   }

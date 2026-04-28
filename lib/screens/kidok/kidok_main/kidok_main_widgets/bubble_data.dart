@@ -1,0 +1,123 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class BubbleData {
+  final String label;
+  final double value;
+  final Color color;
+  final Color textColor;
+  Offset position;
+
+  BubbleData({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.textColor,
+    this.position = Offset.zero,
+  });
+
+  BubbleData copy() {
+    return BubbleData(
+      label: label,
+      value: value,
+      color: color,
+      textColor: textColor,
+      position: position,
+    );
+  }
+
+  double get radius => 20 + (value.clamp(0, 100) / 100) * 10.w;
+}
+
+class TopThreePainter extends CustomPainter {
+  final List<BubbleData> data;
+
+  TopThreePainter({super.repaint, required this.data});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    double fixedRadius = 200.0;
+    double distance = fixedRadius * 1.5;
+
+    final top3 = List<BubbleData>.from(data)..sort((a, b) => b.value.compareTo(a.value));
+    top3.length = 3;
+    final angles = [
+      -pi / 2,
+      -pi / 2 + 4 * pi / 3,
+      -pi / 2 + 2 * pi / 3,
+    ];
+
+    for (int j = 2; j >= 0; j--) {
+      final bubble = top3[j];
+      final offset = Offset(cos(angles[j]) * distance * 0.5, sin(angles[j]) * distance * 0.5);
+      final bubbleCenter = center + offset;
+
+      canvas.drawCircle(
+          bubbleCenter,
+          bubble.radius,
+          Paint()
+            ..color = bubble.color
+            ..blendMode = BlendMode.multiply);
+
+      final textSpan = TextSpan(text: '${bubble.label}', style: TextStyle(color: bubble.textColor));
+
+      final textPainter = TextPainter(
+        text: textSpan,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+
+      textPainter.layout(maxWidth: bubble.radius * 2);
+      final textOffset = bubbleCenter - Offset(textPainter.width / 2, textPainter.height / 2);
+      textPainter.paint(canvas, textOffset);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class PerfectPainter extends CustomPainter {
+  final List<BubbleData> data;
+
+  PerfectPainter({super.repaint, required this.data});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    double fixedRadius =40.0;
+    double distance = fixedRadius * 2.2;
+
+    final top6 = List<BubbleData>.from(data)..sort((a, b) => b.value.compareTo(a.value));
+    top6.length = min(6, top6.length);
+
+    final angles = [
+      pi / 2,
+      pi / 2 + pi / 3,
+      pi / 2 + 2 * pi / 3,
+      pi / 2 + pi,
+      pi / 2 + 4 * pi / 3,
+      pi / 2 + 5 * pi / 3,
+    ];
+
+    for (int j = 0; j < top6.length; j++) {
+      final bubble = top6[j];
+      final angle = angles[j];
+      final offset = Offset(cos(angle) * distance * 0.55, sin(angle) * distance * 0.55);
+
+      canvas.drawCircle(
+        center + offset,
+        bubble.radius,
+        Paint()
+          ..color = bubble.color
+          ..blendMode = BlendMode.multiply,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}

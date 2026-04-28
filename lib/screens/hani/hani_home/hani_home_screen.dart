@@ -1,12 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
+import 'package:hani_booki/_data/mission/mission_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_contents.dart';
+import 'package:hani_booki/services/mission/mission_list_service.dart';
 import 'package:hani_booki/services/hani/hani_erase_service.dart';
 import 'package:hani_booki/services/hani/hani_flip_service.dart';
 import 'package:hani_booki/services/hani/hani_goldenbell_service.dart';
@@ -16,14 +19,18 @@ import 'package:hani_booki/services/hani/hani_puzzle_service.dart';
 import 'package:hani_booki/services/hani/hani_song_service.dart';
 import 'package:hani_booki/services/hani/hani_stroke_service.dart';
 import 'package:hani_booki/services/hani/hani_story_service.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
 import 'package:hani_booki/widgets/kidok_button.dart';
+import 'package:hani_booki/widgets/mission/mission_button.dart';
 import 'package:hani_booki/widgets/new_kidok_button.dart';
 import 'package:hani_booki/widgets/new_star_count.dart';
 import 'package:hani_booki/widgets/star_count.dart';
+import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
 class HaniHomeScreen extends StatefulWidget {
@@ -47,6 +54,7 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     bgmController.playBgm('hani');
+    _initMission();
   }
 
   @override
@@ -62,6 +70,17 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
   void didPopNext() {
     super.didPopNext();
     bgmController.playBgm('hani');
+  }
+
+  Future<void> _initMission() async {
+    if (!Get.isRegistered<MissionController>()) {
+      Get.put(MissionController());
+    }
+    await missionListService(widget.keyCode);
+    final result = await missionSaveService(missionNum: 1, gb: 'attendance', keycode: widget.keyCode);
+    if (result.success) {
+      showStampDialog(widget.keyCode, isAttendance: true);
+    }
   }
 
   @override
@@ -181,12 +200,13 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
               ),
               Expanded(
                 child: Padding(
-                  padding: screenWidth >= 1000 ? EdgeInsets.zero : EdgeInsets.only(bottom: 8),
+                  padding: screenWidth >= 1000 ? EdgeInsets.zero : EdgeInsets.symmetric(vertical: 24),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: screenWidth >= 1000 ? MainAxisAlignment.center : MainAxisAlignment.end,
                         children: [
+                          MissionButton(keycode: widget.keyCode),
                           NewKidokButton(
                             type: 'hani',
                             keycode: widget.keyCode,

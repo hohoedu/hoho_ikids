@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/kidok/kidok_bookcase.data.dart';
 import 'package:logger/logger.dart';
@@ -25,8 +26,6 @@ class KidokListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger().d("index $index");
-    Logger().d("isSelectedList $isSelectedList");
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -44,10 +43,11 @@ class KidokListView extends StatelessWidget {
             Expanded(
               flex: 1,
               child: CircleAvatar(
+                radius: 8.sp,
                 backgroundColor: Color(circleColor),
                 child: Text(
                   subject,
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 6.sp, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -55,7 +55,7 @@ class KidokListView extends StatelessWidget {
               flex: 2,
               child: Text(
                 note,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.bold),
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
               ),
