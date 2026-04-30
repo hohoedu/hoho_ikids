@@ -76,6 +76,7 @@ const missionStyles = [
     'cardColor': Color(0xFFFFD8E3),
     'footerColor': Color(0xFFEDA8BC),
     'completedAsset': 'assets/images/mission/complete_pink.png',
+    'clearAsset':'assets/images/mission/attendance_complete.png'
   },
   {
     'label': 'MISSION. 2',
@@ -83,6 +84,7 @@ const missionStyles = [
     'cardColor': Color(0xFFC8ECE1),
     'footerColor': Color(0xFF9BCABC),
     'completedAsset': 'assets/images/mission/complete_green.png',
+    'clearAsset':'assets/images/mission/contents_complete.png'
   },
 ];
 

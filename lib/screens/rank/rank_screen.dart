@@ -32,7 +32,6 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    // hosu가 숫자가 아닌 경우 1로 fallback
     _selectedTab = int.tryParse(widget.hosu) ?? 1;
     _controller = AnimationController(
       vsync: this,
@@ -605,27 +604,78 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                   width: w * 0.05,
                   child: RankQuestion(),
                 ),
-                if (myRankItem != null && !isTopThree)
+                // if (myRankItem != null)
+                //   Positioned(
+                //     top: screenWidth > 1000 ? MediaQuery.of(context).size.height * 0.1 : 0,
+                //     // top: 0,
+                //     right: 0,
+                //     child: SizedBox(
+                //       width: MediaQuery.of(context).size.width * 0.25,
+                //       height: screenWidth > 1000 ? MediaQuery.of(context).size.height * 0.15 : MediaQuery.of(context).size.height * 0.2,
+                //       child: Container(
+                //         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                //         decoration: BoxDecoration(
+                //           color: Colors.white,
+                //           borderRadius: BorderRadius.only(bottomLeft: Radius.circular(50), topLeft: Radius.circular(50)),
+                //           boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6)],
+                //         ),
+                //         child: Center(
+                //           child: Row(
+                //             mainAxisAlignment: MainAxisAlignment.center,
+                //             children: [
+                //               Image.asset('assets/images/star.png'),
+                //               Text(
+                //                 ' ${myRankItem.point}점',
+                //                 style: TextStyle(
+                //                   fontSize: w * 0.04,
+                //                   fontWeight: FontWeight.bold,
+                //                   color: const Color(0xFF4F3C77),
+                //                 ),
+                //               ),
+                //             ],
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                if (myRankItem != null)
                   Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16), topLeft: Radius.circular(16)),
-                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6)],
-                      ),
-                      child: Text(
-                        '내 점수: ${myRankItem.point}점',
-                        style: TextStyle(
-                          fontSize: w * 0.016,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF4F3C77),
+                      top: 0,
+                      bottom: kToolbarHeight,
+                      right: 16,
+                      child: Center(
+                        child: Container(
+                          width: screenWidth >= 1000 ? constraints.maxWidth * 0.085 : constraints.maxWidth * 0.1,
+                          height: screenWidth >= 1000 ? constraints.maxHeight * 0.2 : constraints.maxHeight * 0.35,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFFFDE00),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(100), color: Color(0xFFFFF3A3)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset(
+                                      'assets/images/star.png',
+                                      scale: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '${myRankItem.point}',
+                                style: const TextStyle(color: Color(0xFF4E3A16), fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'BMJUA'),
+                                softWrap: false,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
+                      ))
               ],
             );
           },

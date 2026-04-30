@@ -53,8 +53,7 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> with TickerProvider
     bgmController.playBgm('hani_write');
     _audioPlayer = AudioPlayer();
     _updateNote();
-
-    initStarEventFromServer(btype: 'H', hosu: widget.keyCode.substring(2, 4), gb: 'write');
+    // initStarEventFromServer(btype: 'H', hosu: widget.keyCode.substring(2, 4), gb: 'write');
   }
 
   Future<void> _playSound(String url) async {
@@ -100,7 +99,7 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> with TickerProvider
       await starUpdateService('write', widget.keyCode);
       final result = await missionSaveService(missionNum: 2, gb: 'write', keycode: widget.keyCode);
       if (result.success) {
-        await showStampDialog(widget.keyCode);
+        await showVerticalStampDialog(widget.keyCode);
       }
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {

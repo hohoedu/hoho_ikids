@@ -22,6 +22,14 @@ final screenHeight = MediaQuery.of(Get.context!).size.height;
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  // 화면 가로모드(왼쪽만) 고정
+  if (Platform.isIOS) {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
+  } else {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+  }
+
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await Hive.initFlutter();
   await Hive.openBox('settings');
@@ -45,12 +53,7 @@ Future<void> main() async {
   // 효과음 셋업
   await SoundManager.setupSounds();
 
-  // 화면 가로모드(왼쪽만) 고정
-  if (Platform.isIOS) {
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
-  } else {
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
-  }
+
 
   Future.delayed(
     const Duration(seconds: 2),

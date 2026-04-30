@@ -99,7 +99,7 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> with TickerProvid
       await starUpdateService('write', widget.keyCode);
       final result = await missionSaveService(missionNum: 2, gb: 'write', keycode: widget.keyCode);
       if (result.success) {
-        await showStampDialog(widget.keyCode);
+        await showVerticalStampDialog(widget.keyCode);
       }
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {

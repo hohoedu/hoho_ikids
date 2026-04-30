@@ -23,10 +23,11 @@ Future<void> missionClearService(int missionNum, String keycode) async {
     'missionNum': missionNum.toString(),
     'missionstar': mission.missionStar
   };
+  Logger().d(requestData);
 
   try {
     final response = await dio.post(url, data: jsonEncode(requestData));
-
+    Logger().d(response);
     if (response.statusCode == 200) {
       final Map<String, dynamic> result = json.decode(response.data);
       if (result['result'] == '0000') {
@@ -39,7 +40,6 @@ Future<void> missionClearService(int missionNum, String keycode) async {
         }
 
         missionController.markCleared(missionNum);
-
       }
     }
   } catch (e) {

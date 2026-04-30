@@ -39,8 +39,6 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
     _starGb = gb;
     _starContentId = btype + gb + hosu;
 
-
-
     final status = await starStatusService(btype: btype, hosu: hosu, gb: gb);
 
     if (status == null) {
@@ -209,7 +207,6 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
   Future<void> _onStarTapped(StarItem star) async {
     _removeStar(star.id);
 
-
     await starSaveService(
       btype: _starBtype,
       hosu: _starHosu,
@@ -233,7 +230,11 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
     isStarDialogOpen = true;
 
     if (_starGb == 'write') {
-      await findVerticalStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
+      if (_starBtype == 'B' && _starHosu == '10') {
+        await findStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
+      } else {
+        await findVerticalStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
+      }
     } else {
       await findStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
     }

@@ -128,7 +128,6 @@ class _MainDrawerState extends State<MainDrawer> {
                       child: GetBuilder<CharacterDataController>(
                         builder: (ctrl) {
                           final character = ctrl.myCharacter;
-                          Logger().d(character);
                           return SizedBox(
                             width: 50,
                             height: 50,

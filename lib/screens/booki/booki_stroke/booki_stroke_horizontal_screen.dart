@@ -3,15 +3,16 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/booki/booki_stroke_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/booki/booki_stroke/booki_stroke_widgets/booki_stroke_horizontal_word.dart';
+import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:just_audio/just_audio.dart';
@@ -26,7 +27,7 @@ class BookiStrokeHorizontalScreen extends StatefulWidget {
   State<BookiStrokeHorizontalScreen> createState() => _BookiStrokeHorizontalScreenState();
 }
 
-class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScreen> {
+class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScreen> with TickerProviderStateMixin, StarEventMixin<BookiStrokeHorizontalScreen> {
   final bgmController = Get.find<BgmController>();
   final strokeData = Get.find<BookiStrokeDataController>();
   final ValueNotifier<bool> resetNotifier = ValueNotifier(false);
@@ -48,6 +49,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
     bgmController.playBgm('booki_write');
     _audioPlayer = AudioPlayer();
     _updateNote();
+    initStarEventFromServer(btype: 'B', hosu: widget.keyCode.substring(2, 4), gb: 'write');
   }
 
   Future<void> _playSound(String url) async {
@@ -128,6 +130,10 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
     }
     if (totalCompletedIndex >= strokeData.bookiStrokeDataList.length) {
       starUpdateService('write', widget.keyCode);
+      final result = await missionSaveService(missionNum: 2, gb: 'write', keycode: widget.keyCode);
+      if (result.success) {
+        await showStampDialog(widget.keyCode);
+      }
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {
           isDialogShown = true;
@@ -234,7 +240,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
                             ),
                             (widget.keyCode.toString().substring(2, 4) == '10')
                                 ? Positioned(
-                                    top: 0, 
+                                    top: 0,
                                     left: 60,
                                     bottom: 30,
                                     right: 0,
@@ -271,9 +277,7 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
                             Expanded(
                               child: GestureDetector(
                                 onTap: _onPrevWord,
-                                child: currentIndex > 0
-                                    ? Icon(Icons.skip_previous, size: screenWidth >= 1000 ? 100 : 46, color: fontWhite)
-                                    : const SizedBox.shrink(),
+                                child: currentIndex > 0 ? Icon(Icons.skip_previous, size: screenWidth >= 1000 ? 100 : 46, color: fontWhite) : const SizedBox.shrink(),
                               ),
                             ),
                             Expanded(
@@ -306,5 +310,11 @@ class _BookiStrokeHorizontalScreenState extends State<BookiStrokeHorizontalScree
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    disposeStarEvent();
+    super.dispose();
   }
 }

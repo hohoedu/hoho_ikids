@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/auth/join_widgets/join_once_verification_screen.dart';
 import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_screen.dart';
 import 'package:hani_booki/services/auth/withdraw_service.dart';
@@ -455,7 +456,13 @@ void showCodeErrorDialog({
   );
 }
 
-Future<void> missionClearDialog() async {
+Future<void> missionClearDialog(int missionNum) async {
+  Future.delayed(const Duration(seconds: 3), () {
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+  });
+
   await Get.generalDialog(
     barrierLabel: 'Dialog',
     barrierColor: Colors.black.withOpacity(0.7),
@@ -487,7 +494,7 @@ Future<void> missionClearDialog() async {
                 Expanded(
                   flex: 10,
                   child: Image.asset(
-                    'assets/images/star/after_star.png',
+                    missionNum == 1 ? 'assets/images/mission/attendance_complete.png' : 'assets/images/mission/contents_complete.png',
                     height: MediaQuery.of(context).size.height * 0.5,
                   ),
                 ),
@@ -530,17 +537,17 @@ Future<void> missionClearDialog() async {
       return FadeTransition(opacity: animation, child: child);
     },
   );
+}
+
+// 별 찾기 가로버전
+Future<void> findStarDialog({required int remainCnt, required int currentCnt}) async {
+  final int totalStars = currentCnt + remainCnt;
+  final int collectedCount = currentCnt;
   Future.delayed(const Duration(seconds: 3), () {
     if (Get.isDialogOpen == true) {
       Get.back();
     }
   });
-}
-
-Future<void> findStarDialog({required int remainCnt, required int currentCnt}) async {
-  final int totalStars = currentCnt + remainCnt;
-  final int collectedCount = currentCnt;
-
   await Get.generalDialog(
     barrierLabel: 'Dialog',
     barrierColor: Colors.black54,
@@ -573,7 +580,7 @@ Future<void> findStarDialog({required int remainCnt, required int currentCnt}) a
                   flex: 9,
                   child: Image.asset(
                     'assets/images/star/after_star.png',
-                    height: MediaQuery.of(context).size.height *0.7,
+                    height: MediaQuery.of(context).size.height * 0.7,
                   ),
                 ),
                 Expanded(
@@ -613,17 +620,17 @@ Future<void> findStarDialog({required int remainCnt, required int currentCnt}) a
       return FadeTransition(opacity: animation, child: child);
     },
   );
+}
+
+// 별 찾기 세로버전
+Future<void> findVerticalStarDialog({required int remainCnt, required int currentCnt}) async {
+  final int totalStars = currentCnt + remainCnt;
+  final int collectedCount = currentCnt;
   Future.delayed(const Duration(seconds: 3), () {
     if (Get.isDialogOpen == true) {
       Get.back();
     }
   });
-}
-
-Future<void> findVerticalStarDialog({required int remainCnt, required int currentCnt}) async {
-  final int totalStars = currentCnt + remainCnt;
-  final int collectedCount = currentCnt;
-
   await Get.generalDialog(
     barrierLabel: 'Dialog',
     barrierColor: Colors.black26,
@@ -696,13 +703,9 @@ Future<void> findVerticalStarDialog({required int remainCnt, required int curren
       return FadeTransition(opacity: animation, child: child);
     },
   );
-  Future.delayed(const Duration(seconds: 3), () {
-    if (Get.isDialogOpen == true) {
-      Get.back();
-    }
-  });
 }
 
+// 미션 1개 성공 가로버전
 Future<void> showStampDialog(String keycode, {bool isAttendance = false}) async {
   final bool isHType = ['Y', 'G', 'S'].contains(keycode[0]);
 
@@ -711,7 +714,11 @@ Future<void> showStampDialog(String keycode, {bool isAttendance = false}) async 
   final String titleImage = isAttendance
       ? (isHType ? 'assets/images/mission/title_attendance_h.png' : 'assets/images/mission/title_attendance_b.png')
       : (isHType ? 'assets/images/mission/title_h.png' : 'assets/images/mission/title_b.png');
-
+  Future.delayed(const Duration(seconds: 3), () {
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+  });
   await Get.generalDialog(
     barrierLabel: 'Dialog',
     barrierColor: Colors.black.withOpacity(0.7),
@@ -782,13 +789,93 @@ Future<void> showStampDialog(String keycode, {bool isAttendance = false}) async 
       return FadeTransition(opacity: animation, child: child);
     },
   );
-  if (!isAttendance) {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (Get.isDialogOpen == true) {
-        Get.back();
-      }
-    });
-  }
+}
+
+Future<void> showVerticalStampDialog(String keycode, {bool isAttendance = false}) async {
+  final bool isHType = ['Y', 'G', 'S'].contains(keycode[0]);
+
+  final String clearImage = isHType ? 'assets/images/mission/mission_clear_h.png' : 'assets/images/mission/mission_clear_b.png';
+
+  final String titleImage = isAttendance
+      ? (isHType ? 'assets/images/mission/title_attendance_h.png' : 'assets/images/mission/title_attendance_b.png')
+      : (isHType ? 'assets/images/mission/title_h.png' : 'assets/images/mission/title_b.png');
+  Future.delayed(const Duration(seconds: 3), () {
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+  });
+  await Get.generalDialog(
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black.withOpacity(0.7),
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: screenWidth > 1000 ? MediaQuery.of(context).size.height * 0.7 : MediaQuery.of(context).size.height * 0.6,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(flex: 1, child: SizedBox()),
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Image.asset(titleImage),
+                  ),
+                ),
+                Expanded(
+                  flex: 9,
+                  child: Image.asset(
+                    clearImage,
+                    height: MediaQuery.of(context).size.height,
+                  ),
+                ),
+                Spacer(),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () => Get.back(),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height: MediaQuery.of(context).size.height * 0.065,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF141414),
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: Center(
+                                child: Text(
+                              '받기',
+                              style: TextStyle(fontSize: 20.sp, color: fontWhite, fontWeight: FontWeight.bold),
+                            )),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(flex: 1, child: SizedBox()),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
 }
 
 void lottieDialog({required VoidCallback onMain, required VoidCallback onReset}) {

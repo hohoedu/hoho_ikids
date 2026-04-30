@@ -37,7 +37,7 @@ android {
     defaultConfig {
         applicationId = "com.hohoedu.hani_booki"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

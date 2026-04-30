@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/character_data.dart';
+import 'package:hani_booki/_data/auth/user_booki_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/auth/user_ebook_data.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
@@ -14,6 +16,7 @@ import 'package:hani_booki/_data/rank/rank_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/home/home_widgets/home_carousel_slider.dart';
 import 'package:hani_booki/screens/rank/rank_screen.dart';
+import 'package:hani_booki/screens/record/record_screen.dart';
 import 'package:hani_booki/services/auth/character_list_service.dart';
 import 'package:hani_booki/services/content_star_service.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
@@ -21,19 +24,13 @@ import 'package:hani_booki/services/rank/rank_service.dart';
 import 'package:hani_booki/services/record/report_read_service.dart';
 import 'package:hani_booki/utils/badge_controller.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
-import 'package:hani_booki/utils/version_check.dart';
+import 'package:hani_booki/utils/get_record_list.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/character_select_dialog.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/drawer/main_drawer.dart';
-import 'package:hani_booki/widgets/notice/notice_screen.dart';
-import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
-import 'package:badges/badges.dart' as badges;
-
-import '../../_data/auth/user_booki_data.dart';
-import '../../utils/get_record_list.dart';
-import '../record/record_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -90,7 +87,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
 
-    characterListService();
+    characterListService().then((_) {
+      _checkCharacter();
+    });
 
     Future.delayed(Duration(milliseconds: 500), () {
       setState(() {
@@ -218,6 +217,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
       ),
     );
+  }
+
+  void _checkCharacter() {
+    final characterController = Get.find<CharacterDataController>();
+    Logger().d(characterController.myCharacter);
+
+    if (characterController.myCharacter == '') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showCharacterSelectDialog(context);
+      });
+    }
   }
 
   @override
