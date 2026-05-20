@@ -44,7 +44,7 @@ class _MissionCardState extends State<MissionCard> with SingleTickerProviderStat
   Future<void> _onStarRewardTap() async {
     Logger().d(widget.keycode);
     final missionNum = _isAttendance ? 1 : 2;
-    // await missionClearService(missionNum, widget.keycode);
+    await missionClearService(missionNum, widget.keycode);
     await missionClearDialog(missionNum);
   }
 
