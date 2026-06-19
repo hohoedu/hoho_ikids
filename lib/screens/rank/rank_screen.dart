@@ -62,7 +62,8 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final int currentHosu = int.tryParse(widget.hosu) ?? 1;
-    final int prevHosu = (currentHosu - 1).clamp(1, currentHosu);
+    // final int prevHosu = (currentHosu - 1).clamp(1, currentHosu);
+    final int prevHosu = currentHosu == 1 ? 12 : currentHosu - 1;
     final userData = Get.find<UserDataController>();
 
     return Obx(() {
@@ -197,8 +198,8 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                   ),
                   Positioned(
                     top: h * (screenWidth > 1000 ? 0.15 : 0),
-                    left: currentHosu == 1 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
-                    right: currentHosu == 1 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
+                    left: currentHosu == 3 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
+                    right: currentHosu == 3 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
                     height: h * 0.1,
                     child: Container(
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(50)),
@@ -227,7 +228,7 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                                   behavior: HitTestBehavior.opaque,
                                   child: Center(
                                     child: Text(
-                                      '$prevHosu호',
+                                      '$prevHosu월',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 8.sp,
@@ -243,7 +244,7 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                                   behavior: HitTestBehavior.opaque,
                                   child: Center(
                                     child: Text(
-                                      '$currentHosu호',
+                                      '$currentHosu월',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 8.sp,
@@ -516,14 +517,13 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                 // ── 탭 바
                 Positioned(
                   top: h * (screenWidth > 1000 ? 0.15 : 0),
-                  left: currentHosu == 1 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
-                  right: currentHosu == 1 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
+                  left: currentHosu == 3 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
+                  right: currentHosu == 3 ? (screenWidth > 1000 ? w * 0.4 : w * 0.42) : (screenWidth > 1000 ? w * 0.3 : w * 0.35),
                   height: h * 0.1,
                   child: Container(
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(50)),
                     padding: const EdgeInsets.all(4),
-                    child: currentHosu == 1
-                        // ✅ 1호: 흰 배경에 보라 버튼 하나
+                    child: currentHosu == 3
                         ? Container(
                             decoration: BoxDecoration(
                               color: const Color(0xff362265),
@@ -531,7 +531,7 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                             ),
                             child: Center(
                               child: Text(
-                                '1호',
+                                '3월',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 8.sp,
@@ -540,7 +540,6 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                               ),
                             ),
                           )
-                        // ✅ 2호 이상: 기존 두 탭
                         : Stack(
                             children: [
                               AnimatedAlign(
@@ -565,7 +564,7 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                                       behavior: HitTestBehavior.opaque,
                                       child: Center(
                                         child: Text(
-                                          '$prevHosu호',
+                                          '$prevHosu월',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 8.sp,
@@ -581,7 +580,7 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                                       behavior: HitTestBehavior.opaque,
                                       child: Center(
                                         child: Text(
-                                          '$currentHosu호',
+                                          '$currentHosu월',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 8.sp,

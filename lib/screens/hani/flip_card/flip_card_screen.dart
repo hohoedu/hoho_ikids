@@ -164,7 +164,7 @@ class _FlipCardScreenState extends State<FlipCardScreen> with TickerProviderStat
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );

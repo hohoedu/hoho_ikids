@@ -279,7 +279,7 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> with TickerProvider
                     ],
                   ),
                 ),
-                ...buildStarWidgets(),
+                ...buildStarWidgets(widget.keyCode),
               ],
             ),
     );

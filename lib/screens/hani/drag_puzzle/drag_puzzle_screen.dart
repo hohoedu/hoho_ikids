@@ -387,7 +387,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> with TickerProvider
               ),
             ),
           ),
-          ...buildStarWidgets()
+          ...buildStarWidgets(widget.keyCode)
         ],
       ),
     );

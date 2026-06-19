@@ -229,7 +229,7 @@ class _MatchScreenState extends State<MatchScreen> with TickerProviderStateMixin
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );

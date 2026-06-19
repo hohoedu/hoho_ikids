@@ -77,7 +77,7 @@ class _InsungListScreenState extends State<InsungListScreen> with TickerProvider
               ),
             ),
           ),
-          ...buildStarWidgets()
+          ...buildStarWidgets(widget.keyCode)
         ],
       ),
     );

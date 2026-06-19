@@ -9,7 +9,7 @@ Future<void> getToken(id) async {
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
   final token = await firebaseMessaging.getToken();
-
+  Logger().d(token);
   sendToken(token, id);
 }
 

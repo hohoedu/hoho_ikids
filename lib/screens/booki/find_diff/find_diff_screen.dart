@@ -471,7 +471,7 @@ class _FindDiffScreenState extends State<FindDiffScreen> with TickerProviderStat
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );

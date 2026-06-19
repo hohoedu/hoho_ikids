@@ -411,7 +411,7 @@ class _MakeWordScreenState extends State<MakeWordScreen> with TickerProviderStat
                 ),
               ),
             ),
-            ...buildStarWidgets(),
+            ...buildStarWidgets(widget.keyCode),
           ],
         ),
       ),

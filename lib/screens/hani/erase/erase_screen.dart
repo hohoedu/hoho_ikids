@@ -189,7 +189,7 @@ class _EraseScreenState extends State<EraseScreen> with TickerProviderStateMixin
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );

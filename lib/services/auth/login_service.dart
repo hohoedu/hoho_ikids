@@ -24,14 +24,22 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
   final storage = Get.find<FlutterSecureStorage>();
   String url = dotenv.get('LOGIN_2026_URL');
   bool isManager = password == 'hoho999999999';
+  String upperPwd = password.toUpperCase();
+  String lowerPwd = password.toLowerCase();
+  String pwd = md5_convertHash(password);
+  String hashedUpperPassword = md5_convertHash(upperPwd);
+  String hashedLowerPassword = md5_convertHash(lowerPwd);
 
-  String hashedPassword = md5_convertHash(password);
   final Map<String, dynamic> requestData = {
     'id': id,
-    'pwd': hashedPassword,
+    // 'pwd':pwd,
+    'pwd': hashedUpperPassword,
+    'pwd2': hashedLowerPassword,
   };
+  Logger().d("requestData = $requestData");
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
+  Logger().d(response);
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {

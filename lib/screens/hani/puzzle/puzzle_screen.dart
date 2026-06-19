@@ -323,7 +323,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> with TickerProviderStateMix
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );

@@ -9,6 +9,7 @@ import 'package:hani_booki/_data/hani/hani_home_data.dart';
 import 'package:hani_booki/_data/mission/mission_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_widgets/hani_contents.dart';
+import 'package:hani_booki/services/mission/mission_clear_service.dart';
 import 'package:hani_booki/services/mission/mission_list_service.dart';
 import 'package:hani_booki/services/hani/hani_erase_service.dart';
 import 'package:hani_booki/services/hani/hani_flip_service.dart';
@@ -77,9 +78,32 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
       Get.put(MissionController());
     }
     await missionListService(widget.keyCode);
+
     final result = await missionSaveService(missionNum: 1, gb: 'attendance', keycode: widget.keyCode);
     if (result.success) {
       showStampDialog(widget.keyCode, isAttendance: true);
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    final missionController = Get.find<MissionController>();
+    final missions = [
+      missionController.attendanceMission,
+      missionController.contentMission,
+    ];
+
+    final hasUnclearedMission = missions.any(
+          (m) => m != null && m.isCompleted && m.isCleared == 'N',
+    );
+
+    if (hasUnclearedMission) {
+      showModalBottomSheet(
+        context: context,
+        isDismissible: true,
+        enableDrag: false,
+        isScrollControlled: true,
+        constraints: const BoxConstraints(maxWidth: double.infinity),
+        builder: (_) => MissionBottomSheet(keycode: widget.keyCode, autoTrigger: true),
+      );
     }
   }
 
@@ -108,7 +132,10 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
       ),
       body: Center(
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width * 0.9,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFFFDDE2),
@@ -166,31 +193,31 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
                             ),
                             widget.keyCode.substring(0, 1) == 'Y'
                                 ? HaniContents(
-                                    path: '${haniData['clean']}',
-                                    onTap: () {
-                                      haniEraseService(id, widget.keyCode, year);
-                                    },
-                                  )
+                              path: '${haniData['clean']}',
+                              onTap: () {
+                                haniEraseService(id, widget.keyCode, year);
+                              },
+                            )
                                 : HaniContents(
-                                    path: '${haniData['puz']}',
-                                    onTap: () {
-                                      haniPuzzleService(id, widget.keyCode, year);
-                                    },
-                                  ),
+                              path: '${haniData['puz']}',
+                              onTap: () {
+                                haniPuzzleService(id, widget.keyCode, year);
+                              },
+                            ),
                             widget.keyCode.substring(0, 1) == 'S'
                                 ? HaniContents(
-                                    path: '${haniData['bell']}',
-                                    onTap: () {
-                                      bgmController.stopBgm();
-                                      haniGoldenbellService(id, widget.keyCode, year);
-                                    },
-                                  )
+                              path: '${haniData['bell']}',
+                              onTap: () {
+                                bgmController.stopBgm();
+                                haniGoldenbellService(id, widget.keyCode, year);
+                              },
+                            )
                                 : HaniContents(
-                                    path: '${haniData['han']}',
-                                    onTap: () {
-                                      haniHanjaSongService(id, widget.keyCode, year);
-                                    },
-                                  ),
+                              path: '${haniData['han']}',
+                              onTap: () {
+                                haniHanjaSongService(id, widget.keyCode, year);
+                              },
+                            ),
                           ],
                         ),
                       ],

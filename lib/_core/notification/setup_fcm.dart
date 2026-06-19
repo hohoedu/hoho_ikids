@@ -35,6 +35,8 @@ Future<void> setupFcm() async {
     'high_importance_channel',
     'high_importance_notification',
     importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
   );
 
   // Android: 알림 채널 생성, 초기화(Android에서는 알림을 표시하기 전에 채널을 설정)
@@ -48,6 +50,7 @@ Future<void> setupFcm() async {
       iOS: DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
+        requestSoundPermission: true,
         requestCriticalPermission: true,
       )));
 

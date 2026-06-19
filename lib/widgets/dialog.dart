@@ -707,6 +707,7 @@ Future<void> findVerticalStarDialog({required int remainCnt, required int curren
 
 // 미션 1개 성공 가로버전
 Future<void> showStampDialog(String keycode, {bool isAttendance = false}) async {
+  bool stampClosed = false;
   final bool isHType = ['Y', 'G', 'S'].contains(keycode[0]);
 
   final String clearImage = isHType ? 'assets/images/mission/mission_clear_h.png' : 'assets/images/mission/mission_clear_b.png';
@@ -715,7 +716,7 @@ Future<void> showStampDialog(String keycode, {bool isAttendance = false}) async 
       ? (isHType ? 'assets/images/mission/title_attendance_h.png' : 'assets/images/mission/title_attendance_b.png')
       : (isHType ? 'assets/images/mission/title_h.png' : 'assets/images/mission/title_b.png');
   Future.delayed(const Duration(seconds: 3), () {
-    if (Get.isDialogOpen == true) {
+    if (!stampClosed && Get.isDialogOpen == true) {
       Get.back();
     }
   });
@@ -789,9 +790,11 @@ Future<void> showStampDialog(String keycode, {bool isAttendance = false}) async 
       return FadeTransition(opacity: animation, child: child);
     },
   );
+  stampClosed = true;
 }
 
 Future<void> showVerticalStampDialog(String keycode, {bool isAttendance = false}) async {
+  bool stampClosed = false;
   final bool isHType = ['Y', 'G', 'S'].contains(keycode[0]);
 
   final String clearImage = isHType ? 'assets/images/mission/mission_clear_h.png' : 'assets/images/mission/mission_clear_b.png';
@@ -800,7 +803,7 @@ Future<void> showVerticalStampDialog(String keycode, {bool isAttendance = false}
       ? (isHType ? 'assets/images/mission/title_attendance_h.png' : 'assets/images/mission/title_attendance_b.png')
       : (isHType ? 'assets/images/mission/title_h.png' : 'assets/images/mission/title_b.png');
   Future.delayed(const Duration(seconds: 3), () {
-    if (Get.isDialogOpen == true) {
+    if (!stampClosed && Get.isDialogOpen == true) {
       Get.back();
     }
   });
@@ -876,108 +879,112 @@ Future<void> showVerticalStampDialog(String keycode, {bool isAttendance = false}
       return FadeTransition(opacity: animation, child: child);
     },
   );
+  stampClosed = true;
 }
 
 void lottieDialog({required VoidCallback onMain, required VoidCallback onReset}) {
   Get.generalDialog(
-    // barrierDismissible: true,
+    barrierDismissible: false,
     barrierLabel: 'Dialog',
     barrierColor: Colors.black26,
     // 다이얼로그 배경 어둡게 처리
     transitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (context, animation, secondaryAnimation) {
-      return Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.transparent, // 원하는 배경색
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 7,
-                  child: Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '+1 스타 ',
-                            style: TextStyle(
-                              color: Colors.yellow,
-                              fontSize: 8.sp,
-                              fontWeight: FontWeight.bold,
+      return PopScope(
+        canPop: false,
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 원하는 배경색
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 7,
+                    child: Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '+1 스타 ',
+                              style: TextStyle(
+                                color: Colors.yellow,
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          TextSpan(
-                            text: '획득!',
-                            style: TextStyle(
-                              color: fontWhite,
-                              fontSize: 8.sp,
-                              fontWeight: FontWeight.bold,
+                            TextSpan(
+                              text: '획득!',
+                              style: TextStyle(
+                                color: fontWhite,
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: GestureDetector(
-                          onTap: onReset,
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.17,
-                            height: MediaQuery.of(context).size.height * 0.13,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '다시하기',
-                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                  Expanded(
+                    flex: 2,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: GestureDetector(
+                            onTap: onReset,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.17,
+                              height: MediaQuery.of(context).size.height * 0.13,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '다시하기',
+                                  style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: GestureDetector(
-                          onTap: onMain,
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.17,
-                            height: MediaQuery.of(context).size.height * 0.13,
-                            decoration: BoxDecoration(
-                              color: Colors.yellow,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '메인으로',
-                                style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: GestureDetector(
+                            onTap: onMain,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.17,
+                              height: MediaQuery.of(context).size.height * 0.13,
+                              decoration: BoxDecoration(
+                                color: Colors.yellow,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '메인으로',
+                                  style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -994,99 +1001,102 @@ void lottieDialog({required VoidCallback onMain, required VoidCallback onReset})
 
 void verticalLottieDialog({required VoidCallback onMain, required VoidCallback onReset}) {
   Get.generalDialog(
-    // barrierDismissible: true,
+    barrierDismissible: false,
     barrierLabel: 'Dialog',
     barrierColor: Colors.black26,
     // 다이얼로그 배경 어둡게 처리
     transitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (context, animation, secondaryAnimation) {
-      return Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.5,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                        children: [
-                          TextSpan(
-                            text: '+1 스타 ',
-                            style: TextStyle(
-                              color: Colors.yellow,
+      return PopScope(
+        canPop: false,
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.5,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Lottie.asset('assets/lottie/star_point.json', height: MediaQuery.of(context).size.height * 0.5),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          children: [
+                            TextSpan(
+                              text: '+1 스타 ',
+                              style: TextStyle(
+                                color: Colors.yellow,
+                              ),
                             ),
-                          ),
-                          TextSpan(
-                            text: '획득!',
-                            style: TextStyle(
-                              color: fontWhite,
+                            TextSpan(
+                              text: '획득!',
+                              style: TextStyle(
+                                color: fontWhite,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: GestureDetector(
-                          onTap: onReset,
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '다시하기',
-                                style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: GestureDetector(
+                            onTap: onReset,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '다시하기',
+                                  style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: GestureDetector(
-                          onTap: onMain,
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            decoration: BoxDecoration(
-                              color: Colors.yellow,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '메인으로',
-                                style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: GestureDetector(
+                            onTap: onMain,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              decoration: BoxDecoration(
+                                color: Colors.yellow,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '메인으로',
+                                  style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),

@@ -7,6 +7,7 @@ import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/mission/mission_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/mission/mission_clear_service.dart';
+import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/mission/mission_button.dart';
 import 'package:hani_booki/widgets/mission/mission_progress.dart';
@@ -16,8 +17,9 @@ class MissionCard extends StatefulWidget {
   final MissionInfo mission;
   final int index;
   final String keycode;
+  final bool autoTrigger;
 
-  const MissionCard({super.key, required this.mission, required this.index, required this.keycode});
+  const MissionCard({super.key, required this.mission, required this.index, required this.keycode, this.autoTrigger = false});
 
   @override
   State<MissionCard> createState() => _MissionCardState();
@@ -34,6 +36,13 @@ class _MissionCardState extends State<MissionCard> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _localCompleted = widget.mission.currentCount;
+
+    if (widget.autoTrigger && _isAllDone) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _onStarRewardTap();
+      });
+    }
   }
 
   @override
@@ -101,10 +110,14 @@ class _MissionCardState extends State<MissionCard> with SingleTickerProviderStat
                         ),
                         Expanded(
                           flex: 3,
-                          child: Text(
-                            widget.mission.missionName,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.bold),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              widget.mission.missionName,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                         Expanded(

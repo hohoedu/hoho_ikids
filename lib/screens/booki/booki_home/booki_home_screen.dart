@@ -60,9 +60,32 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
       Get.put(MissionController());
     }
     await missionListService(widget.keyCode);
+
     final result = await missionSaveService(missionNum: 1, gb: 'attendance', keycode: widget.keyCode);
     if (result.success) {
       showStampDialog(widget.keyCode, isAttendance: true);
+    }
+
+    // ✅ 달성했지만 미클리어 미션 자동 완료
+    final missionController = Get.find<MissionController>();
+    final missions = [
+      missionController.attendanceMission,
+      missionController.contentMission,
+    ];
+
+    final hasUnclearedMission = missions.any(
+          (m) => m != null && m.isCompleted && m.isCleared == 'N',
+    );
+
+    if (hasUnclearedMission) {
+      showModalBottomSheet(
+        context: context,
+        isDismissible: true,
+        enableDrag: false,
+        isScrollControlled: true,
+        constraints: const BoxConstraints(maxWidth: double.infinity),
+        builder: (_) => MissionBottomSheet(keycode: widget.keyCode, autoTrigger: true),
+      );
     }
   }
 

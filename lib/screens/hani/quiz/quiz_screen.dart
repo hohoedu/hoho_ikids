@@ -361,7 +361,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );

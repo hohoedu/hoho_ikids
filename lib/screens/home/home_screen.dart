@@ -18,6 +18,7 @@ import 'package:hani_booki/screens/home/home_widgets/home_carousel_slider.dart';
 import 'package:hani_booki/screens/rank/rank_screen.dart';
 import 'package:hani_booki/screens/record/record_screen.dart';
 import 'package:hani_booki/services/auth/character_list_service.dart';
+import 'package:hani_booki/services/auth/character_select_service.dart';
 import 'package:hani_booki/services/content_star_service.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
 import 'package:hani_booki/services/rank/rank_service.dart';
@@ -224,8 +225,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     Logger().d(characterController.myCharacter);
 
     if (characterController.myCharacter == '') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showCharacterSelectDialog(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final result = await showCharacterSelectDialog(context);
+        if (result != null) {
+          await characterSaveService(result); // 저장 서비스 호출
+        }
       });
     }
   }
@@ -453,18 +457,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               child: child,
                             );
                           },
-                          child: GestureDetector(
-                            onTap: () async {
-                              String hosu = keyCode.substring(2, 4);
-                              if (!Get.isRegistered<RankDataController>()) {
-                                Get.put(RankDataController());
-                              }
-                              await rankService(hosu);
-                              Get.to(() => RankScreen(hosu: hosu));
-                            },
-                            child: Image.asset(
-                              'assets/images/rank/rank.png',
-                              scale: screenWidth > 1000 ? 7 : 10,
+                          child: Visibility(
+                            visible: userDataController.userData!.appRankingView == 'Y',
+                            child: GestureDetector(
+                              onTap: () async {
+                                final String month = DateTime.now().month.toString().padLeft(2, '0');
+
+                                if (!Get.isRegistered<RankDataController>()) {
+                                  Get.put(RankDataController());
+                                }
+                                await rankService(month);
+                                Get.to(() => RankScreen(hosu: month));
+                              },
+                              child: Image.asset(
+                                'assets/images/rank/rank.png',
+                                scale: screenWidth > 1000 ? 7 : 10,
+                              ),
                             ),
                           ),
                         ),

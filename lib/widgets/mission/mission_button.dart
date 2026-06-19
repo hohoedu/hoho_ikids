@@ -74,8 +74,9 @@ class _MissionButtonState extends State<MissionButton> with TickerProviderStateM
 
 class MissionBottomSheet extends StatelessWidget {
   final String keycode;
+  final bool autoTrigger;
 
-  const MissionBottomSheet({super.key, required this.keycode});
+  const MissionBottomSheet({super.key, required this.keycode, this.autoTrigger = false});
 
   String _formatExpiredAt(String expiredAt) {
     try {
@@ -160,6 +161,7 @@ class MissionBottomSheet extends StatelessWidget {
                               mission: entry.value,
                               index: entry.key,
                               keycode: keycode,
+                              autoTrigger: autoTrigger,
                             ),
                           ),
                         ),
@@ -168,10 +170,10 @@ class MissionBottomSheet extends StatelessWidget {
                 ),
               ),
             ),
-            const Text(
-              '※ 연속 미션은 하루라도 놓치면 처음부터 다시 시작돼요!',
-              style: TextStyle(color: Color(0xFFABABAB)),
-            ),
+            // const Text(
+            //   '※ 연속 미션은 하루라도 놓치면 처음부터 다시 시작돼요!',
+            //   style: TextStyle(color: Color(0xFFABABAB)),
+            // ),
           ],
         );
       }),

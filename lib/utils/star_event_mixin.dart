@@ -69,7 +69,7 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
     activeStars.clear();
   }
 
-  List<Widget> buildStarWidgets() {
+  List<Widget> buildStarWidgets(String keyCode) {
     return activeStars.map((star) {
       return Positioned(
         left: star.x,
@@ -82,7 +82,7 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
           child: Transform.rotate(
             angle: star.rotation,
             child: GestureDetector(
-              onTap: () => _onStarTapped(star),
+              onTap: () => _onStarTapped(star, keyCode),
               child: Image.asset(
                 'assets/images/star/before_star.png',
                 width: 200.h,
@@ -204,13 +204,14 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
   // COLLECT
   // ─────────────────────────────────────────
 
-  Future<void> _onStarTapped(StarItem star) async {
+  Future<void> _onStarTapped(StarItem star, String keyCode) async {
     _removeStar(star.id);
 
     await starSaveService(
       btype: _starBtype,
       hosu: _starHosu,
       gb: _starGb,
+      keycode: keyCode
     );
 
     final result = await starStatusService(btype: _starBtype, hosu: _starHosu, gb: _starGb);

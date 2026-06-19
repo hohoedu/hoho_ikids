@@ -13,6 +13,7 @@ class UserData {
   final String userType;
   final String parentName;
   final String character;
+  final String appRankingView;
 
   UserData({
     required this.id,
@@ -25,6 +26,7 @@ class UserData {
     required this.userType,
     required this.parentName,
     this.character = 'hani',
+    required this.appRankingView,
   });
 
   UserData.fromJson(Map<String, dynamic> json, this.id)
@@ -36,7 +38,8 @@ class UserData {
         siblingCount = json['ptelcnt'] == '' ? '0' : json['ptelcnt'],
         userType = json['user_gb'],
         parentName = json['pname'] ?? '',
-        character = json['character'] ?? 'hani';
+        character = json['character'] ?? 'hani',
+        appRankingView = json['app_ranking_open_yn'];
 
   UserData copyWith({
     String? id,
@@ -49,19 +52,20 @@ class UserData {
     String? userType,
     String? parentName,
     String? character,
+    String? appRankingView,
   }) {
     return UserData(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      schoolId: schoolId ?? this.schoolId,
-      schoolName: schoolName ?? this.schoolName,
-      year: year ?? this.year,
-      parentTel: parentTel ?? this.parentTel,
-      siblingCount: siblingCount ?? this.siblingCount,
-      userType: userType ?? this.userType,
-      parentName: parentName ?? this.parentName,
-      character: character ?? this.character,
-    );
+        id: id ?? this.id,
+        username: username ?? this.username,
+        schoolId: schoolId ?? this.schoolId,
+        schoolName: schoolName ?? this.schoolName,
+        year: year ?? this.year,
+        parentTel: parentTel ?? this.parentTel,
+        siblingCount: siblingCount ?? this.siblingCount,
+        userType: userType ?? this.userType,
+        parentName: parentName ?? this.parentName,
+        character: character ?? this.character,
+        appRankingView: appRankingView ?? this.appRankingView);
   }
 }
 
@@ -100,16 +104,18 @@ class UserDataController extends GetxController {
     } else {
       // 기존 데이터가 없으면 새로 생성 (parentTel, siblingCount는 기본값으로 처리)
       _userData.value = UserData(
-          id: id,
-          username: username,
-          schoolId: schoolId,
-          schoolName: schoolName,
-          year: year,
-          parentTel: '',
-          siblingCount: '',
-          userType: '',
-          parentName: '',
-          character: 'hani');
+        id: id,
+        username: username,
+        schoolId: schoolId,
+        schoolName: schoolName,
+        year: year,
+        parentTel: '',
+        siblingCount: '',
+        userType: '',
+        parentName: '',
+        character: 'hani',
+        appRankingView: 'N',
+      );
     }
     update();
   }

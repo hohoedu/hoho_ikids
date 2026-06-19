@@ -236,7 +236,7 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> with Tick
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );

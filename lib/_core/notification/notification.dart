@@ -57,8 +57,8 @@ Future<void> showNotification(RemoteMessage message) async {
     body,
     const NotificationDetails(
       android: AndroidNotificationDetails(
-        "high_importance_channel",
-        "hugh_importance_notification",
+        "high_importance_channel_v2",
+        "high_importance_notification",
         importance: Importance.max,
         priority: Priority.max,
         channelDescription: "channelDescription",

@@ -274,7 +274,7 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> with TickerProvid
                     ],
                   ),
                 ),
-                ...buildStarWidgets(),
+                ...buildStarWidgets(widget.keyCode),
               ],
             ),
     );

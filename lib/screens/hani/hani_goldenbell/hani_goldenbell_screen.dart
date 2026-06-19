@@ -244,7 +244,7 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> with Ticker
               ),
             ),
           ),
-          ...buildStarWidgets(),
+          ...buildStarWidgets(widget.keyCode),
         ],
       ),
     );
