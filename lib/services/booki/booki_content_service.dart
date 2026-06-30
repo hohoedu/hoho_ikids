@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/booki/booki_home_data.dart';
 import 'package:hani_booki/_data/kidok/kidok_bookcase.data.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_screen.dart';
@@ -14,9 +15,10 @@ import 'package:logger/logger.dart';
 // 부키 이북 콘텐츠 리스트
 Future<void> bookiContentService(keyCode, schoolId, year) async {
   final bookiHomeController = Get.put(BookiHomeDataController());
-
+  final userDataController = Get.find<UserDataController>();
   String url = dotenv.get('BOOKI_EBOOK_CONTENT_LIST_URL');
   final Map<String, dynamic> requestData = {
+    'id': userDataController.userData!.id,
     'schoolid': schoolId,
     'keycode': keyCode,
     'yy': year,
@@ -33,9 +35,15 @@ Future<void> bookiContentService(keyCode, schoolId, year) async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        bookiHomeController.setBookiHomeDataMap(resultList['data']);
+        final List<dynamic> data = resultList['data'];
+
+        bookiHomeController.setBookiHomeDataMap(data);
+        Logger().d('date = $data');
         await totalStarService(keyCode);
-        Get.to(() => BookiHomeScreen(keyCode: keyCode));
+        Get.offUntil(
+          GetPageRoute(page: () => BookiHomeScreen(keyCode: keyCode)),
+              (route) => route.isFirst,
+        );
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

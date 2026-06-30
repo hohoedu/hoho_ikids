@@ -31,8 +31,7 @@ import 'package:logger/logger.dart';
 골든벨(신동) : bell
 */
 
-Future<void> starUpdateService(type, keyCode) async {
-
+Future<String> starUpdateService(type, keyCode) async {
   final userController = Get.find<UserDataController>();
   String url = dotenv.get('STAR_UPDATE_URL');
 
@@ -45,17 +44,20 @@ Future<void> starUpdateService(type, keyCode) async {
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
-
+  Logger().d('수재 골든벨 요청 데이터 = $requestData');
   try {
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
       final Map<String, dynamic> resultList = json.decode(response.data);
 
       final resultValue = resultList['result'];
-
+      Logger().d('수재 5호 골든벨 = $resultValue');
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
         totalStarService(keyCode);
+        return '0000';
+      } else if (resultValue == "8888") {
+        return '8888';
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {
@@ -65,12 +67,15 @@ Future<void> starUpdateService(type, keyCode) async {
           onTap: () => Get.back(),
           buttonText: '확인',
         );
+        return '9999';
       }
     }
+    return '9999';
   }
 
   // 예외처리
   catch (e) {
     Logger().d('e = $e');
+    return '9999';
   }
 }

@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 하니 형음의
-Future<void> haniPuzzleService(id, keyCode, year) async {
+Future<void> haniPuzzleService(id, keyCode, year, lastTime) async {
   String url = dotenv.get('HANI_PUZZLE_URL');
 
   final Map<String, dynamic> requestData = {
@@ -46,7 +46,7 @@ Future<void> haniPuzzleService(id, keyCode, year) async {
 
         haniPuzzleDataController.setHaniPuzzleDataList(haniPuzzleDataList);
 
-        Get.to(() => PuzzleScreen(keyCode: keyCode));
+        Get.to(() => PuzzleScreen(keyCode: keyCode, lastTime: lastTime));
 
       } else {
         oneButtonDialog(

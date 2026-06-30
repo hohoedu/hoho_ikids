@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/booki/booki_find_diff_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_screen.dart';
+import 'package:hani_booki/services/booki/booki_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -18,8 +20,9 @@ import 'package:hani_booki/widgets/dialog.dart';
 
 class FindDiffScreen extends StatefulWidget {
   final String keyCode;
+  final String lastTime;
 
-  const FindDiffScreen({super.key, required this.keyCode});
+  const FindDiffScreen({super.key, required this.keyCode, required this.lastTime});
 
   @override
   State<FindDiffScreen> createState() => _FindDiffScreenState();
@@ -28,7 +31,7 @@ class FindDiffScreen extends StatefulWidget {
 class _FindDiffScreenState extends State<FindDiffScreen> with TickerProviderStateMixin, StarEventMixin<FindDiffScreen> {
   final bgmController = Get.find<BgmController>();
   final bookiFindDiffController = Get.find<BookiFindDiffDataController>();
-
+  final userDataController = Get.find<UserDataController>();
   final Set<int> foundCorrectIndexes = {};
 
   Offset? temporaryCorrectOffset;
@@ -102,24 +105,40 @@ class _FindDiffScreenState extends State<FindDiffScreen> with TickerProviderStat
       if (foundCorrectIndexes.length == regions.length) {
         if (currentIndex == bookiFindDiffController.bookiFindDiffDataList.length - 1) {
           Future.delayed(const Duration(milliseconds: 500), () async {
-            await starUpdateService('find', widget.keyCode);
+            final starResult = await starUpdateService('find', widget.keyCode);
             final result = await missionSaveService(missionNum: 2, gb: 'find', keycode: widget.keyCode);
 
             if (result.success) {
               await showStampDialog(widget.keyCode);
             }
 
-            lottieDialog(
-              onReset: () {
-                Get.back();
-                resetQuestion();
-              },
-              onMain: () {
-                Get.back();
-                Get.back();
-                Get.off(() => BookiHomeScreen(keyCode: widget.keyCode));
-              },
-            );
+            if (starResult == '0000') {
+              lottieDialog(
+                onReset: () {
+                  Get.back();
+                  resetQuestion();
+                },
+                onMain: () {
+                  Get.back();
+                  final userData = Get.find<UserDataController>();
+                  bookiContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+                },
+              );
+            }
+            else if (starResult == '8888') {
+              cooltimeDialog(
+                lastTime: widget.lastTime,
+                onReset: () {
+                  Get.back();
+                  resetQuestion();
+                },
+                onMain: () {
+                  Get.back();
+                  final userData = Get.find<UserDataController>();
+                  bookiContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+                },
+              );
+            }
           });
         } else {
           Future.delayed(const Duration(milliseconds: 500), () {

@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_rotate_data.dart';
 import 'package:hani_booki/screens/hani/rotate/rotate_widgets/rotate_images.dart';
+import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -17,8 +19,9 @@ import 'package:logger/logger.dart';
 
 class RotateScreen extends StatefulWidget {
   final String keyCode;
+  final String lastTime;
 
-  const RotateScreen({super.key, required this.keyCode});
+  const RotateScreen({super.key, required this.keyCode, required this.lastTime});
 
   @override
   State<RotateScreen> createState() => _RotateScreenState();
@@ -38,10 +41,6 @@ class _RotateScreenState extends State<RotateScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
 
     bgmController.playBgm('flip');
     _audioPlayer = AudioPlayer();
@@ -72,7 +71,7 @@ class _RotateScreenState extends State<RotateScreen> {
   }
 
   void completeGame() async {
-    await starUpdateService('card', widget.keyCode);
+    final starResult = await starUpdateService('card', widget.keyCode);
     final result = await missionSaveService(missionNum: 2, gb: 'card', keycode: widget.keyCode);
 
     if (result.success) {
@@ -82,21 +81,46 @@ class _RotateScreenState extends State<RotateScreen> {
     Future.delayed(
       Duration(seconds: 1),
       () {
-        verticalLottieDialog(
-          onReset: () {
-            _resetGame();
-            Get.back();
-          },
-          onMain: () async {
-            if (Platform.isIOS) {
-              await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
-            } else {
-              await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
-            }
-            Get.back();
-            Get.back();
-          },
-        );
+        if (starResult == '0000') {
+          verticalLottieDialog(
+            onMain: () async {
+              if (Platform.isIOS) {
+                const platform = MethodChannel('orientation');
+                await platform.invokeMethod('setLandscape');
+                await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
+              } else {
+                await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+              }
+              Get.back();
+              final userData = Get.find<UserDataController>();
+              haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+            },
+            onReset: () {
+              _resetGame();
+              Get.back();
+            },
+          );
+        } else if (starResult == '8888') {
+          verticalCooltimeDialog(
+            lastTime: widget.lastTime,
+            onMain: () async {
+              if (Platform.isIOS) {
+                const platform = MethodChannel('orientation');
+                await platform.invokeMethod('setLandscape');
+                await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
+              } else {
+                await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+              }
+              Get.back();
+              final userData = Get.find<UserDataController>();
+              haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+            },
+            onReset: () {
+              Get.back();
+              _resetGame();
+            },
+          );
+        }
       },
     );
   }

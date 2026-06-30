@@ -4,8 +4,10 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/booki/booki_match_data.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_screen.dart';
+import 'package:hani_booki/services/booki/booki_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -17,8 +19,9 @@ import 'package:logger/logger.dart';
 
 class MatchScreen extends StatefulWidget {
   final String keyCode;
+  final String lastTime;
 
-  const MatchScreen({super.key, required this.keyCode});
+  const MatchScreen({super.key, required this.keyCode, required this.lastTime});
 
   @override
   State<MatchScreen> createState() => _MatchScreenState();
@@ -149,24 +152,43 @@ class _MatchScreenState extends State<MatchScreen> with TickerProviderStateMixin
 
     // 모든 카드가 맞춰졌다면
     if (matchedCards.length == images.length) {
-      await starUpdateService('img', widget.keyCode);
+      final starResult = await starUpdateService('img', widget.keyCode);
       final result = await missionSaveService(missionNum: 2, gb: 'img', keycode: widget.keyCode);
 
       if (result.success) {
         await showStampDialog(widget.keyCode);
       }
 
-      lottieDialog(
-        onReset: () {
-          _resetGame();
-          Get.back();
-        },
-        onMain: () {
-          Get.back();
-          Get.back();
-          Get.off(() => BookiHomeScreen(keyCode: widget.keyCode));
-        },
-      );
+      if (starResult == '0000') {
+        lottieDialog(
+          onReset: () {
+            _resetGame();
+            Get.back();
+          },
+          onMain: () {
+            Get.back();
+            final userData = Get.find<UserDataController>();
+            bookiContentService(
+              widget.keyCode,
+              userData.userData!.id,
+              userData.userData!.year,
+            );
+          },
+        );
+      } else if (starResult == '8888') {
+        cooltimeDialog(
+          lastTime: widget.lastTime,
+          onReset: () {
+            Get.back();
+            _resetGame();
+          },
+          onMain: () {
+            Get.back();
+            final userData = Get.find<UserDataController>();
+            bookiContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+          },
+        );
+      }
     }
   }
 

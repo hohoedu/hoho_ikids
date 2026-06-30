@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 하니 골든벨
-Future<void> haniGoldenbellService(id, keyCode, year) async {
+Future<void> haniGoldenbellService(id, keyCode, year, lastTime) async {
   String url = dotenv.get('HANI_GOLDENBELL_URL');
 
   final Map<String, dynamic> requestData = {
@@ -38,7 +38,7 @@ Future<void> haniGoldenbellService(id, keyCode, year) async {
         haniGoldenbellDataController
             .setHaniGoldenbellDataList(haniGoldenbellDataList);
 
-        Get.to(() => HaniGoldenbellScreen(keyCode: keyCode));
+        Get.to(() => HaniGoldenbellScreen(keyCode: keyCode, lastTime: lastTime));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

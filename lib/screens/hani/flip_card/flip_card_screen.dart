@@ -4,11 +4,13 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_Flip_data.dart';
 
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_sindong.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_default.dart';
 import 'package:hani_booki/screens/hani/flip_card/flip_card_widgets/flip_soojae.dart';
+import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -20,8 +22,9 @@ import 'package:logger/logger.dart';
 
 class FlipCardScreen extends StatefulWidget {
   final String keyCode;
+  final String lastTime;
 
-  const FlipCardScreen({super.key, required this.keyCode});
+  const FlipCardScreen({super.key, required this.keyCode, required this.lastTime});
 
   @override
   State<FlipCardScreen> createState() => _FlipCardScreenState();
@@ -85,7 +88,7 @@ class _FlipCardScreenState extends State<FlipCardScreen> with TickerProviderStat
   }
 
   void completeGame() async {
-    await starUpdateService('card', widget.keyCode);
+    final starResult = await starUpdateService('card', widget.keyCode);
     final result = await missionSaveService(missionNum: 2, gb: 'card', keycode: widget.keyCode);
 
     if (result.success) {
@@ -95,16 +98,32 @@ class _FlipCardScreenState extends State<FlipCardScreen> with TickerProviderStat
     Future.delayed(
       Duration(seconds: 1),
       () {
-        lottieDialog(
-          onReset: () {
-            _resetGame();
-            Get.back();
-          },
-          onMain: () {
-            Get.back();
-            Get.back();
-          },
-        );
+        if (starResult == '0000') {
+          lottieDialog(
+            onMain: () {
+              Get.back();
+              final userData = Get.find<UserDataController>();
+              haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+            },
+            onReset: () {
+              Get.back();
+              _resetGame();
+            },
+          );
+        } else if (starResult == '8888') {
+          cooltimeDialog(
+            lastTime: widget.lastTime,
+            onMain: () {
+              Get.back();
+              final userData = Get.find<UserDataController>();
+              haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+            },
+            onReset: () {
+              Get.back();
+              _resetGame();
+            },
+          );
+        }
       },
     );
   }

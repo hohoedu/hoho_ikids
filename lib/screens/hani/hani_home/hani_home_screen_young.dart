@@ -127,28 +127,30 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                         Row(
                           children: [
                             HaniContents(
-                              path: '${haniData['card']}',
+                              imagePath: '${haniData['card']}',
+                              lastTime: haniHomeData.haniLastTimeMap['card'] ?? '',
                               onTap: () async {
-                                await SystemChrome.setPreferredOrientations([
-                                  DeviceOrientation.portraitUp,
-                                  DeviceOrientation.portraitDown,
-                                ]);
-                                haniRotateService(id, widget.keyCode, year);
+                                haniRotateService(id, widget.keyCode, year, haniHomeData.haniLastTimeMap['card'] ?? '');
                               },
+                              type: 'card',
                             ),
                             HaniContents(
-                              path: '${haniData['quiz']}',
+                              imagePath: '${haniData['quiz']}',
+                              lastTime: haniHomeData.haniLastTimeMap['quiz'] ?? '',
                               onTap: () async {
                                 await haniQuizService(id, widget.keyCode, year);
                                 Get.to(() => QuizScreen(keyCode: widget.keyCode));
                               },
+                              type: 'quiz',
                             ),
                             HaniContents(
-                              path: '${haniData['puz']}',
+                              imagePath: '${haniData['puz']}',
+                              lastTime: haniHomeData.haniLastTimeMap['puz'] ?? '',
                               onTap: () async {
                                 await haniDragPuzzleService(id, widget.keyCode, year);
                                 Get.to(() => DragPuzzleScreen(keyCode: widget.keyCode));
                               },
+                              type: 'puz_young',
                             ),
                           ],
                         ),
@@ -156,16 +158,20 @@ class _HaniHomeScreenYoungState extends State<HaniHomeScreenYoung> with WidgetsB
                         Row(
                           children: [
                             HaniContents(
-                              path: '${haniData['song']}',
+                              imagePath: '${haniData['song']}',
+                              lastTime: haniHomeData.haniLastTimeMap['song'] ?? '',
                               onTap: () {
                                 haniSongListService(id, widget.keyCode, year);
                               },
+                              type: 'song',
                             ),
                             HaniContents(
-                              path: '${haniData['insung']}',
+                              imagePath: '${haniData['insung']}',
+                              lastTime: haniHomeData.haniLastTimeMap['insung'] ?? '',
                               onTap: () {
                                 haniInsungService(id, widget.keyCode, year);
                               },
+                              type: 'insung',
                             ),
                           ],
                         ),

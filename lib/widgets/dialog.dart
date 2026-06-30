@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
@@ -13,6 +14,7 @@ import 'package:hani_booki/screens/auth/join_widgets/join_twice_verification_scr
 import 'package:hani_booki/services/auth/withdraw_service.dart';
 import 'package:hani_booki/services/notice/notice_list_service.dart';
 import 'package:hani_booki/utils/stamp_effect.dart';
+import 'package:hani_booki/widgets/cooltime_icon.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -377,6 +379,8 @@ void verticalBackDialog(isPortraitMode) {
                         child: GestureDetector(
                           onTap: () async {
                             if (Platform.isIOS) {
+                              const platform = MethodChannel('orientation');
+                              await platform.invokeMethod('setLandscape');
                               await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight]);
                             } else {
                               await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
@@ -1109,6 +1113,305 @@ void verticalLottieDialog({required VoidCallback onMain, required VoidCallback o
       );
     },
   );
+}
+
+void cooltimeDialog({
+  required VoidCallback onMain,
+  required VoidCallback onReset,
+  required String lastTime,
+}) {
+  Get.generalDialog(
+    barrierDismissible: false,
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black26,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return PopScope(
+        canPop: false,
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 7,
+                    child: Lottie.asset(
+                      'assets/lottie/star_point.json',
+                      height: MediaQuery.of(context).size.height * 0.5,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: CooltimeResultContent(lastTime: lastTime, fontSize: 8.sp),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: GestureDetector(
+                            onTap: onReset,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.17,
+                              height: MediaQuery.of(context).size.height * 0.13,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '다시하기',
+                                  style: TextStyle(
+                                    color: fontMain,
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: GestureDetector(
+                            onTap: onMain,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.17,
+                              height: MediaQuery.of(context).size.height * 0.13,
+                              decoration: BoxDecoration(
+                                color: Colors.yellow,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '메인으로',
+                                  style: TextStyle(
+                                    color: fontMain,
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+}
+
+void verticalCooltimeDialog({
+  required VoidCallback onMain,
+  required VoidCallback onReset,
+  required String lastTime,
+}) {
+  Get.generalDialog(
+    barrierDismissible: false,
+    barrierLabel: 'Dialog',
+    barrierColor: Colors.black26,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return PopScope(
+        canPop: false,
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.5,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Lottie.asset(
+                      'assets/lottie/star_point.json',
+                      height: MediaQuery.of(context).size.height * 0.5,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: CooltimeResultContent(lastTime: lastTime, fontSize: 28),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: GestureDetector(
+                            onTap: onReset,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '다시하기',
+                                  style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: GestureDetector(
+                            onTap: onMain,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              decoration: BoxDecoration(
+                                color: Colors.yellow,
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '메인으로',
+                                  style: TextStyle(color: fontMain, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  );
+}
+
+class CooltimeResultContent extends StatefulWidget {
+  final String lastTime;
+  final double fontSize;
+
+  const CooltimeResultContent({
+    super.key,
+    required this.lastTime,
+    this.fontSize = 14,
+  });
+
+  @override
+  State<CooltimeResultContent> createState() => _CooltimeResultContentState();
+}
+
+class _CooltimeResultContentState extends State<CooltimeResultContent> {
+  Timer? _timer;
+  String _remaining = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _updateRemaining();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateRemaining());
+  }
+
+  void _updateRemaining() {
+    final lastTime = widget.lastTime;
+    if (lastTime.isEmpty) return;
+    try {
+      final last = DateTime(
+        int.parse(lastTime.substring(0, 4)),
+        int.parse(lastTime.substring(4, 6)),
+        int.parse(lastTime.substring(6, 8)),
+        int.parse(lastTime.substring(8, 10)),
+        int.parse(lastTime.substring(10, 12)),
+        lastTime.length >= 14 ? int.parse(lastTime.substring(12, 14)) : 0,
+      );
+      final remaining = const Duration(minutes: 5) - DateTime.now().difference(last);
+      if (remaining.isNegative) {
+        _timer?.cancel();
+        if (mounted) setState(() => _remaining = '0:00');
+      } else {
+        final m = remaining.inMinutes;
+        final s = remaining.inSeconds % 60;
+        if (mounted) setState(() => _remaining = '$m:${s.toString().padLeft(2, '0')}');
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(
+          fontSize: widget.fontSize,
+          fontWeight: FontWeight.bold,
+          shadows: const [
+            Shadow(color: Colors.black, blurRadius: 4, offset: Offset(1, 1)),
+          ],
+        ),
+        children: [
+          const TextSpan(
+            text: '다음 별 포인트 획득까지 ',
+            style: TextStyle(color: Colors.white),
+          ),
+          TextSpan(
+            text: _remaining,
+            style: const TextStyle(color: Colors.yellowAccent),
+          ),
+          const TextSpan(
+            text: ' 남았어요!',
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 void versionDialog(String platform, String storeUrl) {

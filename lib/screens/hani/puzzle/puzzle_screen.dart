@@ -5,7 +5,9 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_puzzle_data.dart';
+import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -18,8 +20,9 @@ import 'package:logger/logger.dart';
 
 class PuzzleScreen extends StatefulWidget {
   final String keyCode;
+  final String lastTime;
 
-  const PuzzleScreen({super.key, required this.keyCode});
+  const PuzzleScreen({super.key, required this.keyCode, required this.lastTime});
 
   @override
   State<PuzzleScreen> createState() => _PuzzleScreenState();
@@ -124,23 +127,38 @@ class _PuzzleScreenState extends State<PuzzleScreen> with TickerProviderStateMix
         if (visibilityStatus.every((isVisible) => !isVisible)) {
           timer.cancel();
           isGameActive = false;
-          await starUpdateService('puz', widget.keyCode);
+          final starResult = await starUpdateService('puz', widget.keyCode);
           final result = await missionSaveService(missionNum: 2, gb: 'puz', keycode: widget.keyCode);
 
           if (result.success) {
             await showStampDialog(widget.keyCode);
           }
-
-          lottieDialog(
-            onMain: () {
-              Get.back();
-              Get.back();
-            },
-            onReset: () {
-              Get.back();
-              resetGame();
-            },
-          );
+          if (starResult == '0000') {
+            lottieDialog(
+              onMain: () {
+                Get.back();
+                final userData = Get.find<UserDataController>();
+                haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+              },
+              onReset: () {
+                Get.back();
+                resetGame();
+              },
+            );
+          } else if (starResult == '8888') {
+            cooltimeDialog(
+              lastTime: widget.lastTime,
+              onMain: () {
+                Get.back();
+                final userData = Get.find<UserDataController>();
+                haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+              },
+              onReset: () {
+                Get.back();
+                resetGame();
+              },
+            );
+          }
         }
       } else {
         await SoundManager.playNo();

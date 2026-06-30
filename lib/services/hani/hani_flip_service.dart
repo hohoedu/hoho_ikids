@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 하니 카드놀이
-Future<void> haniFlipService(id, keyCode, year) async {
+Future<void> haniFlipService(id, keyCode, year, lastTime) async {
   final HaniFlipDataController haniFlipDataController =
       Get.put(HaniFlipDataController());
   String url = dotenv.get('HANI_FLIP_URL');
@@ -35,7 +35,7 @@ Future<void> haniFlipService(id, keyCode, year) async {
             resultList.map((item) => HaniFlipData.fromJson(item)).toList();
         haniFlipDataController.setHaniFlipDataList(haniFlipDataList);
 
-        Get.to(() => FlipCardScreen(keyCode: keyCode));
+        Get.to(() => FlipCardScreen(keyCode: keyCode, lastTime: lastTime,));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

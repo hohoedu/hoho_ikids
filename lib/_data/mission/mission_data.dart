@@ -127,6 +127,12 @@ class MissionController extends GetxController {
 
   MissionInfo? get contentMission => missionData.value?.contentMission;
 
+  void reset() {
+    missionData.value = null;
+    attendanceCleared.value = false;
+    contentCleared.value = false;
+  }
+
   void updateAttendanceProgress(int newCount) {
     final current = missionData.value;
     if (current == null) return;

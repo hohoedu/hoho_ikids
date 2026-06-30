@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
@@ -9,7 +11,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 하니 그림맞추기
-Future<void> haniRotateService(id, keyCode, year) async {
+Future<void> haniRotateService(id, keyCode, year, lastTime) async {
   String url = dotenv.get('HANI_ROTATE_URL');
 
   final Map<String, dynamic> requestData = {
@@ -35,7 +37,17 @@ Future<void> haniRotateService(id, keyCode, year) async {
         final haniRotateController = Get.put(HaniRotateDataController());
         haniRotateController.setRotateDataList(haniRotateDataList);
 
-        Get.to(() => RotateScreen(keyCode: keyCode));
+        if (Platform.isIOS) {
+          const platform = MethodChannel('orientation');
+          await platform.invokeMethod('setPortrait');
+        }
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        Get.to(() => RotateScreen(keyCode: keyCode, lastTime: lastTime));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

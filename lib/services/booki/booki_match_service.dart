@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 부키 그림맞추기
-Future<void> bookiMatchService(id, keyCode, year) async {
+Future<void> bookiMatchService(id, keyCode, year, lastTime) async {
   String url = dotenv.get('BOOKI_MATCH_URL');
 
   final Map<String, dynamic> requestData = {
@@ -36,7 +36,7 @@ Future<void> bookiMatchService(id, keyCode, year) async {
             Get.put(BookiMatchDataController());
         bookiMatchDataController.setBookiMatchDataList(bookiMatchDataList);
 
-        Get.to(() => MatchScreen(keyCode: keyCode,));
+        Get.to(() => MatchScreen(keyCode: keyCode, lastTime:lastTime));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_su.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_young.dart';
@@ -14,9 +15,10 @@ import 'package:logger/logger.dart';
 // 하니 이북 콘텐츠 리스트
 Future<void> haniContentService(keyCode, schoolId, year) async {
   final haniHomeController = Get.put(HaniHomeDataController());
-
+  final userController = Get.find<UserDataController>();
   String url = dotenv.get('HANI_EBOOK_CONTENT_LIST_URL');
   final Map<String, dynamic> requestData = {
+    'id': userController.userData!.id,
     'keycode': keyCode,
     'schoolid': schoolId,
     'yy': year,
@@ -35,17 +37,28 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
       if (resultValue == "0000") {
         haniHomeController.setHaniHomeDataMap(resultList['data']);
         await totalStarService(keyCode);
+
         if (keyCode.substring(3, 4) == '5' || keyCode.substring(3, 4) == '0') {
           if (keyCode.substring(0, 1) == 'Y') {
-            Get.to(() => HaniHomeScreenYoung(keyCode: keyCode));
+            Get.offUntil(
+              GetPageRoute(page: () => HaniHomeScreenYoung(keyCode: keyCode)),
+              (route) => route.isFirst,
+            );
             return;
           }
           if (keyCode.substring(0, 1) == 'G') {
-            Get.to(() => HaniHomeScreenSu(keyCode: keyCode));
+            Get.offUntil(
+              GetPageRoute(page: () => HaniHomeScreenSu(keyCode: keyCode)),
+              (route) => route.isFirst,
+            );
             return;
           }
         }
-        Get.to(() => HaniHomeScreen(keyCode: keyCode));
+
+        Get.offUntil(
+          GetPageRoute(page: () => HaniHomeScreen(keyCode: keyCode)),
+          (route) => route.isFirst,
+        );
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 부키 다른그림 찾기
-Future<void> bookiFindDiffService(id, keyCode, year) async {
+Future<void> bookiFindDiffService(id, keyCode, year, lastTime) async {
   String url = dotenv.get('BOOKI_FIND_DIFF_URL');
 
   final Map<String, dynamic> requestData = {
@@ -40,7 +40,7 @@ Future<void> bookiFindDiffService(id, keyCode, year) async {
         bookiFindDiffDataController
             .setBookiFindDiffDataList(bookiFindDiffDataList);
 
-        Get.to(() => FindDiffScreen(keyCode: keyCode));
+        Get.to(() => FindDiffScreen(keyCode: keyCode, lastTime:lastTime));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

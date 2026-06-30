@@ -57,8 +57,11 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
 
   Future<void> _initMission() async {
     if (!Get.isRegistered<MissionController>()) {
-      Get.put(MissionController());
+      Get.put(MissionController(), permanent: true);
+    } else {
+      Get.find<MissionController>().reset();
     }
+
     await missionListService(widget.keyCode);
 
     final result = await missionSaveService(missionNum: 1, gb: 'attendance', keycode: widget.keyCode);
@@ -66,7 +69,6 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
       showStampDialog(widget.keyCode, isAttendance: true);
     }
 
-    // ✅ 달성했지만 미클리어 미션 자동 완료
     final missionController = Get.find<MissionController>();
     final missions = [
       missionController.attendanceMission,
@@ -74,7 +76,7 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
     ];
 
     final hasUnclearedMission = missions.any(
-          (m) => m != null && m.isCompleted && m.isCleared == 'N',
+      (m) => m != null && m.isCompleted && m.isCleared == 'N',
     );
 
     if (hasUnclearedMission) {
@@ -120,7 +122,7 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
     String id = userData.userData!.id;
     String year = userData.userData!.year;
     final bool isSibling = userData.userData!.siblingCount == '1' ? false : true;
-
+    Logger().d('keyCode = ${widget.keyCode}');
     return Scaffold(
       key: scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -164,15 +166,21 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
                                 children: [
                                   BookiTopContents(
                                     imagePath: '${bookiData['story']}',
+                                    lastTime: bookiHomeData.bookiLastTimeMap['story'] ?? '',
                                     onTap: () => bookiStoryService(id, widget.keyCode, year),
+                                    type: 'story',
                                   ),
                                   BookiTopContents(
                                     imagePath: '${bookiData['song']}',
+                                    lastTime: bookiHomeData.bookiLastTimeMap['song'] ?? '',
                                     onTap: () => bookiSongService(id, widget.keyCode, year),
+                                    type: 'song',
                                   ),
                                   BookiTopContents(
                                     imagePath: '${bookiData['write']}',
+                                    lastTime: bookiHomeData.bookiLastTimeMap['write'] ?? '',
                                     onTap: () => bookiStrokeService(id, widget.keyCode, year),
+                                    type: 'write',
                                   ),
                                 ],
                               ),
@@ -182,20 +190,26 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
                                   BookiBottomContents(
                                     imagePath: '${bookiData['bell']}',
                                     color: gold,
+                                    lastTime: bookiHomeData.bookiLastTimeMap['bell'] ?? '',
                                     onTap: () {
                                       bgmController.stopBgm();
-                                      bookiGoldenbellService(id, widget.keyCode, year);
+                                      bookiGoldenbellService(id, widget.keyCode, year, bookiHomeData.bookiLastTimeMap['bell'] ?? '');
                                     },
+                                    type: 'bell',
                                   ),
                                   BookiBottomContents(
                                     imagePath: '${bookiData['find']}',
                                     color: amethyst,
-                                    onTap: () => bookiFindDiffService(id, widget.keyCode, year),
+                                    lastTime: bookiHomeData.bookiLastTimeMap['find'] ?? '',
+                                    onTap: () => bookiFindDiffService(id, widget.keyCode, year, bookiHomeData.bookiLastTimeMap['find'] ?? ''),
+                                    type: 'find',
                                   ),
                                   BookiBottomContents(
                                     imagePath: '${bookiData['img']}',
                                     color: emerald,
-                                    onTap: () => bookiMatchService(id, widget.keyCode, year),
+                                    lastTime: bookiHomeData.bookiLastTimeMap['img'] ?? '',
+                                    onTap: () => bookiMatchService(id, widget.keyCode, year, bookiHomeData.bookiLastTimeMap['img'] ?? ''),
+                                    type: 'img',
                                   ),
                                 ],
                               ),
@@ -209,11 +223,15 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
                                 children: [
                                   BookiTopContents(
                                     imagePath: '${bookiData['story']}',
+                                    lastTime: bookiHomeData.bookiLastTimeMap['story'] ?? '',
                                     onTap: () => bookiStoryService(id, widget.keyCode, year),
+                                    type: 'story',
                                   ),
                                   BookiTopContents(
                                     imagePath: '${bookiData['song']}',
+                                    lastTime: bookiHomeData.bookiLastTimeMap['song'] ?? '',
                                     onTap: () => bookiSongService(id, widget.keyCode, year),
+                                    type: 'song',
                                   ),
                                 ],
                               ),
@@ -223,20 +241,26 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
                                   BookiBottomContents(
                                     imagePath: '${bookiData['bell']}',
                                     color: gold,
+                                    lastTime: bookiHomeData.bookiLastTimeMap['bell'] ?? '',
                                     onTap: () {
                                       bgmController.stopBgm();
-                                      bookiGoldenbellService(id, widget.keyCode, year);
+                                      bookiGoldenbellService(id, widget.keyCode, year, bookiHomeData.bookiLastTimeMap['bell'] ?? '');
                                     },
+                                    type: 'bell',
                                   ),
                                   BookiBottomContents(
                                     imagePath: '${bookiData['find']}',
                                     color: amethyst,
-                                    onTap: () => bookiFindDiffService(id, widget.keyCode, year),
+                                    lastTime: bookiHomeData.bookiLastTimeMap['find'] ?? '',
+                                    onTap: () => bookiFindDiffService(id, widget.keyCode, year, bookiHomeData.bookiLastTimeMap['find'] ?? ''),
+                                    type: 'find',
                                   ),
                                   BookiBottomContents(
                                     imagePath: '${bookiData['img']}',
                                     color: emerald,
-                                    onTap: () => bookiMatchService(id, widget.keyCode, year),
+                                    lastTime: bookiHomeData.bookiLastTimeMap['img'] ?? '',
+                                    onTap: () => bookiMatchService(id, widget.keyCode, year, bookiHomeData.bookiLastTimeMap['img'] ?? ''),
+                                    type: 'img',
                                   ),
                                 ],
                               ),

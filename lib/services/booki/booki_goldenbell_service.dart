@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 부키 골든벨
-Future<void> bookiGoldenbellService(id, keyCode, year) async {
+Future<void> bookiGoldenbellService(id, keyCode, year, lastTime) async {
   String url = dotenv.get('BOOKI_GOLDENBELL_URL');
 
   final Map<String, dynamic> requestData = {
@@ -38,7 +38,7 @@ Future<void> bookiGoldenbellService(id, keyCode, year) async {
         bookiGoldenbellDataController
             .setBookiGoldenbellDataList(bookiGoldenbellDataList);
 
-        Get.to(() => BookiGoldenbellScreen(keyCode: keyCode));
+        Get.to(() => BookiGoldenbellScreen(keyCode: keyCode, lastTime: lastTime));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

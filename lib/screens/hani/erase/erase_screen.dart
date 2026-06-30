@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_erase_data.dart';
+import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
@@ -17,8 +19,9 @@ import 'package:scratcher/scratcher.dart';
 
 class EraseScreen extends StatefulWidget {
   final String keyCode;
+  final String lastTime;
 
-  const EraseScreen({super.key, required this.keyCode});
+  const EraseScreen({super.key, required this.keyCode, required this.lastTime});
 
   @override
   State<EraseScreen> createState() => _EraseScreenState();
@@ -84,32 +87,56 @@ class _EraseScreenState extends State<EraseScreen> with TickerProviderStateMixin
   Future<void> nextScratcher() async {
     if (remainingGroups.isEmpty) {
       await Future.delayed(Duration(milliseconds: 300));
-      await starUpdateService('clean', widget.keyCode);
+      final starResult = await starUpdateService('clean', widget.keyCode);
       final result = await missionSaveService(missionNum: 2, gb: 'clean', keycode: widget.keyCode);
 
       if (result.success) {
         await showStampDialog(widget.keyCode);
       }
-
-      lottieDialog(
-        onMain: () {
-          Get.back();
-          Get.back();
-        },
-        onReset: () {
-          Get.back();
-          setState(() {
-            remainingGroups = List.from(eraseData.getGroupedData());
-            if (remainingGroups.isNotEmpty) {
-              _isScratched = false;
-              _scratcherKey = UniqueKey();
-              getRandomGroup();
-            } else {
-              Logger().e("오류: 리셋 후 remainingGroups가 비어 있습니다.");
-            }
-          });
-        },
-      );
+      if (starResult == '0000') {
+        lottieDialog(
+          onMain: () {
+            Get.back();
+            final userData = Get.find<UserDataController>();
+            haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+          },
+          onReset: () {
+            Get.back();
+            setState(() {
+              remainingGroups = List.from(eraseData.getGroupedData());
+              if (remainingGroups.isNotEmpty) {
+                _isScratched = false;
+                _scratcherKey = UniqueKey();
+                getRandomGroup();
+              } else {
+                Logger().e("오류: 리셋 후 remainingGroups가 비어 있습니다.");
+              }
+            });
+          },
+        );
+      } else if (starResult == '8888') {
+        cooltimeDialog(
+          lastTime: widget.lastTime,
+          onMain: () {
+            Get.back();
+            final userData = Get.find<UserDataController>();
+            haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+          },
+          onReset: () {
+            Get.back();
+            setState(() {
+              remainingGroups = List.from(eraseData.getGroupedData());
+              if (remainingGroups.isNotEmpty) {
+                _isScratched = false;
+                _scratcherKey = UniqueKey();
+                getRandomGroup();
+              } else {
+                Logger().e("오류: 리셋 후 remainingGroups가 비어 있습니다.");
+              }
+            });
+          },
+        );
+      }
       return;
     }
 

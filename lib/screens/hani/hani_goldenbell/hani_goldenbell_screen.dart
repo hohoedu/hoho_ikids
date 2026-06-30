@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_data.dart';
+import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
@@ -18,8 +20,9 @@ import 'package:logger/logger.dart';
 
 class HaniGoldenbellScreen extends StatefulWidget {
   final String keyCode;
+  final String lastTime;
 
-  const HaniGoldenbellScreen({super.key, required this.keyCode});
+  const HaniGoldenbellScreen({super.key, required this.keyCode, required this.lastTime});
 
   @override
   State<HaniGoldenbellScreen> createState() => _HaniGoldenbellScreenState();
@@ -86,24 +89,44 @@ class _HaniGoldenbellScreenState extends State<HaniGoldenbellScreen> with Ticker
   }
 
   void endQuestion() async {
-    await starUpdateService('bell', widget.keyCode);
+    final starResult = await starUpdateService('bell', widget.keyCode);
     final result = await missionSaveService(missionNum: 2, gb: 'bell', keycode: widget.keyCode);
     if (result.success) {
       await showStampDialog(widget.keyCode);
     }
-    lottieDialog(
-      onMain: () {
-        Get.back();
-        Get.back();
-      },
-      onReset: () {
-        Get.back();
-        setState(() {
-          currentIndex = 0;
-          resetQuestionState();
-        });
-      },
-    );
+    if(starResult == '0000') {
+      lottieDialog(
+        onMain: () {
+          Get.back();
+          final userData = Get.find<UserDataController>();
+          haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+        },
+        onReset: () {
+          Get.back();
+          setState(() {
+            currentIndex = 0;
+            resetQuestionState();
+          });
+        },
+      );
+    }
+    else if (starResult == '8888'){
+      cooltimeDialog(
+        lastTime: widget.lastTime,
+        onMain: () {
+          Get.back();
+          final userData = Get.find<UserDataController>();
+          haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+        },
+        onReset: () {
+          Get.back();
+          setState(() {
+            currentIndex = 0;
+            resetQuestionState();
+          });
+        },
+      );
+    }
   }
 
   void checkAnswer(int answerIndex) {

@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 하니 골든벨(수재 5호)
-Future<void> haniGoldenbellSuService(id, keyCode, year) async {
+Future<void> haniGoldenbellSuService(id, keyCode, year, lastTime) async {
   String url = dotenv.get('HANI_GOLDENBELL_G5_URL');
 
   final Map<String, dynamic> requestData = {
@@ -17,6 +17,7 @@ Future<void> haniGoldenbellSuService(id, keyCode, year) async {
     'keycode': keyCode,
     'yy': year,
   };
+  Logger().d(keyCode);
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));
@@ -30,14 +31,13 @@ Future<void> haniGoldenbellSuService(id, keyCode, year) async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        List<HaniGoldenbellSuData> haniGoldenbellSuDataList =
-            resultData.map((item) => HaniGoldenbellSuData.fromJson(item)).toList();
+        List<HaniGoldenbellSuData> haniGoldenbellSuDataList = resultData.map((item) => HaniGoldenbellSuData.fromJson(item)).toList();
 
         final haniGoldenbellSuDataController = Get.put(HaniGoldenbellSuDataController());
         haniGoldenbellSuDataController.setHaniGoldenbellSuDataList(haniGoldenbellSuDataList);
 
         Logger().d('result = ${haniGoldenbellSuDataController.haniGoldenbellDataList[1].correctAnswer}');
-        Get.to(() => HaniGoldenbellSuScreen(keyCode: keyCode));
+        Get.to(() => HaniGoldenbellSuScreen(keyCode: keyCode, lastTime: lastTime));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {

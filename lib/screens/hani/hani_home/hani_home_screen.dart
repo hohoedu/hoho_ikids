@@ -75,8 +75,11 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
 
   Future<void> _initMission() async {
     if (!Get.isRegistered<MissionController>()) {
-      Get.put(MissionController());
+      Get.put(MissionController(), permanent: true);
+    } else {
+      Get.find<MissionController>().reset();
     }
+
     await missionListService(widget.keyCode);
 
     final result = await missionSaveService(missionNum: 1, gb: 'attendance', keycode: widget.keyCode);
@@ -92,7 +95,7 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
     ];
 
     final hasUnclearedMission = missions.any(
-          (m) => m != null && m.isCompleted && m.isCleared == 'N',
+      (m) => m != null && m.isCompleted && m.isCleared == 'N',
     );
 
     if (hasUnclearedMission) {
@@ -132,10 +135,7 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
       ),
       body: Center(
         child: Container(
-          width: MediaQuery
-              .of(context)
-              .size
-              .width * 0.9,
+          width: MediaQuery.of(context).size.width * 0.9,
           height: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFFFDDE2),
@@ -158,21 +158,28 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
                         Row(
                           children: [
                             HaniContents(
-                                path: '${haniData['song']}',
-                                onTap: () {
-                                  haniSongService(id, widget.keyCode, year);
-                                }),
+                              imagePath: '${haniData['song']}',
+                              lastTime: haniHomeData.haniLastTimeMap['song'] ?? '',
+                              onTap: () {
+                                haniSongService(id, widget.keyCode, year);
+                              },
+                              type: 'song',
+                            ),
                             HaniContents(
-                              path: '${haniData['story']}',
+                              imagePath: '${haniData['story']}',
+                              lastTime: haniHomeData.haniLastTimeMap['story'] ?? '',
                               onTap: () {
                                 haniStoryService(id, widget.keyCode, year);
                               },
+                              type: 'story',
                             ),
                             HaniContents(
-                              path: '${haniData['insung']}',
+                              imagePath: '${haniData['insung']}',
+                              lastTime: haniHomeData.haniLastTimeMap['insung'] ?? '',
                               onTap: () {
                                 haniInsungService(id, widget.keyCode, year);
                               },
+                              type: 'insung',
                             ),
                           ],
                         ),
@@ -180,44 +187,56 @@ class _HaniHomeScreenState extends State<HaniHomeScreen> with WidgetsBindingObse
                         Row(
                           children: [
                             HaniContents(
-                              path: '${haniData['write']}',
+                              imagePath: '${haniData['write']}',
+                              lastTime: haniHomeData.haniLastTimeMap['write'] ?? '',
                               onTap: () {
                                 haniStrokeService(id, widget.keyCode, year);
                               },
+                              type: 'write',
                             ),
                             HaniContents(
-                              path: '${haniData['card']}',
+                              imagePath: '${haniData['card']}',
+                              lastTime: haniHomeData.haniLastTimeMap['card'] ?? '',
                               onTap: () {
-                                haniFlipService(id, widget.keyCode, year);
+                                haniFlipService(id, widget.keyCode, year, haniHomeData.haniLastTimeMap['card'] ?? '');
                               },
+                              type: 'card',
                             ),
                             widget.keyCode.substring(0, 1) == 'Y'
                                 ? HaniContents(
-                              path: '${haniData['clean']}',
-                              onTap: () {
-                                haniEraseService(id, widget.keyCode, year);
-                              },
-                            )
+                                    imagePath: '${haniData['clean']}',
+                                    lastTime: haniHomeData.haniLastTimeMap['clean'] ?? '',
+                                    onTap: () {
+                                      haniEraseService(id, widget.keyCode, year, haniHomeData.haniLastTimeMap['clean'] ?? '');
+                                    },
+                                    type: 'clean',
+                                  )
                                 : HaniContents(
-                              path: '${haniData['puz']}',
-                              onTap: () {
-                                haniPuzzleService(id, widget.keyCode, year);
-                              },
-                            ),
+                                    imagePath: '${haniData['puz']}',
+                                    lastTime: haniHomeData.haniLastTimeMap['puz'] ?? '',
+                                    onTap: () {
+                                      haniPuzzleService(id, widget.keyCode, year, haniHomeData.haniLastTimeMap['puz'] ?? '');
+                                    },
+                                    type: 'puz',
+                                  ),
                             widget.keyCode.substring(0, 1) == 'S'
                                 ? HaniContents(
-                              path: '${haniData['bell']}',
-                              onTap: () {
-                                bgmController.stopBgm();
-                                haniGoldenbellService(id, widget.keyCode, year);
-                              },
-                            )
+                                    imagePath: '${haniData['bell']}',
+                                    lastTime: haniHomeData.haniLastTimeMap['bell'] ?? '',
+                                    onTap: () {
+                                      bgmController.stopBgm();
+                                      haniGoldenbellService(id, widget.keyCode, year, haniHomeData.haniLastTimeMap['bell']);
+                                    },
+                                    type: 'bell',
+                                  )
                                 : HaniContents(
-                              path: '${haniData['han']}',
-                              onTap: () {
-                                haniHanjaSongService(id, widget.keyCode, year);
-                              },
-                            ),
+                                    imagePath: '${haniData['han']}',
+                                    lastTime: haniHomeData.haniLastTimeMap['han'] ?? '',
+                                    onTap: () {
+                                      haniHanjaSongService(id, widget.keyCode, year);
+                                    },
+                                    type: 'han',
+                                  ),
                           ],
                         ),
                       ],

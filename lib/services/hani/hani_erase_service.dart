@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 // 하니 쓱싹쓱싹
-Future<void> haniEraseService(id, keyCode, year) async {
+Future<void> haniEraseService(id, keyCode, year, lastTime) async {
   final haniEraseDataController = Get.put(HaniEraseDataController());
   String url = dotenv.get('HANI_ERASE_URL');
 
@@ -30,10 +30,9 @@ Future<void> haniEraseService(id, keyCode, year) async {
 
       // 응답 결과가 있는 경우
       if (resultValue == "0000") {
-        List<HaniEraseData> haniEraseDataList =
-            resultList.map((item) => HaniEraseData.fromJson(item)).toList();
+        List<HaniEraseData> haniEraseDataList = resultList.map((item) => HaniEraseData.fromJson(item)).toList();
         haniEraseDataController.setHaniEraseDataList(haniEraseDataList);
-        Get.to(() => EraseScreen(keyCode: keyCode));
+        Get.to(() => EraseScreen(keyCode: keyCode, lastTime: lastTime));
       }
       // 응답 데이터가 오류일 때("9999": 오류)
       else {
