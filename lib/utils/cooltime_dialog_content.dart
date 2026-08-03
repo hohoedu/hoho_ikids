@@ -5,6 +5,18 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/utils/cooltime_utils.dart';
 
+void showCooltimeBlockDialog(String lastTime) {
+  Get.defaultDialog(
+    barrierDismissible: true,
+    backgroundColor: Colors.white,
+    title: '별 포인트 충전 중!',
+    content: CooltimeDialogContent(lastTime: lastTime),
+    buttonColor: Colors.green,
+    textConfirm: '확인',
+    onConfirm: () => Get.back(),
+  );
+}
+
 class CooltimeDialogContent extends StatefulWidget {
   final String lastTime;
 

@@ -12,8 +12,10 @@ import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/star_event_mixin.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:hive/hive.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 
@@ -27,7 +29,7 @@ class RotateScreen extends StatefulWidget {
   State<RotateScreen> createState() => _RotateScreenState();
 }
 
-class _RotateScreenState extends State<RotateScreen> {
+class _RotateScreenState extends State<RotateScreen> with TickerProviderStateMixin, StarEventMixin<RotateScreen>{
   final bgmController = Get.find<BgmController>();
   late AudioPlayer _audioPlayer;
 
@@ -46,6 +48,12 @@ class _RotateScreenState extends State<RotateScreen> {
     _audioPlayer = AudioPlayer();
 
     _initGame();
+    initStarEventFromServer(
+      btype: 'H',
+      hosu: widget.keyCode.substring(2, 4),
+      gb: 'card',
+      isPortrait: true,
+    );
   }
 
   void _initGame() {
@@ -81,7 +89,7 @@ class _RotateScreenState extends State<RotateScreen> {
     Future.delayed(
       Duration(seconds: 1),
       () {
-        if (starResult == '0000') {
+        if (starResult.result == '0000') {
           verticalLottieDialog(
             onMain: () async {
               if (Platform.isIOS) {
@@ -100,9 +108,9 @@ class _RotateScreenState extends State<RotateScreen> {
               Get.back();
             },
           );
-        } else if (starResult == '8888') {
+        } else if (starResult.result == '8888') {
           verticalCooltimeDialog(
-            lastTime: widget.lastTime,
+            lastTime: starResult.edate ?? '',
             onMain: () async {
               if (Platform.isIOS) {
                 const platform = MethodChannel('orientation');
@@ -137,62 +145,67 @@ class _RotateScreenState extends State<RotateScreen> {
         titleStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         onTapBackIcon: () => verticalBackDialog(true),
       ),
-      body: Padding(
-        padding: EdgeInsets.only(bottom: 32),
-        child: Column(
-          children: [
-            Platform.isIOS
-                ? const Spacer()
-                : const Expanded(
-                    child: Text(
-                    '뜻소리를 외친 후\n한자를 뒤집어 보세요',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  )),
-            Expanded(
-              flex: 8,
-              child: RotateImages(
-                key: _rotateKey,
-                items: randomCards,
-                carouselController: carouselController,
-                onFirstTap: (index) {
-                  _playSound(randomCards[index].sound);
-                },
-                onComplete: () {
-                  Future.delayed(
-                    const Duration(milliseconds: 500),
-                    () => completeGame(),
-                  );
-                },
-                onPageChanged: (index) {
-                  setState(() {
-                    currentIndex = index;
-                  });
-                },
-                currentIndex: currentIndex,
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${currentIndex + 1}',
-                        style: TextStyle(color: Colors.green, fontSize: 26, fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                        text: ' / ${randomCards.length}',
-                        style: TextStyle(color: fontMain, fontSize: 26, fontWeight: FontWeight.bold),
-                      )
-                    ],
+      body: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: 32),
+            child: Column(
+              children: [
+                Platform.isIOS
+                    ? const Spacer()
+                    : const Expanded(
+                        child: Text(
+                        '뜻소리를 외친 후\n한자를 뒤집어 보세요',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      )),
+                Expanded(
+                  flex: 8,
+                  child: RotateImages(
+                    key: _rotateKey,
+                    items: randomCards,
+                    carouselController: carouselController,
+                    onFirstTap: (index) {
+                      _playSound(randomCards[index].sound);
+                    },
+                    onComplete: () {
+                      Future.delayed(
+                        const Duration(milliseconds: 500),
+                        () => completeGame(),
+                      );
+                    },
+                    onPageChanged: (index) {
+                      setState(() {
+                        currentIndex = index;
+                      });
+                    },
+                    currentIndex: currentIndex,
                   ),
                 ),
-              ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${currentIndex + 1}',
+                            style: TextStyle(color: Colors.green, fontSize: 26, fontWeight: FontWeight.bold),
+                          ),
+                          TextSpan(
+                            text: ' / ${randomCards.length}',
+                            style: TextStyle(color: fontMain, fontSize: 26, fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          ...buildStarWidgets(widget.keyCode)
+        ],
       ),
     );
   }
@@ -209,6 +222,7 @@ class _RotateScreenState extends State<RotateScreen> {
       ]);
     }
     _audioPlayer.dispose();
+    disposeStarEvent();
     super.dispose();
   }
 }

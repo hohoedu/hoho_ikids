@@ -399,6 +399,7 @@ class _DragPuzzleScreenState extends State<DragPuzzleScreen> with TickerProvider
     _audioPlayer.dispose();
     imageCache.clear();
     imageCache.clearLiveImages();
+    disposeStarEvent();
     super.dispose();
   }
 }

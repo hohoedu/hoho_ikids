@@ -30,15 +30,16 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
   late String _starGb;
   late String _starContentId;
   String? _starIdate;
+  bool _starIsPortrait = false;
 
   bool isStarDialogOpen = false;
 
-  Future<void> initStarEventFromServer({required String btype, required String hosu, required String gb}) async {
+  Future<void> initStarEventFromServer({required String btype, required String hosu, required String gb, bool isPortrait = false,}) async {
     _starBtype = btype;
     _starHosu = hosu;
     _starGb = gb;
     _starContentId = btype + gb + hosu;
-
+    _starIsPortrait = isPortrait;
     final status = await starStatusService(btype: btype, hosu: hosu, gb: gb);
 
     if (status == null) {
@@ -230,12 +231,8 @@ mixin StarEventMixin<T extends StatefulWidget> on State<T>, TickerProviderStateM
 
     isStarDialogOpen = true;
 
-    if (_starGb == 'write') {
-      if (_starBtype == 'B' && _starHosu == '10') {
-        await findStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
-      } else {
-        await findVerticalStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
-      }
+    if (_starIsPortrait) {
+      await findVerticalStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
     } else {
       await findStarDialog(remainCnt: remainCnt, currentCnt: currentCnt);
     }

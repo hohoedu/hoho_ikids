@@ -88,7 +88,12 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
       // 정상적으로 로그인 된 유저
       else if (resultValue == "0000") {
         if (!isManager) {
-          await getToken(id);
+          // FCM 토큰 발급 실패(APNS 토큰 미설정 등)로 로그인 자체가 막히지 않도록 별도 처리
+          try {
+            await getToken(id);
+          } catch (e) {
+            Logger().d('getToken error = $e');
+          }
         }
         if (isAutoLoginChecked) {
           await storage.write(key: 'user_id', value: id);

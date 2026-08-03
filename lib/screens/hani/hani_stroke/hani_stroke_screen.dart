@@ -53,7 +53,7 @@ class _HaniStrokeScreenState extends State<HaniStrokeScreen> with TickerProvider
     bgmController.playBgm('hani_write');
     _audioPlayer = AudioPlayer();
     _updateNote();
-    // initStarEventFromServer(btype: 'H', hosu: widget.keyCode.substring(2, 4), gb: 'write');
+    initStarEventFromServer(btype: 'H', hosu: widget.keyCode.substring(2, 4), gb: 'write', isPortrait: true);
   }
 
   Future<void> _playSound(String url) async {

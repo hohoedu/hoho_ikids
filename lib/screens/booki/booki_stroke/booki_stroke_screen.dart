@@ -53,7 +53,7 @@ class _BookiStrokeScreenState extends State<BookiStrokeScreen> with TickerProvid
     bgmController.playBgm('booki_write');
     _audioPlayer = AudioPlayer();
     _updateNote();
-    initStarEventFromServer(btype: 'B', hosu: widget.keyCode.substring(2, 4), gb: 'write');
+    initStarEventFromServer(btype: 'B', hosu: widget.keyCode.substring(2, 4), gb: 'write', isPortrait: true);
   }
 
   Future<void> _playSound(String url) async {

@@ -159,7 +159,7 @@ class _MatchScreenState extends State<MatchScreen> with TickerProviderStateMixin
         await showStampDialog(widget.keyCode);
       }
 
-      if (starResult == '0000') {
+      if (starResult.result == '0000') {
         lottieDialog(
           onReset: () {
             _resetGame();
@@ -175,9 +175,9 @@ class _MatchScreenState extends State<MatchScreen> with TickerProviderStateMixin
             );
           },
         );
-      } else if (starResult == '8888') {
+      } else if (starResult.result == '8888') {
         cooltimeDialog(
-          lastTime: widget.lastTime,
+          lastTime: starResult.edate ?? '',
           onReset: () {
             Get.back();
             _resetGame();

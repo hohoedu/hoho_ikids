@@ -46,8 +46,17 @@ class HaniHomeDataController extends GetxController {
     update();
   }
 
+  // 서버 edate 반영 지연에 대비해 완료 시점을 즉시 로컬에 반영
+  void markJustPlayed(String type) {
+    final now = DateTime.now();
+    String two(int n) => n.toString().padLeft(2, '0');
+    _haniLastTimeMap[type] =
+        '${now.year}${two(now.month)}${two(now.day)}${two(now.hour)}${two(now.minute)}${two(now.second)}';
+    update();
+  }
+
   bool isCooltime(String lastTime, String type) {
-    const excludedTypes = ['song', 'story', 'write', 'quiz', 'puz_young', 'workbook', 'han', 'insung'];
+    const excludedTypes = ['write', 'quiz', 'puz_young', 'workbook'];
     if (excludedTypes.contains(type)) return false;
     try {
       final last = DateTime(

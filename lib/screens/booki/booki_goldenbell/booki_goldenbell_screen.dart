@@ -85,7 +85,7 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> with Tick
     if (result.success) {
       await showStampDialog(widget.keyCode);
     }
-    if (starResult == '0000') {
+    if (starResult.result == '0000') {
       lottieDialog(
         onMain: () {
           Get.back();
@@ -104,9 +104,9 @@ class _BookiGoldenbellScreenState extends State<BookiGoldenbellScreen> with Tick
           });
         },
       );
-    } else if (starResult == '8888') {
+    } else if (starResult.result == '8888') {
       cooltimeDialog(
-        lastTime: widget.lastTime,
+        lastTime: starResult.edate ?? '',
         onReset: () {
           Get.back();
           setState(() {

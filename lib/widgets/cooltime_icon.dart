@@ -3,8 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/utils/cooltime_dialog_content.dart';
 import 'package:hani_booki/utils/cooltime_utils.dart';
 
@@ -78,17 +76,7 @@ class _CooltimeIconState extends State<CooltimeIcon> {
     if (_remaining.isEmpty) return const SizedBox.shrink();
 
     return GestureDetector(
-      onTap: () {
-        Get.defaultDialog(
-          barrierDismissible: true,
-          backgroundColor: Colors.white,
-          title: '별 포인트 충전 중!',
-          content: CooltimeDialogContent(lastTime: widget.lastTime),
-          buttonColor: Colors.green,
-          textConfirm: '확인',
-          onConfirm: () => Get.back(),
-        );
-      },
+      onTap: () => showCooltimeBlockDialog(widget.lastTime),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: Column(

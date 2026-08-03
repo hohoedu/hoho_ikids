@@ -89,7 +89,7 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> with Ti
     if (result.success) {
       await showStampDialog(widget.keyCode);
     }
-    if (starResult == '0000') {
+    if (starResult.result == '0000') {
       lottieDialog(
         onMain: () {
           Get.back();
@@ -104,9 +104,9 @@ class _HaniGoldenbellSuScreenState extends State<HaniGoldenbellSuScreen> with Ti
           });
         },
       );
-    } else if (starResult == '8888') {
+    } else if (starResult.result == '8888') {
       cooltimeDialog(
-        lastTime: widget.lastTime,
+        lastTime: starResult.edate ?? '',
         onMain: () {
           Get.back();
           final userData = Get.find<UserDataController>();

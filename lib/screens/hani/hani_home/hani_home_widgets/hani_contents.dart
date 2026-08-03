@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
+import 'package:hani_booki/utils/cooltime_dialog_content.dart';
+import 'package:hani_booki/utils/cooltime_utils.dart';
 import 'package:hani_booki/widgets/cooltime_icon.dart';
 
 class HaniContents extends StatelessWidget {
@@ -24,9 +26,11 @@ class HaniContents extends StatelessWidget {
         final cooltime = controller.isCooltime(lastTime, type);
         final remaining = controller.remainingTime(lastTime);
 
+        final blocked = cooltime && videoBlockedCooltimeTypes.contains(type);
+
         return Expanded(
           child: GestureDetector(
-            onTap: onTap,
+            onTap: blocked ? () => showCooltimeBlockDialog(lastTime) : onTap,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Stack(

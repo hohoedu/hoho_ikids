@@ -3,6 +3,11 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
+import 'package:hani_booki/_data/auth/user_data.dart';
+import 'package:hani_booki/_data/booki/booki_home_data.dart';
+import 'package:hani_booki/_data/hani/hani_home_data.dart';
+import 'package:hani_booki/services/booki/booki_content_service.dart';
+import 'package:hani_booki/services/hani/hani_content_service.dart';
 import 'package:hani_booki/services/mission/mission_clear_service.dart';
 import 'package:hani_booki/services/mission/mission_save_service.dart';
 import 'package:hani_booki/services/star_update_service.dart';
@@ -195,24 +200,52 @@ observer.observe(document.body, { childList: true, subtree: true });
     );
   }
 
+  Future<void> _refreshHomeData() async {
+    final userData = Get.find<UserDataController>();
+    final first = widget.keyCode.substring(0, 1);
+    if (['Y', 'G', 'S'].contains(first)) {
+      await haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+      // 서버 edate 반영이 늦는 경우가 있어 방금 완료한 시점으로 즉시 덮어써 아이콘이 바로 보이게 함
+      Get.find<HaniHomeDataController>().markJustPlayed(widget.content);
+    } else {
+      await bookiContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+      Get.find<BookiHomeDataController>().markJustPlayed(widget.content);
+    }
+  }
+
   void _showResultDialog() async {
-    await starUpdateService(widget.content, widget.keyCode);
+    final starResult = await starUpdateService(widget.content, widget.keyCode);
     final result = await missionSaveService(missionNum: 2, gb: widget.content, keycode: widget.keyCode);
 
     if (result.success) {
       await showStampDialog(widget.keyCode);
     }
 
-    lottieDialog(
-      onMain: () {
-        Get.back();
-        Get.back();
-      },
-      onReset: () {
-        Get.back();
-        _controller?.reload();
-      },
-    );
+    Logger().d("starResult.result = ${starResult.result}");
+    if (starResult.result == '0000') {
+      lottieDialog(
+        onMain: () {
+          Get.back();
+          _refreshHomeData();
+        },
+        onReset: () {
+          Get.back();
+          _controller?.reload();
+        },
+      );
+    } else if (starResult.result == '8888') {
+      cooltimeDialog(
+        lastTime: starResult.edate ?? '',
+        onReset: () {
+          Get.back();
+          _controller?.reload();
+        },
+        onMain: () {
+          Get.back();
+          _refreshHomeData();
+        },
+      );
+    }
   }
 
   @override

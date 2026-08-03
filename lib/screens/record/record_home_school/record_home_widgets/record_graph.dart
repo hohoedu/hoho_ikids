@@ -19,13 +19,7 @@ class RecordGraph extends StatefulWidget {
   final Function(bool) onGraphTapChanged;
   bool isOnTap;
 
-  RecordGraph(
-      {super.key,
-      required this.contentStar,
-      required this.type,
-      required this.isOnTap,
-      required this.onGraphTapChanged,
-      required this.keyCode});
+  RecordGraph({super.key, required this.contentStar, required this.type, required this.isOnTap, required this.onGraphTapChanged, required this.keyCode});
 
   @override
   State<RecordGraph> createState() => _RecordGraphState();
@@ -64,7 +58,6 @@ class _RecordGraphState extends State<RecordGraph> {
   void _setCurrentIndex() {
     if (widget.type == 'hani') {
       _currentIndex = haniData.userHaniDataList.length - 1;
-
     } else {
       _currentIndex = bookiData.userBookiDataList.length - 1;
       Logger().d(_currentIndex);
@@ -73,7 +66,6 @@ class _RecordGraphState extends State<RecordGraph> {
 
   @override
   Widget build(BuildContext context) {
-
     return LayoutBuilder(builder: (context, constraints) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -120,8 +112,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                         return GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              _currentIndex = int.parse(
-                                                  widget.contentStar.contentStarDataList[value.toInt()].index);
+                                              _currentIndex = int.parse(widget.contentStar.contentStarDataList[value.toInt()].index);
                                               isGraphTap = true;
                                               widget.isOnTap = false;
                                             });
@@ -129,18 +120,13 @@ class _RecordGraphState extends State<RecordGraph> {
                                           child: Container(
                                             width: constraints.maxWidth * 0.15,
                                             alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                                color: Colors.transparent,
-                                                borderRadius: BorderRadius.vertical(bottom: Radius.circular(5))),
+                                            decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.vertical(bottom: Radius.circular(5))),
                                             child: Text(
-                                              formattedSubject(
-                                                  widget.contentStar.contentStarDataList[value.toInt()].subject),
+                                              formattedSubject(widget.contentStar.contentStarDataList[value.toInt()].subject),
                                               style: TextStyle(
                                                   color: widget.type == 'hani'
-                                                      ? haniReportTextColor[
-                                                          widget.contentStar.contentStarDataList[value.toInt()].index]
-                                                      : bookiReportTextColor[
-                                                          widget.contentStar.contentStarDataList[value.toInt()].index],
+                                                      ? haniReportTextColor[widget.contentStar.contentStarDataList[value.toInt()].index]
+                                                      : bookiReportTextColor[widget.contentStar.contentStarDataList[value.toInt()].index],
                                                   fontWeight: FontWeight.bold,
                                                   height: 1.2),
                                               textAlign: TextAlign.center,
@@ -150,9 +136,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                       }
                                       return const SizedBox();
                                     },
-                                    reservedSize: screenWidth >= 1000
-                                        ? constraints.maxHeight * 0.15
-                                        : constraints.maxHeight * 0.3,
+                                    reservedSize: screenWidth >= 1000 ? constraints.maxHeight * 0.15 : constraints.maxHeight * 0.3,
                                   ),
                                 ),
                                 topTitles: AxisTitles(
@@ -218,34 +202,29 @@ class _RecordGraphState extends State<RecordGraph> {
                                   Row(
                                     children: [
                                       Text(
-                                        widget.contentStar.contentStarDataList[0].subject,
+                                        widget.contentStar.contentStarDataList[_currentIndex-1].subject,
                                         style: TextStyle(
                                           fontSize: 8.sp,
                                           fontWeight: FontWeight.bold,
                                           color: widget.type == 'hani'
-                                              ? haniReportTextColor[
-                                                  widget.contentStar.contentStarDataList[0].index]
-                                              : bookiReportColor[
-                                                  widget.contentStar.contentStarDataList[0].index],
+                                              ? haniReportTextColor[widget.contentStar.contentStarDataList[_currentIndex-1].index]
+                                              : bookiReportColor[widget.contentStar.contentStarDataList[_currentIndex-1].index],
                                         ),
                                       ),
                                       ...List.generate(
-                                        widget.contentStar.contentStarDataList[0].contentList.length,
+                                        widget.contentStar.contentStarDataList[_currentIndex-1].contentList.length,
                                         (index) {
                                           return Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                  color: widget.type == 'hani'
-                                                      ? haniReportTextColor['$_currentIndex']
-                                                      : bookiReportColor['$_currentIndex'],
+                                                  color: widget.type == 'hani' ? haniReportTextColor['$_currentIndex'] : bookiReportColor['$_currentIndex'],
                                                   borderRadius: BorderRadius.circular(5)),
                                               child: Center(
                                                 child: Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                                                   child: Text(
-                                                    widget.contentStar.contentStarDataList[0]
-                                                        .contentList[index],
+                                                    widget.contentStar.contentStarDataList[_currentIndex-1].contentList[index],
                                                     style: TextStyle(
                                                       color: fontWhite,
                                                       fontWeight: FontWeight.bold,
@@ -264,7 +243,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        widget.contentStar.contentStarDataList[0].note,
+                                        widget.contentStar.contentStarDataList[_currentIndex-1].note,
                                         style: TextStyle(
                                           color: fontMain,
                                           fontSize: 6.5.sp,

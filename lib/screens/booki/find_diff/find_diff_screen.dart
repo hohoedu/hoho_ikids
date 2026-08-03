@@ -112,7 +112,7 @@ class _FindDiffScreenState extends State<FindDiffScreen> with TickerProviderStat
               await showStampDialog(widget.keyCode);
             }
 
-            if (starResult == '0000') {
+            if (starResult.result == '0000') {
               lottieDialog(
                 onReset: () {
                   Get.back();
@@ -125,9 +125,9 @@ class _FindDiffScreenState extends State<FindDiffScreen> with TickerProviderStat
                 },
               );
             }
-            else if (starResult == '8888') {
+            else if (starResult.result == '8888') {
               cooltimeDialog(
-                lastTime: widget.lastTime,
+                lastTime: starResult.edate ?? '',
                 onReset: () {
                   Get.back();
                   resetQuestion();

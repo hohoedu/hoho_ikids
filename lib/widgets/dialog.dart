@@ -16,6 +16,7 @@ import 'package:hani_booki/services/notice/notice_list_service.dart';
 import 'package:hani_booki/utils/stamp_effect.dart';
 import 'package:hani_booki/widgets/cooltime_icon.dart';
 import 'package:hani_booki/widgets/notice/notice_screen.dart';
+import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1356,7 +1357,7 @@ class _CooltimeResultContentState extends State<CooltimeResultContent> {
 
   void _updateRemaining() {
     final lastTime = widget.lastTime;
-    if (lastTime.isEmpty) return;
+    if (lastTime.isEmpty && lastTime == '') return;
     try {
       final last = DateTime(
         int.parse(lastTime.substring(0, 4)),
