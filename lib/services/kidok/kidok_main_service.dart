@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/kidok/kidok_main_data.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 
 // 키독 메인 도서 리스트
 Future<void> kidokMainService(year, keyCode, isSibling) async {
-  String url = dotenv.get('KIDOK_MAIN_URL');
+  String url = Env.get('KIDOK_MAIN_URL');
   final kidokMainController = Get.put(KidokMainDataController());
   final Map<String, dynamic> requestData = {
     'yy': year,

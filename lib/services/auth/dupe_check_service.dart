@@ -1,14 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:logger/logger.dart';
 
 // 아이디 중복 확인
 Future<String> dupeCheckService(String id) async {
-  String url = dotenv.get('DUPE_URL');
+  String url = Env.get('DUPE_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,

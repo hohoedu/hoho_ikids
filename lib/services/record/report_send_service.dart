@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 // 학습 기록 상태
 Future<void> reportSendService(String keyCode, String hosu) async {
   final userData = Get.find<UserDataController>();
-  String url = dotenv.get('REPORT_SEND_URL');
+  String url = Env.get('REPORT_SEND_URL');
 
   final Map<String, dynamic> requestData = {
     'id': userData.userData!.id,

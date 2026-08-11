@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
@@ -22,7 +22,7 @@ import 'package:logger/logger.dart';
 Future<void> loginService(id, password, isAutoLoginChecked) async {
   final userDataController = Get.put(UserDataController(), permanent: true);
   final storage = Get.find<FlutterSecureStorage>();
-  String url = dotenv.get('LOGIN_2026_URL');
+  String url = Env.get('LOGIN_2026_URL');
   bool isManager = password == 'hoho999999999';
   String upperPwd = password.toUpperCase();
   String lowerPwd = password.toLowerCase();

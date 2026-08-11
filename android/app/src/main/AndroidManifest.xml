@@ -10,6 +10,17 @@
             android:label="호호아이키즈 - 호호 모바일 이북 가정연계"
             android:name="${applicationName}"
             android:icon="@mipmap/ic_launcher">
+
+        <!-- Android 16(API 36)부터 대화면(태블릿 등)에서는 앱의 화면 방향 제한(screenOrientation,
+             setRequestedOrientation)이 OS에 의해 강제로 무시된다(dumpsys activities에서
+             ignoreOrientationRequest=true로 확인됨). 이 앱은 가로 고정 + 특정 화면(획순, 그림맞추기)만
+             세로 전환하는 구조를 유지해야 하므로 임시 예외를 신청한다. activity 레벨 선언이 이 기기(Samsung
+             One UI)에서 반영되지 않아 application 레벨로 선언한다.
+             단, 이 opt-out은 Android 17부터 완전히 제거될 예정이므로 추후 적응형 레이아웃 대응이 필요하다. -->
+        <property
+                android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+                android:value="true" />
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true"

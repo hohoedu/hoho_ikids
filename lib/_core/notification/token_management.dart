@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:logger/logger.dart';
 
@@ -59,7 +59,7 @@ void _retryTokenInBackground(id, {int attempt = 1}) {
 
 // 토큰을 서버로 전송
 Future<void> sendToken(token, id) async {
-  String url = dotenv.get("FCM_TOKEN_URL");
+  String url = Env.get("FCM_TOKEN_URL");
   final Map<String, dynamic> requestData = {
     'id': id,
     'token': token,

@@ -391,3 +391,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,android,windows,web,linux,dart,flutter,java,kotlin,swift
+# envied generated (contains obfuscated secrets — treat like .env)
+lib/_core/env.g.dart

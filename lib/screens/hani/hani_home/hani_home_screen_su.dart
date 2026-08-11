@@ -66,7 +66,7 @@ class _HaniHomeScreenSuState extends State<HaniHomeScreenSu> with WidgetsBinding
 
   Future<void> _initMission() async {
     if (!Get.isRegistered<MissionController>()) {
-      Get.put(MissionController());
+      Get.put(MissionController(), permanent: true);
     }
     await missionListService(widget.keyCode);
     final result = await missionSaveService(missionNum: 1, gb: 'attendance', keycode: widget.keyCode);

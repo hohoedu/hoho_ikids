@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 // 키독 문제 풀이
 Future<void> kidokResultService(List<int?> selectedAnswers, bookCode, keycode) async {
   final userData = Get.find<UserDataController>();
-  String url = dotenv.get('KIDOK_SAVE_URL');
+  String url = Env.get('KIDOK_SAVE_URL');
   final Map<String, dynamic> requestData = {
     'yy': userData.userData!.year,
     'bcode': bookCode,

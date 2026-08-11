@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/join_dto.dart';
@@ -17,7 +17,7 @@ enum PhoneCheckResult {
 
 // 전화번호에 가입된 유저 수
 Future<PhoneCheckResult> userCountService(String phone, {String? pin1, String? pin2, String? cname}) async {
-  String url = dotenv.get('USER_COUNT_URL');
+  String url = Env.get('USER_COUNT_URL');
   final currentYear = DateTime.now().year;
 
   if (pin1 == null || cname == null) {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -33,7 +33,7 @@ import 'package:logger/logger.dart';
 
 Future<({String result, String? edate})> starUpdateService(type, keyCode) async {
   final userController = Get.find<UserDataController>();
-  String url = dotenv.get('STAR_UPDATE_URL');
+  String url = Env.get('STAR_UPDATE_URL');
 
   final Map<String, dynamic> requestData = {
     'id': userController.userData!.id,

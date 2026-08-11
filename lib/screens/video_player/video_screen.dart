@@ -92,7 +92,16 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
       appBar: MainAppBar(
         title: ' ',
         isContent: true,
-        onTapBackIcon: () => showBackDialog(false),
+        onTapBackIcon: () async {
+          final result = await _controller?.evaluateJavascript(
+            source: "typeof checkVideoWatched === 'function' ? checkVideoWatched() : false",
+          );
+          if (result == true) {
+            _showResultDialog();
+          } else {
+            showBackDialog(false);
+          }
+        },
       ),
       body: Stack(
         children: [
@@ -159,12 +168,34 @@ function hasPlayedEntireVideo(video, threshold = 0.9, tolerance = 0.1) {
   return playedSeconds >= threshold * video.duration;
 }
 
+function checkVideoWatched() {
+  var video = document.querySelector('video');
+  if (!video) return false;
+  return hasPlayedEntireVideo(video);
+}
+
+function exitNativeFullscreen(video) {
+  // 아이패드는 영상 종료 시 네이티브 전체화면이 자동으로 닫히지 않아 명시적으로 닫아줌
+  try {
+    if (video.webkitExitFullscreen) {
+      video.webkitExitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  } catch (e) {
+    console.log('exitNativeFullscreen error: ' + e);
+  }
+}
+
 function handleVideo(video) {
   video.addEventListener('loadedmetadata', function() {
     console.log("비디오 길이: " + video.duration);
   });
-  
+
   video.addEventListener('ended', function() {
+    exitNativeFullscreen(video);
     if (hasPlayedEntireVideo(video)) {
       console.log("전체 재생 완료 (90% 이상 시청)");
       window.flutter_inappwebview.callHandler('videoEnded');
@@ -228,18 +259,10 @@ observer.observe(document.body, { childList: true, subtree: true });
           Get.back();
           _refreshHomeData();
         },
-        onReset: () {
-          Get.back();
-          _controller?.reload();
-        },
       );
     } else if (starResult.result == '8888') {
       cooltimeDialog(
         lastTime: starResult.edate ?? '',
-        onReset: () {
-          Get.back();
-          _controller?.reload();
-        },
         onMain: () {
           Get.back();
           _refreshHomeData();

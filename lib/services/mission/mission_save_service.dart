@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -15,8 +15,14 @@ class MissionResult {
 }
 
 Future<MissionResult> missionSaveService({required int missionNum, required String gb, required String keycode}) async {
-  final String url = dotenv.get('MISSION_SAVE_URL');
+  final String url = Env.get('MISSION_SAVE_URL');
   final userdata = Get.find<UserDataController>();
+
+  // MissionController가 라우트 정리 등으로 사라진 경우 크래시 대신 안전하게 종료
+  if (!Get.isRegistered<MissionController>()) {
+    Logger().e('missionSaveService: MissionController not registered');
+    return MissionResult(success: false, message: '');
+  }
   final controller = Get.find<MissionController>();
 
   final mission = missionNum == 1 ? controller.attendanceMission : controller.contentMission;

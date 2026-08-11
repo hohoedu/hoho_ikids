@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -14,7 +14,7 @@ import 'package:logger/logger.dart';
 
 // 공지사항 리스트
 Future<void> noticeListService() async {
-  String url = dotenv.get('NOTICE_LIST_URL');
+  String url = Env.get('NOTICE_LIST_URL');
   final noticeListDataController = Get.put(NoticeListDataController());
   final badgeController = Get.put(BadgeController());
   final userdata = Get.find<UserDataController>();

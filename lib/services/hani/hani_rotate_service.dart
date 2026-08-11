@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_rotate_data.dart';
@@ -12,7 +12,7 @@ import 'package:logger/logger.dart';
 
 // 하니 그림맞추기
 Future<void> haniRotateService(id, keyCode, year, lastTime) async {
-  String url = dotenv.get('HANI_ROTATE_URL');
+  String url = Env.get('HANI_ROTATE_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,

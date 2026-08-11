@@ -41,9 +41,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
   bool _answeredCorrect = false;
   bool _arrivedImage = false;
 
-  final List<GlobalKey> _answerKeys = [GlobalKey(), GlobalKey()];
+  // AnimatedSwitcher 전환 중 이전/다음 문제가 동시에 존재할 때 GlobalKey가 겹치면
+  // Element가 강제 재부모화되어 정답 이미지가 다음 문제로 딸려 들어오는 버그가 생긴다.
+  // 따라서 문제(_setupAnswer)마다 새 키를 발급한다.
+  late List<GlobalKey> _answerKeys;
 
-  final GlobalKey _targetKey = GlobalKey();
+  late GlobalKey _targetKey;
 
   OverlayEntry? _overlayEntry;
   bool _isAnimating = false;
@@ -100,6 +103,10 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     ]..shuffle();
     _answeredCorrect = false;
     _tappedIndex = -1;
+
+    // 문제가 바뀔 때마다 새 GlobalKey를 발급해 AnimatedSwitcher 전환 중 키 충돌을 방지
+    _answerKeys = [GlobalKey(), GlobalKey()];
+    _targetKey = GlobalKey();
   }
 
   Future<void> _onAnswerTap(int index) async {
@@ -122,11 +129,15 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
     await animateMovingImage(fromKey: _answerKeys[index], toKey: _targetKey);
 
+    if (!mounted) return;
+
     setState(() {
       _arrivedImage = true;
     });
 
     Future.delayed(Duration(seconds: 1), () async {
+      if (!mounted) return;
+
       final lastIndex = quizData.haniQuizDataList.length - 1;
 
       if (currentIndex >= lastIndex) {
@@ -161,20 +172,30 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
 
   // 정답 시 애니메이션
   Future<void> animateMovingImage({required GlobalKey fromKey, required GlobalKey toKey}) async {
+    // 위젯이 이미 dispose되었으면 애니메이션 진행하지 않음
+    if (!mounted) return;
+
+    // RenderObject가 아직 준비되지 않았으면(레이아웃 전/위젯 소멸) 안전하게 종료
+    final renderFrom = fromKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderTo = toKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderFrom == null || renderTo == null) return;
+
+    final overlay = Overlay.maybeOf(context);
+    if (overlay == null) return;
+
     _isAnimating = true;
 
-    final renderFrom = fromKey.currentContext!.findRenderObject() as RenderBox;
     final startOffset = renderFrom.localToGlobal(Offset.zero);
     final sizeFrom = renderFrom.size;
 
-    final renderTo = toKey.currentContext!.findRenderObject() as RenderBox;
     final endOffset = renderTo.localToGlobal(Offset.zero);
     final sizeTo = renderTo.size;
 
-    final overlay = Overlay.of(context)!;
+    // 애니메이션 도중 _tappedIndex가 -1로 초기화되어도 안전하도록 이미지 URL을 미리 캡처
+    final movingImageUrl = (_tappedIndex >= 0 && _tappedIndex < answer.length) ? answer[_tappedIndex] : null;
 
     final animationListener = () {
-      _overlayEntry!.markNeedsBuild();
+      _overlayEntry?.markNeedsBuild();
     };
 
     _moveAnimation = Tween<Offset>(
@@ -190,10 +211,12 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
         top: current.dy,
         width: sizeFrom.width,
         height: sizeFrom.height,
-        child: Image.network(
-          answer[_tappedIndex],
-          fit: BoxFit.contain,
-        ),
+        child: movingImageUrl == null
+            ? const SizedBox.shrink()
+            : Image.network(
+                movingImageUrl,
+                fit: BoxFit.contain,
+              ),
       );
     });
 
@@ -202,10 +225,14 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     await _moveController.forward();
 
     _overlayEntry?.remove();
-    _moveController.reset();
-    _moveAnimation.removeListener(animationListener);
     _overlayEntry = null;
+    _moveAnimation.removeListener(animationListener);
     _isAnimating = false;
+
+    // await 도중 위젯이 dispose되면 컨트롤러도 dispose되므로 reset 호출 금지
+    if (mounted) {
+      _moveController.reset();
+    }
   }
 
   Future<void> resetQuiz() async {
@@ -216,6 +243,8 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin, 
     await haniQuizService(userData!.id, widget.keyCode, userData!.year);
 
     await _preloadAllImages();
+
+    if (!mounted) return;
 
     setState(() {
       currentIndex = 0;

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_hani_data.dart';
@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 
 // 하니 이북 리스트
 Future<void> haniListService(id, schoolId, year) async {
-  String url = dotenv.get('HANI_EBOOK_LIST_URL');
+  String url = Env.get('HANI_EBOOK_LIST_URL');
   final userHaniController = Get.put(UserHaniDataController(),permanent: true);
   final Map<String, dynamic> requestData = {
     'id': id,

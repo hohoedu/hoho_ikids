@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -10,7 +10,7 @@ import 'package:logger/logger.dart';
 
 // 키독 책장 리스트
 Future<void> kidokBookcaseService(keycode) async {
-  String url = dotenv.get('KIDOK_BOOKCASE_URL');
+  String url = Env.get('KIDOK_BOOKCASE_URL');
   final kidokBookcaseController = Get.put(KidokBookcaseDataController());
   final userData = Get.find<UserDataController>();
   final Map<String, dynamic> requestData = {

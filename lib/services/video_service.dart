@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:logger/logger.dart';
 
 Future<String> fetchVimeoVideoUrl(String videoId) async {
-  String accessToken = dotenv.get('VIMEO_TOKEN');
+  String accessToken = Env.get('VIMEO_TOKEN');
 
   final dio = Dio();
 

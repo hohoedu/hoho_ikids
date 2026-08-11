@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -16,9 +16,9 @@ Future<void> bookiRecordLearningService(teacherId, pin, hosu, schoolId) async {
   final userData = Get.find<UserDataController>();
   String url = '';
   if (userData.userData!.userType == 'M') {
-    url = dotenv.get('M_BOOKI_REPORT_LEARNING_URL');
+    url = Env.get('M_BOOKI_REPORT_LEARNING_URL');
   } else {
-    url = dotenv.get('BOOKI_REPORT_LEARNING_URL');
+    url = Env.get('BOOKI_REPORT_LEARNING_URL');
   }
 
   final Map<String, dynamic> requestData = {

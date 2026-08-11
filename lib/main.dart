@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,8 +36,7 @@ Future<void> main() async {
 
   await setupFcm();
 
-  // env 로드
-  await dotenv.load(fileName: ".env");
+  // env 값은 빌드타임에 코드로 생성되므로(Env 클래스) 런타임 로드가 필요 없습니다.
 
   // SecureStorage 초기화
   Get.put(const FlutterSecureStorage());

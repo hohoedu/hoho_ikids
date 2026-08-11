@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_code_data.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 
 // 유저 코드 가져오기
 Future<void> getUserCode() async {
-  String url = dotenv.get('USER_CODE_URL');
+  String url = Env.get('USER_CODE_URL');
   final userData = Get.find<UserDataController>();
   final userCodeData = Get.put(UserCodeDataController());
   final Map<String, dynamic> requestData = {

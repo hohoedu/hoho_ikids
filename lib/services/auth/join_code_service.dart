@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/join_user_data.dart';
@@ -14,7 +14,7 @@ import 'user_count_service.dart';
 // 가입 코드 확인
 Future<bool> joinCodeService(TextEditingController classCode) async {
   final JoinUserDataController joinUserDataController = Get.put(JoinUserDataController(), permanent: true);
-  String url = dotenv.get('JOIN_CODE_URL');
+  String url = Env.get('JOIN_CODE_URL');
 
   final Map<String, dynamic> requestData = {
     'keycode': classCode.text,
@@ -71,7 +71,7 @@ Future<bool> joinCodeService(TextEditingController classCode) async {
 
 // 가입 코드 확인
 Future<bool> codeVerifyService(String classCode) async {
-  String url = dotenv.get('JOIN_CODE_URL');
+  String url = Env.get('JOIN_CODE_URL');
 
   final Map<String, dynamic> requestData = {
     'keycode': classCode,

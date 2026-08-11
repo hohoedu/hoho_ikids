@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_booki_data.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 
 // 부키 이북 리스트
 Future<void> bookiListManagerService(schoolId, year) async {
-  String url = dotenv.get('M_BOOKI_EBOOK_LIST_URL');
+  String url = Env.get('M_BOOKI_EBOOK_LIST_URL');
   final userBookiData = Get.put(UserBookiDataController(), permanent: true);
   final Map<String, dynamic> requestData = {
     'schoolid': schoolId,

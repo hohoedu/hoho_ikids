@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -14,13 +14,13 @@ import 'package:logger/logger.dart';
 Future<void> contentStarService(keyCode, type) async {
   final userData = Get.find<UserDataController>();
   final contentStarDataController = Get.put(ContentStarDataController());
-  // String url = dotenv.get('CONTENT_STAR_URL');
+  // String url = Env.get('CONTENT_STAR_URL');
   String url = '';
   if (type == 'hani') {
-    url = dotenv.get('H_CONTENT_STAR_URL');
+    url = Env.get('H_CONTENT_STAR_URL');
   }
   if (type == 'booki') {
-    url = dotenv.get('B_CONTENT_STAR_URL');
+    url = Env.get('B_CONTENT_STAR_URL');
   }
 
   final Map<String, dynamic> requestData = {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/screens/video_player/video_screen.dart';
@@ -11,9 +11,9 @@ import 'package:logger/logger.dart';
 Future<void> haniInsungService(id, keyCode, year) async {
   String url = '';
   if (keyCode.substring(0, 1) == 'Y' && keyCode.substring(3, 4) == '5') {
-    url = dotenv.get('HANI_INSUNG_Y5_URL');
+    url = Env.get('HANI_INSUNG_Y5_URL');
   } else {
-    url = dotenv.get('HANI_INSUNG_URL');
+    url = Env.get('HANI_INSUNG_URL');
   }
   Logger().d('url =$url');
   final Map<String, dynamic> requestData = {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_booki_data.dart';
@@ -15,7 +15,7 @@ import 'package:logger/logger.dart';
 
 // 학습기록 상단 이미지
 Future<void> getRecordList(String keyCode, String type) async {
-  String url = dotenv.get('RECORD_LIST_URL');
+  String url = Env.get('RECORD_LIST_URL');
   final userData = Get.find<UserDataController>();
   final userRecordList = Get.put(UserRecordListDataController());
   String section1 = keyCode.substring(0, 1);

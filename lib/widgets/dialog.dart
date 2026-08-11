@@ -887,7 +887,7 @@ Future<void> showVerticalStampDialog(String keycode, {bool isAttendance = false}
   stampClosed = true;
 }
 
-void lottieDialog({required VoidCallback onMain, required VoidCallback onReset}) {
+void lottieDialog({required VoidCallback onMain, VoidCallback? onReset}) {
   Get.generalDialog(
     barrierDismissible: false,
     barrierLabel: 'Dialog',
@@ -945,32 +945,34 @@ void lottieDialog({required VoidCallback onMain, required VoidCallback onReset})
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: GestureDetector(
-                            onTap: onReset,
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.17,
-                              height: MediaQuery.of(context).size.height * 0.13,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '다시하기',
-                                  style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                        if (onReset != null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: GestureDetector(
+                              onTap: onReset,
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.17,
+                                height: MediaQuery.of(context).size.height * 0.13,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '다시하기',
+                                    style: TextStyle(color: fontMain, fontSize: 8.sp, fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
+                          padding: EdgeInsets.only(left: onReset != null ? 8.0 : 0),
                           child: GestureDetector(
                             onTap: onMain,
                             child: Container(
-                              width: MediaQuery.of(context).size.width * 0.17,
+                              width: MediaQuery.of(context).size.width * (onReset != null ? 0.17 : 0.34) +
+                                  (onReset != null ? 0 : 16),
                               height: MediaQuery.of(context).size.height * 0.13,
                               decoration: BoxDecoration(
                                 color: Colors.yellow,
@@ -1118,7 +1120,7 @@ void verticalLottieDialog({required VoidCallback onMain, required VoidCallback o
 
 void cooltimeDialog({
   required VoidCallback onMain,
-  required VoidCallback onReset,
+  VoidCallback? onReset,
   required String lastTime,
 }) {
   Get.generalDialog(
@@ -1166,36 +1168,38 @@ void cooltimeDialog({
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: GestureDetector(
-                            onTap: onReset,
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.17,
-                              height: MediaQuery.of(context).size.height * 0.13,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '다시하기',
-                                  style: TextStyle(
-                                    color: fontMain,
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.bold,
+                        if (onReset != null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: GestureDetector(
+                              onTap: onReset,
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.17,
+                                height: MediaQuery.of(context).size.height * 0.13,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '다시하기',
+                                    style: TextStyle(
+                                      color: fontMain,
+                                      fontSize: 8.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
+                          padding: EdgeInsets.only(left: onReset != null ? 8.0 : 0),
                           child: GestureDetector(
                             onTap: onMain,
                             child: Container(
-                              width: MediaQuery.of(context).size.width * 0.17,
+                              width: MediaQuery.of(context).size.width * (onReset != null ? 0.17 : 0.34) +
+                                  (onReset != null ? 0 : 16),
                               height: MediaQuery.of(context).size.height * 0.13,
                               decoration: BoxDecoration(
                                 color: Colors.yellow,

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 // 회원 탈퇴
 Future<void> withdrawService() async {
   final userData = Get.find<UserDataController>();
-  String url = dotenv.get('WITHDRAW_URL');
+  String url = Env.get('WITHDRAW_URL');
 
   final Map<String, dynamic> requestData = {
     'id': userData.userData!.id,

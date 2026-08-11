@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_data.dart';
@@ -15,10 +15,10 @@ import 'package:logger/logger.dart';
 Future<void> haniSongListService(id, keyCode, year) async {
   String url = '';
   if (keyCode.substring(0, 1) == 'Y') {
-    url = dotenv.get('HANI_SONG_LIST_Y_URL');
+    url = Env.get('HANI_SONG_LIST_Y_URL');
   }
   if (keyCode.substring(0, 1) == 'G') {
-    url = dotenv.get('HANI_SONG_LIST_G_URL');
+    url = Env.get('HANI_SONG_LIST_G_URL');
   }
 
   final Map<String, dynamic> requestData = {

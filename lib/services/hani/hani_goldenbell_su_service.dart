@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_goldenbell_su_data.dart';
@@ -10,7 +10,7 @@ import 'package:logger/logger.dart';
 
 // 하니 골든벨(수재 5호)
 Future<void> haniGoldenbellSuService(id, keyCode, year, lastTime) async {
-  String url = dotenv.get('HANI_GOLDENBELL_G5_URL');
+  String url = Env.get('HANI_GOLDENBELL_G5_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 
 // 키독 책장 그래프
 Future<void> kidokChartService(String hosu, String keyCode) async {
-  final String url = dotenv.get('KIDOK_GRAPH_URL');
+  final String url = Env.get('KIDOK_GRAPH_URL');
   final kidokChartController = Get.put(KidokChartDataController());
   final userData = Get.find<UserDataController>();
   kidokChartController.isLoading.value = true;

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_make_word_data.dart';
@@ -10,7 +10,7 @@ import 'package:logger/logger.dart';
 // 하니 어휘 만들기
 Future<void> haniMakeWordService(id, keyCode, year) async {
   final makeWordDataController = Get.put(HaniMakeWordDataController());
-  String url = dotenv.get('HANI_MAKE_CARD_URL');
+  String url = Env.get('HANI_MAKE_CARD_URL');
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,

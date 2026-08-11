@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/screens/auth/login_screen.dart';
@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 
 // 비밀번호 찾기 서비스
 Future<void> searchPasswordService(id, phoneNumber) async {
-  String url = dotenv.get('PASSWORD_SEARCH_URL');
+  String url = Env.get('PASSWORD_SEARCH_URL');
 
   final Map<String, dynamic> requestData = {'id': id, 'ptel': phoneNumber};
 

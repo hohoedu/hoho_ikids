@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/character_data.dart';
@@ -8,7 +8,7 @@ import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:logger/logger.dart';
 
 Future<void> characterListService() async {
-  final String url = dotenv.get('CHARACTER_LIST_URL');
+  final String url = Env.get('CHARACTER_LIST_URL');
   final characterController = Get.put(CharacterDataController());
   final userdata = Get.find<UserDataController>();
 

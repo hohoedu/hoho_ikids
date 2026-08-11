@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 Future<bool> legacyParentService({required String parentName, required String relation, required String id}) async {
-  String url = dotenv.get('INSERT_PNAME_URL');
+  String url = Env.get('INSERT_PNAME_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,

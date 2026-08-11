@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/kidok/kidok_theme_data.dart';
@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 
 // 키독 테마
 Future<void> kidokThemeService(keycode, year) async {
-  String url = dotenv.get('KIDOK_MAIN_THEME_URL');
+  String url = Env.get('KIDOK_MAIN_THEME_URL');
   final kidokThemeController = Get.put(KidokThemeDataController());
 
   final Map<String, dynamic> requestData = {

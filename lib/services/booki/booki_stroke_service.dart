@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/booki/booki_stroke_data.dart';
@@ -15,7 +15,7 @@ import 'package:logger/logger.dart';
 // 부키 획순 따라쓰기
 Future<void> bookiStrokeService(id, String keyCode, year) async {
   final bookiStrokeDataController = Get.put(BookiStrokeDataController());
-  String url = dotenv.get('BOOKI_STROKE_URL');
+  String url = Env.get('BOOKI_STROKE_URL');
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,

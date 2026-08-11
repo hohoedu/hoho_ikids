@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/screens/video_player/video_screen.dart';
@@ -11,10 +11,10 @@ import 'package:logger/logger.dart';
 Future<void> haniSongFiveService(id, keyCode, year, hosu) async {
   String url = '';
   if (keyCode.substring(0, 1) == 'Y') {
-    url = dotenv.get('HANI_SONG_Y5_URL');
+    url = Env.get('HANI_SONG_Y5_URL');
   }
   if (keyCode.substring(0, 1) == 'G') {
-    url = dotenv.get('HANI_SONG_G5_URL');
+    url = Env.get('HANI_SONG_G5_URL');
   }
 
   final Map<String, dynamic> requestData = {

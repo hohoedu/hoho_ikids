@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -8,7 +8,7 @@ import 'package:hani_booki/services/total_star_service.dart';
 import 'package:logger/logger.dart';
 
 Future<void> starSaveService({required String btype, required String hosu, required String gb, required String keycode}) async {
-  final String url = dotenv.get('FIND_STAR_SAVE_URL');
+  final String url = Env.get('FIND_STAR_SAVE_URL');
   final userdata = Get.find<UserDataController>();
 
   final Map<String, dynamic> requestData = {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 
 // 키독 책장 도서목록
 Future<void> kidokSublistService(hosu, keyCode) async {
-  String url = dotenv.get('KIDOK_SUBLIST_URL');
+  String url = Env.get('KIDOK_SUBLIST_URL');
   final kidokSublistController = Get.put(KidokSublistDataController());
   final userdata = Get.find<UserDataController>();
   final Map<String, dynamic> requestData = {

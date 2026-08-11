@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_stroke_data.dart';
@@ -14,7 +14,7 @@ import 'package:logger/logger.dart';
 // 하니 획순 따라쓰기
 Future<void> haniStrokeService(id, keyCode, year) async {
   final haniStrokeDataController = Get.put(HaniStrokeDataController());
-  String url = dotenv.get('HANI_STROKE_URL');
+  String url = Env.get('HANI_STROKE_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,

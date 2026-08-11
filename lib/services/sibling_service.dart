@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/sibling_data.dart';
@@ -15,7 +15,7 @@ import 'package:logger/logger.dart';
 Future<void> siblingService(tel) async {
   final siblingData = Get.put(SiblingDataController(), permanent: true);
   final userData = Get.put(UserDataController());
-  String url = dotenv.get('SIBLING_URL');
+  String url = Env.get('SIBLING_URL');
 
   final Map<String, dynamic> requestData = {'ptel': tel};
 

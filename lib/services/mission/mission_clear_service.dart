@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -8,7 +8,7 @@ import 'package:hani_booki/_data/mission/mission_data.dart';
 import 'package:logger/logger.dart';
 
 Future<void> missionClearService(int missionNum, String keycode) async {
-  final String url = dotenv.get('MISSION_CLEAR_URL');
+  final String url = Env.get('MISSION_CLEAR_URL');
   final userdata = Get.find<UserDataController>();
   final missionController = Get.find<MissionController>();
 

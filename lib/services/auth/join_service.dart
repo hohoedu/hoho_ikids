@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/join_dto.dart';
@@ -14,7 +14,7 @@ import 'package:logger/logger.dart';
 
 // 회원가입
 Future<void> joinService() async {
-  String url = dotenv.get('INSERT_2026_URL');
+  String url = Env.get('INSERT_2026_URL');
   final joinController = Get.find<JoinController>();
 
   final Map<String, dynamic> requestData = {

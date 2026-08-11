@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/notice/notice_view_data.dart';
@@ -10,7 +10,7 @@ import 'package:logger/logger.dart';
 // 공지사항 개별 내용
 Future<void> noticeViewService(idx, gb) async {
   final noticeViewDataController = Get.put(NoticeViewDataController());
-  String url = dotenv.get('NOTICE_VIEW_URL');
+  String url = Env.get('NOTICE_VIEW_URL');
 
   final Map<String, dynamic> requestData = {
     'idx': idx,

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/hani/hani_Flip_data.dart';
@@ -12,7 +12,7 @@ import 'package:logger/logger.dart';
 Future<void> haniFlipService(id, keyCode, year, lastTime) async {
   final HaniFlipDataController haniFlipDataController =
       Get.put(HaniFlipDataController());
-  String url = dotenv.get('HANI_FLIP_URL');
+  String url = Env.get('HANI_FLIP_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,

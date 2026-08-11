@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
@@ -11,7 +11,7 @@ import 'package:hani_booki/services/auth/character_list_service.dart';
 import 'package:logger/logger.dart';
 
 Future<void> characterSaveService(String selected) async {
-  final String url = dotenv.get('CHARACTER_SELECT_URL');
+  final String url = Env.get('CHARACTER_SELECT_URL');
   final userdata = Get.find<UserDataController>();
 
   final Map<String, dynamic> requestData = {'id': userdata.userData!.id, 'yy': userdata.userData!.year, 'character_key': selected};

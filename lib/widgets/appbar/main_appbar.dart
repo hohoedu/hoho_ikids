@@ -47,10 +47,22 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _MainAppBarState extends State<MainAppBar> {
   final bgmController = Get.find<BgmController>();
+  DateTime? _lastMenuTapTime;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void _handleMenuTap() {
+    // 아이패드 트랙패드/펜슬 입력에서 짧은 간격으로 탭이 중복 발생해 드로어가 열리자마자
+    // 닫히는 현상이 있어, 연속 탭을 걸러냄
+    final now = DateTime.now();
+    if (_lastMenuTapTime != null && now.difference(_lastMenuTapTime!) < const Duration(milliseconds: 500)) {
+      return;
+    }
+    _lastMenuTapTime = now;
+    widget.onTap?.call();
   }
 
   @override
@@ -97,7 +109,7 @@ class _MainAppBarState extends State<MainAppBar> {
         Visibility(
           visible: widget.title == null,
           child: GestureDetector(
-            onTap: widget.onTap,
+            onTap: _handleMenuTap,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(

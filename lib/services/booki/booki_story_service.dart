@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/screens/video_player/video_screen.dart';
@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 
 // 부키 동화
 Future<void> bookiStoryService(id, keycode, year) async {
-  String url = dotenv.get('BOOKI_STORY_URL');
+  String url = Env.get('BOOKI_STORY_URL');
 
   final Map<String, dynamic> requestData = {
     'id': id,

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hani_booki/_core/env.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
@@ -9,7 +9,7 @@ import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
 Future<void> rankService(String hosu) async {
-  final String url = dotenv.get('RANK_URL');
+  final String url = Env.get('RANK_URL');
   final rankController = Get.find<RankDataController>();
   final userdata = Get.find<UserDataController>();
 
