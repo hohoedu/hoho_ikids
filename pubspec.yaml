@@ -86,10 +86,16 @@ flutter:
     - assets/images/rank/
     - assets/images/star/
     - assets/images/mission/
+
     - assets/images/hani/relics/
     - assets/images/hani/cooking/
     - assets/images/hani/pang/
     - assets/images/hani/run/
+
+    - assets/images/booki/basket/
+    - assets/images/booki/proviso/
+    - assets/images/booki/sentence/
+    - assets/images/booki/story_board/
 
     - assets/lottie/
 
