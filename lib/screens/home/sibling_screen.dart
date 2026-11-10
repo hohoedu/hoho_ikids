@@ -6,6 +6,7 @@ import 'package:hani_booki/_core/constants.dart';
 import 'package:hani_booki/_data/auth/sibling_data.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/screens/home/home_screen.dart';
+import 'package:hani_booki/services/auth/character_list_service.dart';
 import 'package:hani_booki/services/auth/ebook_status_service.dart';
 import 'package:hani_booki/services/sibling_service.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
@@ -77,6 +78,7 @@ class SiblingScreen extends StatelessWidget {
                                 userData.userData!.year,
                               );
                               _userUpdate(index);
+                              await characterListService();
                               Get.to(() => const HomeScreen());
                             },
                             child: Container(

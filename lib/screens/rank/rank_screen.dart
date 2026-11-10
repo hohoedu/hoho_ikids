@@ -7,7 +7,9 @@ import 'package:hani_booki/_data/rank/rank_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/screens/rank/rank_widgets/rank_question.dart';
 import 'package:hani_booki/services/rank/rank_service.dart';
+import 'package:hani_booki/utils/character_lottie.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:lottie/lottie.dart';
 import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
@@ -52,11 +54,6 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
     });
     await rankService(hosu.toString().padLeft(2, '0'));
     setState(() => _isLoading = false); // ✅ 로딩 종료
-  }
-
-  String _getCharacterAsset(String rank, String characterNum) {
-    final character = characterNum.startsWith('H') ? 'hani' : 'booki';
-    return 'https://hohoeduimg.speedgabia.com/hohoeduapp/character/${rank}_$characterNum.png';
   }
 
   @override
@@ -374,8 +371,8 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                     bottom: firstCharBottom,
                     left: w * 0.32,
                     right: w * 0.32,
-                    child: Image.network(
-                      _getCharacterAsset('first', first.characterNum),
+                    child: Lottie.asset(
+                      characterRankLottieAsset('first', first.characterNum),
                       height: firstCharHeight,
                     ),
                   ),
@@ -417,8 +414,8 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                     bottom: sideCharBottom,
                     left: w * 0.1,
                     right: w * 0.6,
-                    child: Image.network(
-                      _getCharacterAsset('second', second.characterNum),
+                    child: Lottie.asset(
+                      characterRankLottieAsset('second', second.characterNum),
                       height: sideCharHeight,
                     ),
                   ),
@@ -461,8 +458,8 @@ class _RankScreenState extends State<RankScreen> with SingleTickerProviderStateM
                     bottom: sideCharBottom,
                     left: w * 0.6,
                     right: w * 0.1,
-                    child: Image.network(
-                      _getCharacterAsset('third', third.characterNum),
+                    child: Lottie.asset(
+                      characterRankLottieAsset('third', third.characterNum),
                       height: sideCharHeight,
                     ),
                   ),

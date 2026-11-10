@@ -2,7 +2,7 @@ name: hani_booki
 description: "호호하니&호호부키"
 publish_to: 'none'
 # 현재 버전
-version: 1.0.45+60
+version: 1.0.46+61
 
 environment:
   sdk: ^3.5.4
@@ -86,6 +86,10 @@ flutter:
     - assets/images/rank/
     - assets/images/star/
     - assets/images/mission/
+    - assets/images/hani/relics/
+    - assets/images/hani/cooking/
+    - assets/images/hani/pang/
+    - assets/images/hani/run/
 
     - assets/lottie/
 
@@ -94,6 +98,8 @@ flutter:
     - assets/audio/bgm/
 
     - assets/text/
+
+    - assets/certs/
 
 
   fonts:
@@ -108,3 +114,23 @@ flutter:
     - family: BMJUA
       fonts:
         - asset: assets/fonts/BMJUA.ttf
+
+    - family: MPLUS-BOLD
+      fonts:
+        - asset: assets/fonts/MPLUSRounded1c-Bold.ttf
+
+    - family: MPLUS-EXTRABOLD
+      fonts:
+        - asset: assets/fonts/MPLUSRounded1c-ExtraBold.ttf
+
+    - family: NANUM-R
+      fonts:
+        - asset: assets/fonts/NanumSquareRoundR.ttf
+
+    - family: NANUM-B
+      fonts:
+        - asset: assets/fonts/NanumSquareRoundB.ttf
+
+    - family: NANUM-EB
+      fonts:
+        - asset: assets/fonts/NanumSquareRoundEB.ttf

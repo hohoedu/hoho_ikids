@@ -7,6 +7,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_core/notification/setup_fcm.dart';
 import 'package:hani_booki/_core/theme.dart';
 import 'package:hani_booki/utils/app_lifecycle_handler.dart';
@@ -33,6 +34,9 @@ Future<void> main() async {
   await Hive.initFlutter();
   await Hive.openBox('settings');
   await Hive.openBox('notification_settings');
+
+  // 구형 안드로이드 인증서(Sectigo Root R46) 신뢰 설정
+  await setupDioCertificates();
 
   await setupFcm();
 

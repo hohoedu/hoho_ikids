@@ -29,18 +29,26 @@ Future<void> loginService(id, password, isAutoLoginChecked) async {
   String pwd = md5_convertHash(password);
   String hashedUpperPassword = md5_convertHash(upperPwd);
   String hashedLowerPassword = md5_convertHash(lowerPwd);
+  String shaPassword = sha256_convertHash(password);
+  String shaUpperPassword = sha256_convertHash(upperPwd);
+  String shaLowerPassword = sha256_convertHash(lowerPwd);
 
   final Map<String, dynamic> requestData = {
     'id': id,
     // 'pwd':pwd,
     'pwd': hashedUpperPassword,
     'pwd2': hashedLowerPassword,
+    'pwd_sha_up': shaUpperPassword,
+    'pwd2_sha_lo': shaLowerPassword,
+    'pwd_sha': shaPassword
   };
   Logger().d("requestData = $requestData");
-  // HTTP POST 요청
-  final response = await dio.post(url, data: jsonEncode(requestData));
-  Logger().d(response);
+  Logger().d("url = $url");
+  // HTTP POST 요청t
   try {
+    final response = await dio.post(url, data: jsonEncode(requestData));
+    Logger().d(response);
+
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
       final Map<String, dynamic> resultList = json.decode(response.data);

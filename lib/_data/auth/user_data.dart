@@ -113,7 +113,7 @@ class UserDataController extends GetxController {
         siblingCount: '',
         userType: '',
         parentName: '',
-        character: 'hani',
+        character: 'booki',
         appRankingView: 'N',
       );
     }

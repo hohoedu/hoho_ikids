@@ -20,6 +20,7 @@ Future<void> joinService() async {
   final Map<String, dynamic> requestData = {
     'id': joinController.joinDTO.value.id,
     'cname': joinController.joinDTO.value.username,
+    // 'pwd': sha256_convertHash(joinController.joinDTO.value.password),
     'pwd': md5_convertHash(joinController.joinDTO.value.password),
     'pname': (joinController.joinDTO.value.parentName),
     'ptel': removeHyphen(joinController.joinDTO.value.parentTel),
