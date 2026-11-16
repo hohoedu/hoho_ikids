@@ -90,14 +90,19 @@ class HanjaRun {
   /// 맞힐 때마다 6%씩 빨라지고 [maxSpeed]에서 멈춘다.
   double get fallSpeed => min(baseSpeed * pow(1.06, correctCount), maxSpeed).toDouble();
 
-  /// 정답 처리 후 얻은 점수를 돌려준다. 연속으로 맞힐수록 더 받는다.
+  /// 정답 처리 후 얻은 점수를 돌려준다. 처음 속도 10점 → 최고 속도 20점.
   int onCorrect() {
+    final gained = 10 + (10 * (fallSpeed - baseSpeed) / (maxSpeed - baseSpeed)).round();
     streak++;
     correctCount++;
-    final gained = 10 + 2 * min<int>(streak - 1, 10);
     score += gained;
     return gained;
   }
+
+  /// 별 1~5개 받는 최소 점수. 약 5·10·15·20·30개 맞히면 받음(20개쯤에서 최고 속도).
+  static const starScores = [50, 120, 200, 300, 500];
+
+  int get stars => starScores.where((s) => score >= s).length;
 
   /// 장애물(돌·쓰레기통)에 부딪힘: 하트 하나를 잃고 연속 정답이 끊긴다. 복습 목록엔 안 넣음.
   void onCrash() {

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/screens/hani/hari_run/hani_run_logic.dart';
@@ -17,7 +18,10 @@ Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {bool obstacl
     ..devicePixelRatio = 1
     ..padding = FakeViewPadding(left: pad.left, top: pad.top, right: pad.right, bottom: pad.bottom);
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(GetMaterialApp(home: HaniRunScreen(random: Random(5), obstacles: obstacles)));
+  await tester.pumpWidget(ScreenUtilInit(
+    designSize: const Size(360, 722), // main.dart 와 같게
+    builder: (_, __) => GetMaterialApp(home: HaniRunScreen(random: Random(5), obstacles: obstacles)),
+  ));
 }
 
 Future<void> _run(WidgetTester tester, Duration total, {bool Function()? until}) async {
@@ -84,18 +88,18 @@ void main() {
     final q = await _answer(tester, size, correct: false);
     expect(run.hearts, 2);
     expect(run.mistakes, contains(q.target));
-    expect(find.textContaining('정답은 ${q.target.char}'), findsOneWidget);
+    expect(find.textContaining('정답은'), findsNothing);
 
     await _answer(tester, size, correct: false);
     await _answer(tester, size, correct: false);
     expect(run.isOver, isTrue);
     await _run(tester, const Duration(seconds: 1));
-    expect(find.text('게임 끝!'), findsOneWidget);
+    expect(find.textContaining('스타', findRichText: true), findsOneWidget); // 부키와 같은 결과 다이얼로그
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.text('다시 하기'));
-    await tester.pump();
-    expect(find.text('게임 끝!'), findsNothing);
+    await tester.tap(find.text('다시하기'));
+    await _run(tester, const Duration(milliseconds: 500)); // 다이얼로그 닫히는 애니메이션
+    expect(find.textContaining('스타', findRichText: true), findsNothing);
     expect(_state(tester).run.hearts, 3);
     expect(_state(tester).run.score, 0);
   });

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/screens/hani/hani_pang/hani_pang_board.dart';
@@ -15,7 +16,10 @@ Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {int seed = 3
     ..devicePixelRatio = 1
     ..padding = FakeViewPadding(left: pad.left, top: pad.top, right: pad.right, bottom: pad.bottom);
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(GetMaterialApp(home: HaniPangScreen(random: Random(seed))));
+  await tester.pumpWidget(ScreenUtilInit(
+    designSize: const Size(360, 722), // main.dart 와 같게 (결과 다이얼로그가 씀)
+    builder: (_, __) => GetMaterialApp(home: HaniPangScreen(random: Random(seed))),
+  ));
 }
 
 Future<void> _run(WidgetTester tester, Duration total) async {
@@ -84,12 +88,32 @@ void main() {
 
     // 시간 끝
     await _run(tester, const Duration(seconds: 60));
-    expect(find.text('시간 끝!'), findsOneWidget);
+    await _run(tester, const Duration(milliseconds: 400));
+    expect(find.textContaining('스타', findRichText: true), findsOneWidget); // 부키와 같은 결과 다이얼로그
 
-    await tester.tap(find.text('다시 하기'));
-    await tester.pump();
-    expect(find.text('시간 끝!'), findsNothing);
+    await tester.tap(find.text('다시하기'));
+    await _run(tester, const Duration(milliseconds: 400));
+    expect(find.textContaining('스타', findRichText: true), findsNothing);
     expect(find.text('0점'), findsOneWidget);
+  });
+
+  testWidgets('5초 동안 못 맞추면 힌트 두 칸이 깜빡이고, 맞추면 사라짐', (tester) async {
+    await _pump(tester, const Size(874, 402), EdgeInsets.zero);
+    final Board board = (tester.state(find.byType(HaniPangScreen)) as dynamic).board;
+    final hint = find.byKey(const ValueKey('hint'));
+
+    await _run(tester, const Duration(seconds: 4));
+    expect(hint, findsNothing);
+    await _run(tester, const Duration(milliseconds: 1100));
+    expect(hint, findsNWidgets(2));
+
+    final (a, b) = board.findHint()!;
+    Offset center(Pos p) => tester.getCenter(find.byKey(ValueKey(board.tileAt(p)!.id)));
+    await tester.tapAt(center(a));
+    await tester.pump();
+    await tester.tapAt(center(b));
+    await _run(tester, const Duration(seconds: 3));
+    expect(hint, findsNothing);
   });
 
   testWidgets('드래그로도 바꿀 수 있음', (tester) async {

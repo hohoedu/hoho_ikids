@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/screens/hani/hani_pang/hani_pang_board.dart';
+import 'package:get/get.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 import 'package:intl/intl.dart';
 
 /// 한자팡: 같은 한자 블록 3개 이상 맞추기. 제한 시간 동안 점수를 모은다.
@@ -39,6 +43,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   static const _kindsPerGame = 6; // 블록 8종 중 한 판에 쓰는 수 (적을수록 쉬움)
   static const _pointPerBlock = 100;
   static const _gameTime = Duration(seconds: 60);
+  static const _hintAfter = Duration(seconds: 5); // 이만큼 못 맞추면 힌트
 
   static const _move = Duration(milliseconds: 200);
   static const _clear = Duration(milliseconds: 220);
@@ -65,6 +70,8 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   bool _busy = false;
   bool _over = false;
   Pos? _selected;
+  Timer? _hintTimer;
+  (Pos, Pos)? _hint; // 깜빡이는 힌트 두 칸
   Pos? _dragFrom;
   Offset _dragOrigin = Offset.zero;
 
@@ -76,6 +83,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
 
   @override
   void dispose() {
+    _hintTimer?.cancel();
     _timer.dispose();
     super.dispose();
   }
@@ -92,6 +100,17 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
     _over = false;
     _selected = null;
     _timer.forward(from: 0);
+    _resetHint();
+  }
+
+  /// 맞출 때마다 다시 세고, [_hintAfter] 동안 못 맞추면 바꿀 두 칸을 깜빡여 줌
+  void _resetHint() {
+    _hint = null;
+    _hintTimer?.cancel();
+    _hintTimer = Timer(_hintAfter, () {
+      if (!mounted || _over) return;
+      _busy ? _resetHint() : setState(() => _hint = _board.findHint()); // 블록 움직이는 중이면 다시 셈
+    });
   }
 
   void _syncView() {
@@ -106,10 +125,22 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
 
   void _maybeEnd() {
     if (_busy || !_timer.isCompleted || _over) return;
+    _hintTimer?.cancel();
     setState(() {
       _over = true;
       _selected = null;
+      _hint = null;
     });
+    lottieDialog(
+      onReset: () {
+        Get.back();
+        setState(_newGame);
+      },
+      onMain: () {
+        Get.back();
+        Get.back();
+      },
+    );
   }
 
   // ───────── 입력 ─────────
@@ -159,9 +190,11 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
     if (!mounted) return;
 
     if (!result.valid) {
+      SoundManager.playNo();
       setState(() => _swapView(a, b)); // 맞는 줄이 없으면 제자리로
       await _wait(_move);
     } else {
+      SoundManager.playCorrect();
       for (final step in result.steps) {
         await _playStep(step);
         if (!mounted) return;
@@ -170,6 +203,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
         setState(_syncView);
         await _wait(_fall);
       }
+      if (mounted) setState(_resetHint);
     }
     if (!mounted) return;
     _busy = false;
@@ -240,7 +274,6 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
               },
             ),
           ),
-          if (_over) _buildGameOver(),
         ],
       ),
     );
@@ -411,6 +444,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   Widget _buildTile(_Cell c, double cell) {
     final t = c.tile;
     final selected = _selected == Pos(c.row, c.col);
+    final hinted = _hint != null && (_hint!.$1 == Pos(c.row, c.col) || _hint!.$2 == Pos(c.row, c.col));
     final clearing = _clearing.contains(t.id);
     final special = _hiddenSpecial.contains(t.id) ? Special.none : t.special;
 
@@ -430,7 +464,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(_blockAsset(t.color)),
+              hinted ? _Pulse(child: Image.asset(_blockAsset(t.color))) : Image.asset(_blockAsset(t.color)),
               if (special != Special.none) CustomPaint(painter: _SpecialPainter(special)),
               if (selected)
                 DecoratedBox(
@@ -490,61 +524,6 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
       ),
     );
   }
-
-  Widget _buildGameOver() {
-    return Positioned.fill(
-      child: ColoredBox(
-        color: Colors.black54,
-        child: Center(
-          child: LayoutBuilder(
-            builder: (context, c) {
-              final pw = min(c.maxWidth * 0.45, 420.0), ph = pw * 322 / 598;
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: pw,
-                    height: ph,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.asset('$_dir/wood.png', fit: BoxFit.fill),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('시간 끝!', style: _text(ph * 0.15)),
-                            Padding(
-                              padding: EdgeInsets.only(top: ph * 0.04),
-                              child: Text('${NumberFormat('#,###').format(_score)}점', style: _text(ph * 0.24)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: ph * 0.1),
-                    child: GestureDetector(
-                      onTap: () => setState(_newGame),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: ph * 0.25, vertical: ph * 0.08),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF7862A),
-                          borderRadius: BorderRadius.circular(ph),
-                          border: Border.all(color: Colors.white, width: 3),
-                        ),
-                        child: Text('다시 하기', style: _text(ph * 0.14).copyWith(color: Colors.white)),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// 특수 블록 표시: 레이저는 가로/세로 빛줄기, 블랙홀은 가운데 소용돌이
@@ -593,4 +572,28 @@ class _SpecialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SpecialPainter old) => old.type != type;
+}
+
+/// 힌트 블록: 살짝 커졌다 작아졌다 반복
+class _Pulse extends StatefulWidget {
+  const _Pulse({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_Pulse> createState() => _PulseState();
+}
+
+class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 500))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      ScaleTransition(key: const ValueKey('hint'), scale: Tween(begin: 1.0, end: 1.15).animate(_c), child: widget.child);
 }

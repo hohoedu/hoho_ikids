@@ -78,7 +78,8 @@ class _BasketScreenState extends State<BasketScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: MainAppBar(
-        title: ' ',
+        title: '아래의 인물과 관련된 것을 바구니에 담아보세요.',
+        titleStyle: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
@@ -93,16 +94,6 @@ class _BasketScreenState extends State<BasketScreen> {
                 height: _designH * s,
                 child: Stack(
                   children: [
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      top: 40 * s,
-                      child: Text(
-                        '아래의 인물과 관련된 것을 바구니에 담아보세요.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: 'BMJUA', fontSize: 46 * s, color: const Color(0xFF3A3A3A)),
-                      ),
-                    ),
                     Positioned(
                       left: 800 * s,
                       top: 140 * s,

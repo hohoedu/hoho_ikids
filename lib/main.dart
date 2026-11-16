@@ -7,6 +7,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/utils/splash_screen.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_core/notification/setup_fcm.dart';
 import 'package:hani_booki/_core/theme.dart';
@@ -57,12 +58,18 @@ Future<void> main() async {
 
 
 
-  Future.delayed(
-    const Duration(seconds: 2),
-    () {
-      FlutterNativeSplash.remove();
-    },
-  );
+  // Android 는 시스템 스플래시를 바로 내리고 Flutter SplashScreen 으로 큰 이미지를 보여줌
+  // (Android 12+ 시스템 스플래시는 로고가 작은 원 안에만 그려짐)
+  if (Platform.isAndroid) {
+    FlutterNativeSplash.remove();
+  } else {
+    Future.delayed(
+      const Duration(seconds: 2),
+      () {
+        FlutterNativeSplash.remove();
+      },
+    );
+  }
   configLoading();
   runApp(const MyApp());
 }
@@ -103,7 +110,8 @@ class MyApp extends StatelessWidget {
                 context,
                 MediaQuery(
                   data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling, devicePixelRatio: 1.0),
-                  child: child!,
+                  // 스플래시를 Navigator 위에 덮어서 그 사이 뜨는 다이얼로그도 가림
+                  child: Platform.isAndroid ? SplashScreen(child: child!) : child!,
                 ),
               );
             },

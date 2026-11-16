@@ -51,23 +51,27 @@ void main() {
   });
 
   group('HanjaRun', () {
-    test('연속으로 맞힐수록 점수를 더 받고, 틀리면 연속이 끊긴다', () {
+    test('빨라질수록 점수가 10점에서 20점까지 오르고, 틀려도 속도 점수는 유지', () {
       final run = HanjaRun();
       expect(run.onCorrect(), 10);
-      expect(run.onCorrect(), 12);
-      expect(run.onCorrect(), 14);
-      expect(run.score, 36);
+      final second = run.onCorrect();
+      expect(second, inInclusiveRange(10, 11));
       run.onMistake(hanja8[0]);
       expect(run.streak, 0);
-      expect(run.onCorrect(), 10);
-    });
-
-    test('연속 보너스는 30점에서 멈춘다', () {
-      final run = HanjaRun();
-      for (var i = 0; i < 20; i++) {
+      expect(run.onCorrect(), greaterThanOrEqualTo(second));
+      for (var i = 0; i < 30; i++) {
         run.onCorrect();
       }
-      expect(run.onCorrect(), 30);
+      expect(run.onCorrect(), 20);
+    });
+
+    test('점수 구간별 별 개수', () {
+      final run = HanjaRun();
+      expect(run.stars, 0);
+      for (final (score, stars) in [(49, 0), (50, 1), (119, 1), (120, 2), (200, 3), (300, 4), (499, 4), (500, 5), (2000, 5)]) {
+        run.score = score;
+        expect(run.stars, stars, reason: '$score점');
+      }
     });
 
     test('하트 3개를 잃으면 끝나고, 틀린 한자는 한 번씩만 기록된다', () {

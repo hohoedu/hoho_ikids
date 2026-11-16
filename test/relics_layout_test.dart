@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/screens/hani/relics/relics_screen.dart';
@@ -56,6 +57,40 @@ void main() {
       expect(frame.height / size.height, greaterThan(0.6), reason: '액자가 충분히 큼');
     });
   }
+
+  testWidgets('다 긁기 전엔 보기가 안 눌리고, 오답은 그대로·정답이면 결과 다이얼로그', (tester) async {
+    tester.view
+      ..physicalSize = const Size(874, 402)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(ScreenUtilInit(
+      designSize: const Size(360, 722),
+      builder: (_, __) => const GetMaterialApp(home: RelicsScreen()),
+    ));
+    final dialog = find.textContaining('스타', findRichText: true);
+
+    await tester.tap(find.byKey(const ValueKey('choice1')));
+    await tester.pump(const Duration(seconds: 1));
+    expect(dialog, findsNothing, reason: '긁기 전');
+
+    final area = tester.getRect(find.byType(SprayScratcher));
+    for (var y = area.top + 5; y < area.bottom; y += area.height / 8) {
+      await tester.dragFrom(Offset(area.left + 2, y), Offset(area.width - 4, 0));
+      await tester.pump();
+    }
+    await tester.dragFrom(Offset(area.left + 2, area.bottom - 3), Offset(area.width - 4, 0));
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('choice0'))); // 門 오답
+    await tester.pump(const Duration(seconds: 1));
+    expect(dialog, findsNothing, reason: '오답');
+
+    await tester.tap(find.byKey(const ValueKey('choice1'))); // 間 정답
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(dialog, findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 // 테스트 환경엔 오디오 플러그인이 없어 BGM 미리 불러오기를 건너뜀

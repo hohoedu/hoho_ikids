@@ -82,7 +82,8 @@ class _StoryBoardScreenState extends State<StoryBoardScreen> {
       extendBodyBehindAppBar: true,
       backgroundColor: _bg,
       appBar: MainAppBar(
-        title: ' ',
+        title: '사건이 일어난 순서에 맞춰 스토리보드를 완성해 보세요.',
+        titleStyle: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
         isContent: true,
         onTapBackIcon: () => showBackDialog(false),
       ),
@@ -94,16 +95,6 @@ class _StoryBoardScreenState extends State<StoryBoardScreen> {
             height: _designH * s,
             child: Stack(
               children: [
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: 40 * s,
-                  child: Text(
-                    '사건이 일어난 순서에 맞춰 스토리보드를 완성해 보세요.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'BMJUA', fontSize: 46 * s, color: _text),
-                  ),
-                ),
                 for (int i = 0; i < _scenes.length; i++) ...[
                   _buildSlot(i, s),
                   if (i > 0)

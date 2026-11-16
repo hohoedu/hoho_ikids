@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/screens/hani/hari_run/hani_run_data.dart';
 import 'package:hani_booki/screens/hani/hari_run/hani_run_logic.dart';
+import 'package:get/get.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
@@ -44,6 +47,9 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
 
   static const _baseTravel = 4.0; // 처음엔 화면 오른쪽에서 캐릭터까지 4초
   static const _firstCalmQuestions = 2; // 처음 몇 문제는 장애물 없음
+  static const _obstacleChance = 0.7; // 문제마다 장애물이 나올 확률
+  static const _obstacleGapSec = 2.0; // 장애물 지나고 동전 도착까지 시간
+  static const _motionSec = 1.5; // 정답/오답 모션 보여 주는 시간
 
   late final Random _rand = widget.random ?? Random();
   late final Ticker _ticker = createTicker(_tick);
@@ -57,6 +63,9 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
   int _lane = 0;
   double _bgOffset = 0;
   double _hurtUntil = 0;
+  double _hitUntil = 0; // 하니 부딪힘 모션 끝나는 시각
+  double _heartUntil = 0; // 하니 정답 모션 끝나는 시각
+  double? _heartLostAt; // 하트 -1 이 하늘로 날아가기 시작한 시각
   double _time = 0;
   ({String text, Color color, double at})? _toast;
   bool _over = false;
@@ -90,6 +99,8 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
     _nextSpawnIn = 1.0;
     _lane = 0;
     _toast = null;
+    _hitUntil = _heartUntil = 0;
+    _heartLostAt = null;
     _over = false;
   }
 
@@ -104,7 +115,8 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
     if (_size == Size.zero) return;
     _time += dt;
 
-    if (!_over) {
+    // 부딪히면 hit 모션 동안 길·물건이 멈춤
+    if (!_over && _time >= _hitUntil) {
       final move = _speed * dt;
       _bgOffset += move;
       for (final t in _things) {
@@ -126,9 +138,10 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
     _question = q;
     var x = _size.width + _coinSize;
     // 장애물은 동전보다 먼저 와서, 피한 뒤 정답 길을 고를 시간이 있게
-    if (widget.obstacles && _quiz.asked > _firstCalmQuestions && _rand.nextBool()) {
+    if (widget.obstacles && _quiz.asked > _firstCalmQuestions && _rand.nextDouble() < _obstacleChance) {
       _things.add(_Thing(_rand.nextBool() ? _Kind.rock : _Kind.trash, _rand.nextInt(2), x));
-      x += _size.width * 0.38;
+      // 거리 대신 시간으로 띄워서, 빨라져도 장애물 피한 뒤 동전까지 2초 여유
+      x += _speed * _obstacleGapSec;
     }
     for (final side in Side.values) {
       _things.add(_Thing(_Kind.coin, side == Side.left ? 0 : 1, x, q.at(side)));
@@ -142,7 +155,7 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
         if (t.lane == _lane) {
           t.caught = true;
           _run.onCrash();
-          _hurt('아야!', const Color(0xFFE53935));
+          _hurt('아야!');
           _afterMistake();
         }
         continue;
@@ -157,12 +170,15 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
       final got = pair.firstWhere((c) => c.lane == _lane);
       got.caught = true;
       if (identical(got.hanja, q.target)) {
+        SoundManager.playCorrect();
         final gained = _run.onCorrect();
         _toast = (text: '+$gained', color: const Color(0xFFFF8A1F), at: _time);
+        _heartUntil = _time + _motionSec;
+        _hitUntil = 0;
       } else {
         _run.onMistake(q.target);
         _quiz.markMistake(q.target);
-        _hurt('정답은 ${q.target.char} (${q.target.reading})', const Color(0xFFE53935));
+        _hurt();
       }
       _question = null;
       _nextSpawnIn = 0.6;
@@ -171,15 +187,32 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
     }
   }
 
-  void _hurt(String text, Color color) {
+  void _hurt([String? text]) {
+    SoundManager.playNo(); // 오답·장애물 모두
     _hurtUntil = _time + 0.7;
-    _toast = (text: text, color: color, at: _time);
+    _hitUntil = _time + _motionSec;
+    _heartUntil = 0;
+    _heartLostAt = _time;
+    if (text != null) _toast = (text: text, color: const Color(0xFFE53935), at: _time);
   }
 
   void _afterMistake() {
     if (_run.isOver && !_over) {
       Future.delayed(const Duration(milliseconds: 900), () {
-        if (mounted) setState(() => _over = true);
+        if (!mounted) return;
+        setState(() => _over = true);
+        // 부키 콘텐츠와 같은 결과 다이얼로그. 점수 구간별 별 개수만 넘김
+        lottieDialog(
+          stars: _run.stars,
+          onReset: () {
+            Get.back();
+            setState(_restart);
+          },
+          onMain: () {
+            Get.back();
+            Get.back();
+          },
+        );
       });
     }
   }
@@ -219,8 +252,8 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
                 _buildCharacter(),
                 _buildBubble(),
                 _buildToast(),
+                _buildLostHeart(),
                 Positioned(top: h * 0.03, right: side, height: h * 0.11, child: _buildHud(h * 0.11)),
-                if (_over) _buildGameOver(),
               ],
             ),
           );
@@ -311,8 +344,10 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
 
   Widget _buildCharacter() {
     final h = _size.height;
-    final ch = h * 0.30, cw = ch * 560 / 878;
+    final ch = h * 0.30, cw = ch; // 하니 로티 3종 모두 900x900
     final hurt = _time < _hurtUntil;
+    // 오답·장애물 > 정답 > 평상시 달리기
+    final motion = _time < _hitUntil ? 'hanihit' : _time < _heartUntil ? 'hanirunheart' : 'hanirun';
     return AnimatedPositioned(
       key: const ValueKey('character'),
       duration: const Duration(milliseconds: 150),
@@ -324,7 +359,8 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
       child: Opacity(
         // 부딪히면 깜빡임
         opacity: hurt && (_time * 10).floor().isEven ? 0.35 : 1,
-        child: Lottie.asset('assets/lottie/mushroom_character.json', fit: BoxFit.contain),
+        // 키가 바뀌면 모션이 처음부터 재생됨
+        child: Lottie.asset('assets/lottie/Hoho_$motion.json', key: ValueKey(motion), fit: BoxFit.contain),
       ),
     );
   }
@@ -385,6 +421,36 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
     );
   }
 
+  /// 하트를 잃으면 하니 머리 위에서 하트 -1 이 하늘로 날아감
+  Widget _buildLostHeart() {
+    final at = _heartLostAt;
+    if (at == null || _time - at > 1.2) return const SizedBox.shrink();
+    final h = _size.height, v = (_time - at) / 1.2;
+    final startY = h * _laneY[_lane] - h * 0.3;
+    return Positioned(
+      left: _charX - h * 0.08 + sin(v * pi * 3) * h * 0.03, // 살랑살랑
+      top: startY - Curves.easeIn.transform(v) * (startY + h * 0.15),
+      child: IgnorePointer(
+        child: Opacity(
+          opacity: (1.4 - v).clamp(0, 1),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('$_dir/heart.png', height: h * 0.09),
+              Text(
+                ' -1',
+                style: _text(h * 0.07).copyWith(
+                  color: const Color(0xFFE53935),
+                  shadows: const [Shadow(color: Colors.white, blurRadius: 6)],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   static const _brown = Color(0xFF4E321C);
 
   TextStyle _text(double size) => TextStyle(fontFamily: 'BMJUA', fontSize: size, color: _brown, height: 1.1);
@@ -415,75 +481,6 @@ class _HaniRunScreenState extends State<HaniRunScreen> with SingleTickerProvider
           ),
           Text('${NumberFormat('#,###').format(_run.score)}점', style: _text(h * 0.42)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildGameOver() {
-    final h = _size.height;
-    return Positioned.fill(
-      child: ColoredBox(
-        color: Colors.black54,
-        child: Center(
-          child: Container(
-            width: min(_size.width * 0.5, 460),
-            padding: EdgeInsets.all(h * 0.05),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF6E2),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF9A6332), width: 3),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('게임 끝!', style: _text(h * 0.08)),
-                Padding(
-                  padding: EdgeInsets.only(top: h * 0.02),
-                  child: Text(
-                    '${NumberFormat('#,###').format(_run.score)}점 · 맞힌 한자 ${_run.correctCount}개',
-                    style: _text(h * 0.05),
-                  ),
-                ),
-                if (_run.mistakes.isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.only(top: h * 0.03),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        for (final m in _run.mistakes)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE2C79A)),
-                            ),
-                            child: Text('${m.char}  ${m.reading}', style: _text(h * 0.045)),
-                          ),
-                      ],
-                    ),
-                  ),
-                Padding(
-                  padding: EdgeInsets.only(top: h * 0.04),
-                  child: GestureDetector(
-                    onTap: () => setState(_restart),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: h * 0.08, vertical: h * 0.025),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF7862A),
-                        borderRadius: BorderRadius.circular(h),
-                        border: Border.all(color: Colors.white, width: 3),
-                      ),
-                      child: Text('다시 하기', style: _text(h * 0.055).copyWith(color: Colors.white)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

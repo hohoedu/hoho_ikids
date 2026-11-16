@@ -887,7 +887,7 @@ Future<void> showVerticalStampDialog(String keycode, {bool isAttendance = false}
   stampClosed = true;
 }
 
-void lottieDialog({required VoidCallback onMain, VoidCallback? onReset}) {
+void lottieDialog({required VoidCallback onMain, VoidCallback? onReset, int stars = 1}) {
   Get.generalDialog(
     barrierDismissible: false,
     barrierLabel: 'Dialog',
@@ -920,7 +920,7 @@ void lottieDialog({required VoidCallback onMain, VoidCallback? onReset}) {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: '+1 스타 ',
+                              text: '+$stars 스타 ',
                               style: TextStyle(
                                 color: Colors.yellow,
                                 fontSize: 8.sp,

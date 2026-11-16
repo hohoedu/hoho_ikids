@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hani_booki/screens/hani/relics/relics_widgets/spray_scratcher.dart';
+import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/widgets/dialog.dart';
 
 class RelicsScreen extends StatefulWidget {
   const RelicsScreen({super.key});
@@ -17,6 +20,49 @@ class _RelicsScreenState extends State<RelicsScreen> {
   // relics_frame.png(1542x938) 안쪽 투명 영역 비율
   static const _frameAspect = 1542 / 938;
   static const _innerL = 105 / 1542, _innerR = 107 / 1542, _innerT = 103 / 938, _innerB = 105 / 938;
+
+  // shortcut: 샘플 문제 하드코딩(그림 속 한자 間 = 아래 보기), 서버 데이터 붙일 때 교체
+  static const _choices = [
+    (asset: 'assets/images/hani/relics/top_btn.png', correct: false), // 門
+    (asset: 'assets/images/hani/relics/bottom_btn.png', correct: true), // 間
+  ];
+
+  int _round = 0; // 다시 하기 때 덮개를 새로 깔기 위한 키
+  bool _cleared = false; // 다 긁어야 보기를 누를 수 있음
+  bool _solved = false;
+  int? _shaking; // 틀린 보기 흔들기
+  int _shakeSeq = 0;
+
+  void _onChoice(int i) {
+    if (!_cleared || _solved) return;
+    if (!_choices[i].correct) {
+      SoundManager.playNo();
+      setState(() {
+        _shaking = i;
+        _shakeSeq++;
+      });
+      return;
+    }
+    SoundManager.playCorrect();
+    setState(() => _solved = true);
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (!mounted) return;
+      lottieDialog(
+        onReset: () {
+          Get.back();
+          setState(() {
+            _round++;
+            _cleared = _solved = false;
+            _shaking = null;
+          });
+        },
+        onMain: () {
+          Get.back();
+          Get.back();
+        },
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +97,7 @@ class _RelicsScreenState extends State<RelicsScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildButton('assets/images/hani/relics/top_btn.png'),
-                            _buildButton('assets/images/hani/relics/bottom_btn.png'),
+                            for (var i = 0; i < _choices.length; i++) _buildButton(i),
                           ],
                         ),
                       ),
@@ -67,11 +112,33 @@ class _RelicsScreenState extends State<RelicsScreen> {
     );
   }
 
-  Widget _buildButton(String asset) {
+  Widget _buildButton(int i) {
+    Widget child = AnimatedScale(
+      // 맞힌 보기는 살짝 커짐
+      scale: _solved && _choices[i].correct ? 1.08 : 1,
+      duration: const Duration(milliseconds: 200),
+      child: Image.asset(_choices[i].asset),
+    );
+    if (_shaking == i) {
+      child = TweenAnimationBuilder<double>(
+        key: ValueKey(_shakeSeq),
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 450),
+        builder: (context, t, child) => Transform.translate(offset: Offset(sin(t * pi * 6) * (1 - t) * 12, 0), child: child),
+        child: child,
+      );
+    }
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
-        child: AspectRatio(aspectRatio: 603 / 406, child: Image.asset(asset)),
+        child: AspectRatio(
+          aspectRatio: 603 / 406,
+          child: GestureDetector(
+            key: ValueKey('choice$i'),
+            onTap: () => _onChoice(i),
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -90,6 +157,8 @@ class _RelicsScreenState extends State<RelicsScreen> {
                 top: h * _innerT,
                 bottom: h * _innerB,
                 child: SprayScratcher(
+                  key: ValueKey(_round),
+                  onThreshold: () => setState(() => _cleared = true),
                   // 기기 크기와 상관없이 같은 손놀림으로 긁히도록 영역 폭의 13%
                   brushSize: w * (1 - _innerL - _innerR) * 0.13,
                   threshold: 75,
