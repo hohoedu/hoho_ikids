@@ -17,6 +17,8 @@ final class Env {
   static final String bookiGoldenbellUrl = _Env.bookiGoldenbellUrl;
   @EnviedField(varName: 'BOOKI_MATCH_URL')
   static final String bookiMatchUrl = _Env.bookiMatchUrl;
+  @EnviedField(varName: 'BOOKI_PROVISO_URL')
+  static final String bookiProvisoUrl = _Env.bookiProvisoUrl;
   @EnviedField(varName: 'BOOKI_REPORT_HIGHFIVE_URL')
   static final String bookiReportHighfiveUrl = _Env.bookiReportHighfiveUrl;
   @EnviedField(varName: 'BOOKI_REPORT_HOME_URL')
@@ -25,10 +27,14 @@ final class Env {
   static final String bookiReportLearningUrl = _Env.bookiReportLearningUrl;
   @EnviedField(varName: 'BOOKI_REPORT_TENACITY_URL')
   static final String bookiReportTenacityUrl = _Env.bookiReportTenacityUrl;
+  @EnviedField(varName: 'BOOKI_SENTENCE_URL')
+  static final String bookiSentenceUrl = _Env.bookiSentenceUrl;
   @EnviedField(varName: 'BOOKI_SONG_URL')
   static final String bookiSongUrl = _Env.bookiSongUrl;
   @EnviedField(varName: 'BOOKI_STORY_URL')
   static final String bookiStoryUrl = _Env.bookiStoryUrl;
+  @EnviedField(varName: 'BOOKI_STORY_BOARD_URL')
+  static final String bookiStoryBoardUrl = _Env.bookiStoryBoardUrl;
   @EnviedField(varName: 'BOOKI_STROKE_URL')
   static final String bookiStrokeUrl = _Env.bookiStrokeUrl;
   @EnviedField(varName: 'B_CONTENT_STAR_URL')
@@ -211,12 +217,15 @@ final class Env {
     'BOOKI_FIND_DIFF_URL': bookiFindDiffUrl,
     'BOOKI_GOLDENBELL_URL': bookiGoldenbellUrl,
     'BOOKI_MATCH_URL': bookiMatchUrl,
+    'BOOKI_PROVISO_URL': bookiProvisoUrl,
     'BOOKI_REPORT_HIGHFIVE_URL': bookiReportHighfiveUrl,
     'BOOKI_REPORT_HOME_URL': bookiReportHomeUrl,
     'BOOKI_REPORT_LEARNING_URL': bookiReportLearningUrl,
     'BOOKI_REPORT_TENACITY_URL': bookiReportTenacityUrl,
     'BOOKI_SONG_URL': bookiSongUrl,
+    'BOOKI_SENTENCE_URL': bookiSentenceUrl,
     'BOOKI_STORY_URL': bookiStoryUrl,
+    'BOOKI_STORY_BOARD_URL': bookiStoryBoardUrl,
     'BOOKI_STROKE_URL': bookiStrokeUrl,
     'B_CONTENT_STAR_URL': bContentStarUrl,
     'CHARACTER_LIST_URL': characterListUrl,

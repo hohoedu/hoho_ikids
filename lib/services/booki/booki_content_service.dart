@@ -5,10 +5,9 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/booki/booki_home_data.dart';
-import 'package:hani_booki/_data/kidok/kidok_bookcase.data.dart';
 import 'package:hani_booki/screens/booki/booki_home/booki_home_screen.dart';
+import 'package:hani_booki/screens/booki/booki_home/booki_home_screen_eleven.dart';
 import 'package:hani_booki/services/total_star_service.dart';
-import 'package:hani_booki/utils/connectivityController.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:logger/logger.dart';
 
@@ -38,11 +37,17 @@ Future<void> bookiContentService(keyCode, schoolId, year) async {
         final List<dynamic> data = resultList['data'];
 
         bookiHomeController.setBookiHomeDataMap(data);
-        Logger().d('date = $data');
         await totalStarService(keyCode);
+        if (keyCode.substring(2, 4) == '10') {
+          Get.offUntil(
+            GetPageRoute(page: () => BookiHomeScreenEleven(keyCode: keyCode)),
+            (route) => route.isFirst,
+          );
+          return;
+        }
         Get.offUntil(
           GetPageRoute(page: () => BookiHomeScreen(keyCode: keyCode)),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       }
       // 응답 데이터가 오류일 때("9999": 오류)

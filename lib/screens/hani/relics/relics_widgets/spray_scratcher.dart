@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:hani_booki/utils/sound_manager.dart';
 
 /// 스프레이 브러쉬로 덮개 이미지를 긁어내는 위젯.
 /// 굵은 중심선 + 주변에 흩뿌린 알갱이로 지우고, [threshold]% 지우면 덮개가 서서히 사라진다.
@@ -39,6 +41,7 @@ class _SprayScratcherState extends State<SprayScratcher> {
   Set<int>? _remaining;
   int _total = 0;
   bool _done = false;
+  Timer? _still; // 손가락이 멈춰 있으면 모래 소리 끔
 
   @override
   void initState() {
@@ -49,9 +52,19 @@ class _SprayScratcherState extends State<SprayScratcher> {
 
   @override
   void dispose() {
+    _still?.cancel();
+    SoundManager.stopSand();
     _stream.removeListener(_listener);
     _repaint.dispose();
     super.dispose();
+  }
+
+  /// 움직이는 동안만 모래 소리. 150ms 동안 안 움직이면 멈춤
+  void _sand() {
+    if (_done) return;
+    SoundManager.startSand();
+    _still?.cancel();
+    _still = Timer(const Duration(milliseconds: 150), SoundManager.stopSand);
   }
 
   void _start(Offset p) {
@@ -78,16 +91,19 @@ class _SprayScratcherState extends State<SprayScratcher> {
       _dots[_rand.nextInt(3)].add(c + Offset(cos(ang), sin(ang)) * d);
     }
 
-    _updateProgress(a, b, r * 0.9);
+    // 아직 덮여 있던 곳을 긁었을 때만 모래 소리 (이미 지운 곳은 조용)
+    if (_updateProgress(a, b, r * 0.9)) _sand();
     _repaint.value++;
   }
 
-  void _updateProgress(Offset a, Offset b, double radius) {
+  /// 이번에 새로 지운 칸이 있으면 true
+  bool _updateProgress(Offset a, Offset b, double radius) {
     final size = context.size!;
     final remaining = _remaining ??= {for (var i = 0; i < _grid * _grid; i++) i};
     if (_total == 0) _total = remaining.length;
 
     final cw = size.width / _grid, ch = size.height / _grid;
+    var erased = false;
     final steps = max(1, ((b - a).distance / 4).ceil());
     for (var s = 0; s <= steps; s++) {
       final p = Offset.lerp(a, b, s / steps)!;
@@ -96,7 +112,7 @@ class _SprayScratcherState extends State<SprayScratcher> {
       for (var x = x0; x <= x1; x++) {
         for (var y = y0; y <= y1; y++) {
           final cell = Offset((x + 0.5) * cw, (y + 0.5) * ch);
-          if ((cell - p).distance <= radius) remaining.remove(y * _grid + x);
+          if ((cell - p).distance <= radius && remaining.remove(y * _grid + x)) erased = true;
         }
       }
     }
@@ -104,8 +120,12 @@ class _SprayScratcherState extends State<SprayScratcher> {
     final progress = (1 - remaining.length / _total) * 100;
     if (!_done && progress >= widget.threshold) {
       setState(() => _done = true);
+      _still?.cancel();
+      SoundManager.stopSand();
+      SoundManager.playSparkle(); // 덮개가 사라질 때 샤라라
       widget.onThreshold?.call();
     }
+    return erased;
   }
 
   @override
@@ -120,6 +140,8 @@ class _SprayScratcherState extends State<SprayScratcher> {
             behavior: HitTestBehavior.opaque,
             onPanStart: (d) => _start(d.localPosition),
             onPanUpdate: (d) => _move(d.localPosition),
+            onPanEnd: (_) => SoundManager.stopSand(),
+            onPanCancel: SoundManager.stopSand,
             child: AnimatedOpacity(
               opacity: _done ? 0 : 1,
               duration: const Duration(milliseconds: 1200),

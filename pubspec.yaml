@@ -101,6 +101,7 @@ flutter:
 
     - assets/audio/
     - assets/audio/effect/
+    - assets/audio/voice/
     - assets/audio/bgm/
 
     - assets/text/

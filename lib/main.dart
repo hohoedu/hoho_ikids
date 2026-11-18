@@ -39,7 +39,9 @@ Future<void> main() async {
   // 구형 안드로이드 인증서(Sectigo Root R46) 신뢰 설정
   await setupDioCertificates();
 
-  await setupFcm();
+  // 알림·효과음 준비는 기다리지 않음: 기다리면 그동안 파란 시스템 스플래시만 길게 보임.
+  // 로고 스플래시(2초)가 떠 있는 사이에 끝나고, FCM 토큰은 로그인할 때 처음 씀
+  setupFcm().catchError((e) => debugPrint('FCM 설정 오류: $e'));
 
   // env 값은 빌드타임에 코드로 생성되므로(Env 클래스) 런타임 로드가 필요 없습니다.
 
@@ -54,7 +56,7 @@ Future<void> main() async {
   // 배경음 셋업
   Get.put(BgmController());
   // 효과음 셋업
-  await SoundManager.setupSounds();
+  SoundManager.setupSounds();
 
 
 

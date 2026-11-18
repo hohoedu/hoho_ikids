@@ -17,8 +17,7 @@ Future<void> bookiFindDiffService(id, keyCode, year, lastTime) async {
     'keycode': keyCode,
     'yy': year
   };
-  Logger().d('id = $id');
-  Logger().d('keycode = $keyCode');
+
 
   // HTTP POST 요청
   final response = await dio.post(url, data: jsonEncode(requestData));

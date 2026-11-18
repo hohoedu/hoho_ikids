@@ -122,7 +122,7 @@ class _BookiHomeScreenState extends State<BookiHomeScreen> with WidgetsBindingOb
     String id = userData.userData!.id;
     String year = userData.userData!.year;
     final bool isSibling = userData.userData!.siblingCount == '1' ? false : true;
-    Logger().d('keyCode = ${widget.keyCode}');
+
     return Scaffold(
       key: scaffoldKey,
       extendBodyBehindAppBar: true,

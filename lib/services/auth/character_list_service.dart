@@ -19,7 +19,6 @@ Future<void> characterListService() async {
 
   try {
     final response = await dio.post(url, data: jsonEncode(requestData));
-    Logger().d(response);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> result = json.decode(response.data);

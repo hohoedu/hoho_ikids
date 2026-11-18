@@ -43,7 +43,7 @@ class NavigatorDev extends StatelessWidget {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      Get.to(() => HaniPangScreen());
+                      Get.to(() => HaniPangScreen(keyCode: 'Y'));
                     },
                     child: Container(
                       color: Colors.blueAccent,
@@ -53,7 +53,7 @@ class NavigatorDev extends StatelessWidget {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      Get.to(() => HaniRunScreen());
+                      Get.to(() => HaniRunScreen(keyCode: 'Y'));
                     },
                     child: Container(
                       color: Colors.yellowAccent,
@@ -89,7 +89,7 @@ class NavigatorDev extends StatelessWidget {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      Get.to(() => ProvisoScreen());
+                      Get.to(() => const ProvisoScreen());
                     },
                     child: Container(
                       color: Colors.greenAccent,

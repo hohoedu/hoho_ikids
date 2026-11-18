@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Android 12+ 시스템 스플래시는 로고를 작은 원 안에만 그려서 아이콘은 비워 두고,
-         Flutter SplashScreen 이 남색 배경에 로고를 크게 보여줌 -->
+    <!-- Android 12+ 시스템 스플래시는 큰 이미지를 못 넣고 아이콘(원 192dp 안)만 그림.
+         android12splash = 288dp 남색 캔버스 가운데 로고 190dp. Flutter SplashScreen 이 같은 크기로 이어 그림 -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowSplashScreenBackground">#2E3192</item>

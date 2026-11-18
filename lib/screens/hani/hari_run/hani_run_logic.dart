@@ -18,7 +18,7 @@ class HanjaQuestion {
 /// 문제를 차례로 낸다. 방금 나온 한자는 바로 다시 내지 않고,
 /// 틀린 한자는 두 문제 뒤에 다시 낸다.
 class HanjaQuiz {
-  HanjaQuiz({List<Hanja> pool = hanja8, Random? random, this.firstQuestion})
+  HanjaQuiz({List<Hanja> pool = runHanjaY, Random? random, this.firstQuestion})
       : assert(pool.length >= 4),
         _pool = pool,
         _random = random ?? Random();

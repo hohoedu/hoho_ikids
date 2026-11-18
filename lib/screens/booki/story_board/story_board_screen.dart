@@ -2,11 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/booki/booki_story_board_data.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
-
-const _path = 'assets/images/booki/story_board';
+import 'package:hani_booki/widgets/sound_button.dart';
+import 'package:hani_booki/widgets/source_image.dart';
 
 // 디자인 기준 캔버스(2000x924) 좌표. 화면 크기에 맞춰 비율로 스케일됨.
 const _designW = 2000.0;
@@ -19,40 +20,74 @@ const _pink = Color(0xFFF77FA3);
 const _dash = Color(0xFFD9B9AC);
 const _text = Color(0xFF3A3A3A);
 
-// shortcut: 제인 구달(story22) 한 문제만 하드코딩, 다른 이야기가 생기면 서버 데이터로 교체
-// 리스트 순서 = 정답 순서
-const _scenes = [
-  ('story22-1.png', '제인은 어렸을 때부터\n동물을 참 좋아했어요.'),
-  ('story22-2.png', '제인은 아프리카에서 침팬지와\n지내며 그들을 지켜봤어요.'),
-  ('story22-3.png', '침팬지가 나뭇가지를 사용해\n흰개미를 먹는 것을 발견했어요.'),
-  ('story22-4.png', '동물을 괴롭히는 사람들에게\n그들을 존중해야 한다고 말했어요.'),
-];
+/// 한 판에 내는 이야기 수 (서버는 10개를 줌)
+const _storiesPerGame = 7;
 
 class StoryBoardScreen extends StatefulWidget {
-  const StoryBoardScreen({super.key});
+  /// [stories] 를 안 주면 bookiStoryBoardService 가 받아 둔 목록을 씀
+  const StoryBoardScreen({super.key, this.stories, this.random});
+
+  final List<BookiStoryBoardData>? stories;
+  final Random? random;
 
   @override
   State<StoryBoardScreen> createState() => _StoryBoardScreenState();
 }
 
 class _StoryBoardScreenState extends State<StoryBoardScreen> {
+  late final Random _rand = widget.random ?? Random();
+  late final List<BookiStoryBoardData> _all =
+      widget.stories ?? Get.find<BookiStoryBoardDataController>().bookiStoryBoardDataList;
+
+  // 이번 판에 낼 이야기들(전체에서 랜덤 7개)과 지금 몇 번째인지
+  late List<BookiStoryBoardData> _stories;
+  int _round = 0;
+
+  List<BookiStoryScene> get _scenes => _stories[_round].scenes;
+
   // 아래 카드 배치 순서 (값 = _scenes 인덱스)
-  late List<int> _deck;
+  List<int> _deck = [];
 
   // 채워진 칸 수. 칸은 앞에서부터 순서대로만 채워짐.
   int _filled = 0;
 
+  // 이번 이야기 그림을 다 받았는지 (받기 전엔 로딩 표시)
+  bool _ready = false;
+
+  @visibleForTesting
+  int get round => _round;
+  @visibleForTesting
+  List<BookiStoryScene> get scenes => _scenes;
+
   @override
   void initState() {
     super.initState();
-    _shuffle();
+    _newGame();
   }
 
-  void _shuffle() {
-    // 1번은 예시로 미리 채워두고, 나머지만 섞어서 문제로 냄
-    _deck = List.generate(_scenes.length - 1, (i) => i + 1)..shuffle();
-    _filled = 1;
+  void _newGame() {
+    _stories = (List.of(_all)..shuffle(_rand)).take(_storiesPerGame).toList();
+    _round = 0;
+    // precacheImage 가 context 를 쓰므로 첫 프레임 뒤에 시작
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startRound());
   }
+
+  /// 이번 이야기 그림을 받은 뒤 시작하고, 다음 이야기 그림은 미리 받아 둠
+  Future<void> _startRound() async {
+    setState(() {
+      // 1번은 예시로 미리 채워두고, 나머지만 섞어서 문제로 냄
+      _deck = List.generate(_scenes.length - 1, (i) => i + 1)..shuffle(_rand);
+      _filled = 1;
+      _ready = false;
+    });
+    // 인터넷이 느려도 10초 뒤엔 시작 (못 받은 그림은 Image가 이어서 받음)
+    await _precache(_round).timeout(const Duration(seconds: 10), onTimeout: () => []);
+    if (!mounted) return;
+    setState(() => _ready = true);
+    if (_round + 1 < _stories.length) _precache(_round + 1);
+  }
+
+  Future<List<void>> _precache(int round) => precacheSources(_stories[round].scenes.map((e) => e.img), context);
 
   void _onDrop(int scene, int slot) {
     if (scene != slot) {
@@ -62,11 +97,20 @@ class _StoryBoardScreenState extends State<StoryBoardScreen> {
     SoundManager.playCorrect();
     setState(() => _filled++);
 
-    if (_filled == _scenes.length) {
+    if (_filled < _scenes.length) return;
+    SoundManager.stopVoice();
+    if (_round + 1 < _stories.length) {
+      // 완성된 이야기를 잠깐 보여 준 뒤 다음 이야기
+      Future.delayed(const Duration(milliseconds: 900), () {
+        if (!mounted) return;
+        _round++;
+        _startRound();
+      });
+    } else {
       lottieDialog(
         onReset: () {
           Get.back();
-          setState(_shuffle);
+          _newGame();
         },
         onMain: () {
           Get.back();
@@ -93,20 +137,32 @@ class _StoryBoardScreenState extends State<StoryBoardScreen> {
           child: SizedBox(
             width: _designW * s,
             height: _designH * s,
-            child: Stack(
-              children: [
-                for (int i = 0; i < _scenes.length; i++) ...[
-                  _buildSlot(i, s),
-                  if (i > 0)
-                    Positioned(
-                      left: (535 + 428 * (i - 1)) * s,
-                      top: 250 * s,
-                      child: Icon(Icons.chevron_right_rounded, size: 80 * s, color: _pink.withValues(alpha: 0.6)),
-                    ),
-                ],
-                for (int i = 0; i < _deck.length; i++) _buildCard(i, s),
-              ],
-            ),
+            child: !_ready
+                ? const Center(child: CircularProgressIndicator(color: _pink))
+                : Stack(
+                    children: [
+                      // 몇 번째 이야기인지
+                      Positioned(
+                        // 앱바 제목과 안 겹치게 1번 칸 왼쪽 빈자리
+                        left: 40 * s,
+                        top: 150 * s,
+                        child: Text(
+                          '${_round + 1} / ${_stories.length}',
+                          style: TextStyle(fontFamily: 'BMJUA', fontSize: 40 * s, color: _pink),
+                        ),
+                      ),
+                      for (int i = 0; i < _scenes.length; i++) ...[
+                        _buildSlot(i, s),
+                        if (i > 0)
+                          Positioned(
+                            left: (535 + 428 * (i - 1)) * s,
+                            top: 250 * s,
+                            child: Icon(Icons.chevron_right_rounded, size: 80 * s, color: _pink.withValues(alpha: 0.6)),
+                          ),
+                      ],
+                      for (int i = 0; i < _deck.length; i++) _buildCard(i, s),
+                    ],
+                  ),
           ),
         );
       }),
@@ -140,7 +196,7 @@ class _StoryBoardScreenState extends State<StoryBoardScreen> {
                   child: i < _filled
                       ? ClipRRect(
                           borderRadius: radius,
-                          child: Image.asset('$_path/${_scenes[i].$1}', fit: BoxFit.cover),
+                          child: sourceImage(_scenes[i].img, fit: BoxFit.cover),
                         )
                       : Padding(
                           padding: EdgeInsets.all(14 * s),
@@ -189,13 +245,34 @@ class _StoryBoardScreenState extends State<StoryBoardScreen> {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          Image.asset('$_path/${_scenes[scene].$1}', height: 268 * s, width: double.infinity, fit: BoxFit.cover),
+          Padding(
+            padding: EdgeInsets.fromLTRB(14 * s, 14 * s, 14 * s, 0),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16 * s),
+                  child: sourceImage(_scenes[scene].img, height: 220 * s, width: double.infinity, fit: BoxFit.cover),
+                ),
+                Positioned(
+                  right: 10 * s,
+                  top: 10 * s,
+                  child: SoundButton(voice: _scenes[scene].voice, size: 64 * s),
+                ),
+              ],
+            ),
+          ),
           Expanded(
-            child: Center(
-              child: Text(
-                _scenes[scene].$2,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'NANUM-B', fontSize: 28 * s, height: 1.35, color: _text),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14 * s),
+              child: Center(
+                child: Text(
+                  _scenes[scene].text,
+                  textAlign: TextAlign.center,
+                  // 폰에서도 읽히게 크고 굵게, 긴 문장(예: 갈라파고스 제도에서…)은 3줄까지
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontFamily: 'NANUM-EB', fontSize: 36 * s, height: 1.3, color: _text),
+                ),
               ),
             ),
           ),

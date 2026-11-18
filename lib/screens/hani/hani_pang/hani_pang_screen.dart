@@ -7,14 +7,17 @@ import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/screens/hani/hani_pang/hani_pang_board.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
+import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:hani_booki/widgets/score_summary.dart';
 import 'package:intl/intl.dart';
 
 /// 한자팡: 같은 한자 블록 3개 이상 맞추기. 제한 시간 동안 점수를 모은다.
 class HaniPangScreen extends StatefulWidget {
-  const HaniPangScreen({super.key, this.random});
+  const HaniPangScreen({super.key, required this.keyCode, this.random});
 
-  /// 테스트에서 보드를 고정할 때만 넘김
+  /// 첫 글자(Y·S…)로 블록 세트를 고름
+  final String keyCode;
   final Random? random;
 
   @override
@@ -40,16 +43,19 @@ class _Fx {
 class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProviderStateMixin {
   static const _dir = 'assets/images/hani/pang';
   static const rows = 5, cols = 8;
-  static const _kindsPerGame = 6; // 블록 8종 중 한 판에 쓰는 수 (적을수록 쉬움)
+  static const _kindsPerGame = 6; // 한 판에 쓰는 블록 종류 수 (적을수록 쉬움)
+  // 과정별 블록 이미지 수: block-y01~y64, block-s01~s60
+  static const _setSize = {'y': 64, 's': 60};
+  // 블록 색은 번호 순서로 8색 반복(분홍·파랑·주황·노랑·초록·보라·빨강·청록) → 색 = (번호-1) % 8
+  static const _colorCount = 8;
   static const _pointPerBlock = 100;
   static const _gameTime = Duration(seconds: 60);
-  static const _hintAfter = Duration(seconds: 5); // 이만큼 못 맞추면 힌트
+  static const _hintAfter = Duration(seconds: 3); // 이만큼 못 맞추면 힌트
 
   static const _move = Duration(milliseconds: 200);
   static const _clear = Duration(milliseconds: 220);
   static const _fall = Duration(milliseconds: 260);
 
-  // 시안(2000x924) 비율로 고정한 무대
   static const _stageAspect = 2000 / 924;
 
   late final Random _rand = widget.random ?? Random();
@@ -59,7 +65,11 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
     });
 
   late Board _board;
-  late List<int> _kinds; // 보드 색 번호 → 블록 이미지 번호(1~8)
+  // shortcut: G 등 세트가 없는 과정은 y 세트 사용, 과정별 세트가 정해지면 _setSize에 추가
+  late final String _course = _setSize.containsKey(widget.keyCode.substring(0, 1).toLowerCase())
+      ? widget.keyCode.substring(0, 1).toLowerCase()
+      : 'y';
+  late List<int> _kinds; // 보드 색 번호 → 블록 이미지 번호(1~세트 크기)
   late int _bonusColor;
   final _view = <int, _Cell>{};
   final _clearing = <int>{};
@@ -74,11 +84,38 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   (Pos, Pos)? _hint; // 깜빡이는 힌트 두 칸
   Pos? _dragFrom;
   Offset _dragOrigin = Offset.zero;
+  bool _started = false; // 하는 방법 안내 → 1, 2, 3, 시작! 뒤에 시간이 흐르고 블록을 움직일 수 있음
+  bool _counting = false; // 시작하기 누른 뒤(안내 닫힘)
+  String? _countdown;
 
   @override
   void initState() {
     super.initState();
+    Get.find<BgmController>().playBgm('hani_pang'); // 나가면 하니 홈이 didPopNext에서 하니 BGM으로 돌림
     _newGame();
+  }
+
+  /// 시작하기: 안내를 닫고 카운트다운
+  void _start() {
+    if (_counting) return;
+    _counting = true;
+    _countdownThenRun();
+  }
+
+  /// 1, 2, 3, 시작! 을 보여 준 뒤 시간 시작(처음·다시하기 공통)
+  Future<void> _countdownThenRun() async {
+    _started = false;
+    for (final label in const ['1', '2', '3', '시작!']) {
+      setState(() => _countdown = label);
+      if (label == '시작!') {
+        _started = true;
+        _timer.forward(from: 0);
+        _resetHint();
+      }
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (!mounted) return;
+    }
+    setState(() => _countdown = null);
   }
 
   @override
@@ -90,20 +127,27 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
 
   @visibleForTesting
   Board get board => _board;
+  @visibleForTesting
+  double get timeValue => _timer.value;
 
   void _newGame() {
-    _kinds = ([for (var i = 1; i <= 8; i++) i]..shuffle(_rand)).take(_kindsPerGame).toList();
+    // 한 판의 블록은 색이 모두 달라야 함(다른 한자인데 같은 색이면 헷갈림): 색 6개를 고르고 색마다 블록 하나
+    final colors = ([for (var c = 0; c < _colorCount; c++) c]..shuffle(_rand)).take(_kindsPerGame);
+    _kinds = [
+      for (final c in colors)
+        ([for (var n = c + 1; n <= _setSize[_course]!; n += _colorCount) n]..shuffle(_rand)).first,
+    ];
     _bonusColor = _rand.nextInt(_kindsPerGame);
     _board = Board(rows: rows, cols: cols, colorCount: _kindsPerGame, random: _rand);
     _syncView();
     _score = 0;
     _over = false;
     _selected = null;
-    _timer.forward(from: 0);
-    _resetHint();
+    _timer.value = 0; // 시간 막대 가득, 카운트다운 끝나면 흐름
+    _hint = null;
+    _hintTimer?.cancel();
   }
 
-  /// 맞출 때마다 다시 세고, [_hintAfter] 동안 못 맞추면 바꿀 두 칸을 깜빡여 줌
   void _resetHint() {
     _hint = null;
     _hintTimer?.cancel();
@@ -119,11 +163,11 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
       ..addAll({for (final (p, t) in _board.tiles) t.id: _Cell(t, p.row, p.col)});
   }
 
-  String _blockAsset(int color) => '$_dir/block-y0${_kinds[color]}.png';
+  String _blockAsset(int color) => '$_dir/block-$_course${_kinds[color].toString().padLeft(2, '0')}.png';
 
   Future<void> _wait(Duration d) => Future.delayed(d);
 
-  void _maybeEnd() {
+  Future<void> _maybeEnd() async {
     if (_busy || !_timer.isCompleted || _over) return;
     _hintTimer?.cancel();
     setState(() {
@@ -131,10 +175,13 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
       _selected = null;
       _hint = null;
     });
+    await showScoreSummary(score: _score);
+    if (!mounted) return;
     lottieDialog(
       onReset: () {
         Get.back();
         setState(_newGame);
+        _countdownThenRun();
       },
       onMain: () {
         Get.back();
@@ -146,7 +193,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   // ───────── 입력 ─────────
 
   void _tap(Pos p) {
-    if (_busy || _over) return;
+    if (!_started || _busy || _over) return;
     final sel = _selected;
     if (sel != null && sel.isAdjacent(p)) {
       _trySwap(sel, p);
@@ -177,7 +224,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   }
 
   Future<void> _trySwap(Pos a, Pos b) async {
-    if (_busy || _over || !_board.inBounds(b)) return;
+    if (!_started || _busy || _over || !_board.inBounds(b)) return;
     _busy = true;
     final result = _board.swap(a, b);
     _hiddenSpecial.addAll([for (final s in result.steps) ...s.created.map((c) => c.tile.id)]);
@@ -194,7 +241,6 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
       setState(() => _swapView(a, b)); // 맞는 줄이 없으면 제자리로
       await _wait(_move);
     } else {
-      SoundManager.playCorrect();
       for (final step in result.steps) {
         await _playStep(step);
         if (!mounted) return;
@@ -211,6 +257,8 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   }
 
   Future<void> _playStep(CascadeStep step) async {
+    // 처음 터질 땐 뽁, 이어서 연쇄로 터지면 콤보 소리가 단계마다 높아짐
+    step.combo == 0 ? SoundManager.playPop() : SoundManager.playCombo(step.combo);
     // 1) 터짐 + 특수 효과
     setState(() {
       for (final t in step.triggered) {
@@ -274,7 +322,110 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
               },
             ),
           ),
+          if (!_counting) Positioned.fill(child: _buildGuide(MediaQuery.sizeOf(context).height)),
+          if (_countdown != null) Positioned.fill(child: _buildCountdown(MediaQuery.sizeOf(context).height)),
         ],
+      ),
+    );
+  }
+
+  /// 시작 전 하는 방법 텍스트 안내
+  Widget _buildGuide(double h) {
+    final icon = h * 0.1;
+    Widget block(int color, [Special special = Special.none]) => Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(_blockAsset(color)),
+            if (special != Special.none) CustomPaint(painter: _SpecialPainter(special)),
+          ],
+        );
+    Widget row(Widget image, String text) => Padding(
+          padding: EdgeInsets.symmetric(vertical: h * 0.012),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: icon * 1.4, height: icon, child: image),
+              SizedBox(width: h * 0.03),
+              Text(text, style: _text(h * 0.045)),
+            ],
+          ),
+        );
+    return Container(
+      color: const Color(0x99000000),
+      alignment: Alignment.center,
+      padding: EdgeInsets.all(h * 0.05),
+      // 아이패드처럼 세로가 긴 화면에선 줄여서 맞춤
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: h * 0.07, vertical: h * 0.04),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF3E0),
+            borderRadius: BorderRadius.circular(h * 0.06),
+            border: Border.all(color: _green, width: h * 0.01),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('하니팡 하는 방법', style: _text(h * 0.065)),
+              SizedBox(height: h * 0.02),
+              // 방법 줄들만 왼쪽 정렬, 묶음 자체는 가운데
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  row(
+                    Row(children: [for (var i = 0; i < 3; i++) Expanded(child: block(0))]),
+                    '옆 블록과 자리를 바꿔 같은 블록 3개를 한 줄로 맞춰요',
+                  ),
+                  row(Icon(Icons.swipe_rounded, size: icon, color: _brown), '블록을 밀거나, 두 블록을 차례로 눌러서 바꿔요'),
+                  row(
+                    Row(children: [Expanded(child: block(1, Special.laserH)), Expanded(child: block(2, Special.blackHole))]),
+                    '4개를 맞추면 레이저, 5개를 맞추면 블랙홀 블록이 생겨요',
+                  ),
+                  row(Image.asset(_blockAsset(_bonusColor)), '보너스 블럭을 터뜨리면 점수가 2배예요'),
+                  row(Icon(Icons.timer_rounded, size: icon, color: _brown), '60초 동안 점수를 최대한 모아요'),
+                ],
+              ),
+              SizedBox(height: h * 0.03),
+              GestureDetector(
+                onTap: _start,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: h * 0.1, vertical: h * 0.02),
+                  decoration: BoxDecoration(color: _green, borderRadius: BorderRadius.circular(h)),
+                  child: Text('시작하기', style: _text(h * 0.055).copyWith(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 1, 2, 3, 시작! 숫자마다 크게 나타났다 작아짐
+  Widget _buildCountdown(double h) {
+    return IgnorePointer(
+      child: Center(
+        child: TweenAnimationBuilder<double>(
+          key: ValueKey(_countdown),
+          tween: Tween(begin: 1.6, end: 1),
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutBack,
+          builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
+          child: Text(
+            _countdown!,
+            style: _text(h * 0.22).copyWith(
+              color: const Color(0xFFFF8A1F),
+              shadows: const [
+                Shadow(color: Colors.white, blurRadius: 2, offset: Offset(3, 3)),
+                Shadow(color: Colors.white, blurRadius: 2, offset: Offset(-3, -3)),
+                Shadow(color: Colors.white, blurRadius: 2, offset: Offset(3, -3)),
+                Shadow(color: Colors.white, blurRadius: 2, offset: Offset(-3, 3)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

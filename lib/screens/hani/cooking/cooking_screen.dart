@@ -53,6 +53,8 @@ class _CookingScreenState extends State<CookingScreen> {
       _hovering = false;
       if (card.correct) {
         SoundManager.playCorrect();
+        // 정답 음성 = 카드 이름 (cooking_card_iceberg.png → assets/audio/voice/cooking_card_iceberg.mp3)
+        SoundManager.playVoice('assets/audio/voice/${card.asset.split('/').last.replaceAll('.png', '.mp3')}');
         _found.add(card.asset);
       } else {
         SoundManager.playNo();

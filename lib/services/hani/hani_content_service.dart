@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_core/http.dart';
 import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/hani/hani_home_data.dart';
+import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_eleven.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_su.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen_young.dart';
 import 'package:hani_booki/screens/hani/hani_home/hani_home_screen.dart';
@@ -46,7 +47,7 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
             );
             return;
           }
-          if (keyCode.substring(0, 1) == 'G') {
+          if (keyCode.substring(0, 1) == 'G') { 
             Get.offUntil(
               GetPageRoute(page: () => HaniHomeScreenSu(keyCode: keyCode)),
               (route) => route.isFirst,
@@ -54,7 +55,13 @@ Future<void> haniContentService(keyCode, schoolId, year) async {
             return;
           }
         }
-
+        if (keyCode.substring(2, 4) == '10') {
+          Get.offUntil(
+            GetPageRoute(page: () => HaniHomeScreenEleven(keyCode: keyCode)),
+            (route) => route.isFirst,
+          );
+          return;
+        }
         Get.offUntil(
           GetPageRoute(page: () => HaniHomeScreen(keyCode: keyCode)),
           (route) => route.isFirst,

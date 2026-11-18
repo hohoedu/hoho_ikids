@@ -21,6 +21,10 @@ class BgmController extends GetxController with WidgetsBindingObserver {
     'kium': 'assets/audio/bgm/booki_k_main.mp3',
     'mannam': 'assets/audio/bgm/booki_d_main.mp3',
     'kidok': 'assets/audio/bgm/kidok.mp3',
+    // 직접 합성한 곡(라이선스 문제 없음), 셔플 139BPM 90초 반복
+    'hani_pang': 'assets/audio/bgm/hani_pang.m4a',
+    // Pixabay Music (the_mountain kids loop, 출처 표시 불필요)
+    'hani_run': 'assets/audio/bgm/hani_run.m4a',
   };
 
   String _currentTrack = '';

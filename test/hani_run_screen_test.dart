@@ -12,7 +12,7 @@ import 'relics_layout_test.dart' show devices;
 
 const _laneY = [0.4755, 0.6955];
 
-Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {bool obstacles = false}) async {
+Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {bool obstacles = false, String keyCode = 'Y011'}) async {
   tester.view
     ..physicalSize = size
     ..devicePixelRatio = 1
@@ -20,8 +20,21 @@ Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {bool obstacl
   addTearDown(tester.view.reset);
   await tester.pumpWidget(ScreenUtilInit(
     designSize: const Size(360, 722), // main.dart 와 같게
-    builder: (_, __) => GetMaterialApp(home: HaniRunScreen(random: Random(5), obstacles: obstacles)),
+    builder: (_, __) => GetMaterialApp(home: HaniRunScreen(keyCode: keyCode, random: Random(5), obstacles: obstacles)),
   ));
+  // 하는 방법 안내가 떠 있는 동안은 문제가 안 나옴
+  await tester.pump(const Duration(seconds: 2));
+  expect(_state(tester).question, isNull);
+  await tester.tap(find.text('시작하기'));
+  await tester.pump();
+  expect(find.text('시작하기'), findsNothing);
+  // 1, 2, 3 동안은 아직 안 달림, 시작! 에서 출발
+  for (final label in ['1', '2', '3']) {
+    expect(find.text(label), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 800));
+  }
+  expect(find.text('시작!'), findsOneWidget);
+  expect(_state(tester).question, isNull);
 }
 
 Future<void> _run(WidgetTester tester, Duration total, {bool Function()? until}) async {
@@ -35,7 +48,7 @@ dynamic _state(WidgetTester tester) => tester.state(find.byType(HaniRunScreen));
 
 /// 문제가 나올 때까지 기다렸다가, 정답(또는 오답) 길을 탭하고 채점까지 기다림
 Future<HanjaQuestion> _answer(WidgetTester tester, Size size, {required bool correct}) async {
-  await _run(tester, const Duration(seconds: 3), until: () => _state(tester).question != null);
+  await _run(tester, const Duration(seconds: 6), until: () => _state(tester).question != null); // 오답이면 3초 멈춤 뒤에 다음 문제
   final HanjaQuestion q = _state(tester).question;
   final targetLane = q.targetSide == Side.left ? 0 : 1;
   final lane = correct ? targetLane : 1 - targetLane;
@@ -67,7 +80,7 @@ void main() {
       }
       expect(bubble.overlaps(hud), isFalse, reason: '말풍선과 점수판 겹침');
       expect(bubble.left, greaterThan(pad.left + 56), reason: '뒤로가기 버튼과 안 겹침');
-      expect(find.text(_state(tester).question.target.reading), findsOneWidget);
+      expect(find.text(_state(tester).question.target.text), findsOneWidget);
 
       // ignore: avoid_print
       print(
@@ -94,6 +107,12 @@ void main() {
     await _answer(tester, size, correct: false);
     expect(run.isOver, isTrue);
     await _run(tester, const Duration(seconds: 1));
+    expect(find.text('최종 점수'), findsNothing); // 부딪힘 모션 3초 먼저
+    await _run(tester, const Duration(seconds: 3));
+    expect(find.text('최종 점수'), findsOneWidget); // 점수·별 먼저
+    expect(find.textContaining('스타', findRichText: true), findsNothing);
+    await _run(tester, const Duration(seconds: 5));
+    expect(find.text('최종 점수'), findsNothing);
     expect(find.textContaining('스타', findRichText: true), findsOneWidget); // 부키와 같은 결과 다이얼로그
     expect(tester.takeException(), isNull);
 
@@ -102,6 +121,14 @@ void main() {
     expect(find.textContaining('스타', findRichText: true), findsNothing);
     expect(_state(tester).run.hearts, 3);
     expect(_state(tester).run.score, 0);
+    // 다시하기도 안내 없이 1, 2, 3, 시작! 뒤에 출발
+    expect(find.text('시작하기'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+    await _run(tester, const Duration(milliseconds: 2000));
+    expect(_state(tester).question, isNull);
+    expect(find.text('시작!'), findsOneWidget);
+    await _run(tester, const Duration(seconds: 3), until: () => _state(tester).question != null);
+    expect(_state(tester).question, isNotNull);
   });
 
   testWidgets('장애물이 나오고, 계속 달려도 에러가 없음', (tester) async {
@@ -121,6 +148,7 @@ void main() {
       }
       sawObstacle |= obstacle.evaluate().isNotEmpty;
     }
+    await tester.pump(const Duration(seconds: 9)); // 장애물을 안 피해서 끝났으면 점수·결과 다이얼로그 타이머 정리
     expect(tester.takeException(), isNull);
     expect(sawObstacle, isTrue);
   });

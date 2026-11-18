@@ -230,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   void _checkCharacter() {
     final characterController = Get.find<CharacterDataController>();
-    Logger().d(characterController.myCharacter);
 
     if (characterController.myCharacter.value == '') {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -278,244 +277,244 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         type: _currentIndex == 0 ? 'hani' : 'booki',
         isSibling: isSibling,
       ),
-      body: NavigatorDev(),
-      // body: Center(
-      //   child: Container(
-      //     width: Platform.isIOS && screenWidth <= 1000 ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
-      //     decoration: BoxDecoration(
-      //       color: _currentIndex == 1 ? bookiColor : haniColor,
-      //     ),
-      //     child: Row(
-      //       children: [
-      //         Expanded(
-      //           flex: 2,
-      //           child: Stack(
-      //             children: [
-      //               Column(
-      //                 mainAxisAlignment: MainAxisAlignment.center,
-      //                 crossAxisAlignment: CrossAxisAlignment.start,
-      //                 children: [
-      //                   Spacer(
-      //                     flex: 1,
-      //                   ),
-      //                   Visibility(
-      //                     visible: isHaniExist,
-      //                     child: GestureDetector(
-      //                       onTap: () async {
-      //                         setState(() {
-      //                           _currentIndex = 0;
-      //                         });
-      //                         carouselController.jumpToPage(0);
-      //                         await _checkAndShowDialog();
-      //                       },
-      //                       child: Padding(
-      //                         padding: const EdgeInsets.symmetric(vertical: 4.0),
-      //                         child: LayoutBuilder(
-      //                           builder: (context, constraints) {
-      //                             return Stack(
-      //                               clipBehavior: Clip.none,
-      //                               alignment: Alignment.centerLeft,
-      //                               children: [
-      //                                 AnimatedContainer(
-      //                                   duration: Duration(milliseconds: 500),
-      //                                   curve: Curves.easeInOut,
-      //                                   width: _currentIndex == 0 ? constraints.maxWidth : 0,
-      //                                   decoration: BoxDecoration(
-      //                                     color: mBackWhite,
-      //                                     borderRadius: BorderRadius.horizontal(
-      //                                       right: Radius.circular(50),
-      //                                     ),
-      //                                     boxShadow: [
-      //                                       BoxShadow(
-      //                                         color: Colors.black.withOpacity(0.2),
-      //                                         offset: Offset(2, 2),
-      //                                         blurRadius: 4,
-      //                                         spreadRadius: 1,
-      //                                       ),
-      //                                     ],
-      //                                   ),
-      //                                   child: SizedBox(
-      //                                     height: constraints.maxWidth * 0.3,
-      //                                   ),
-      //                                 ),
-      //                                 Center(
-      //                                   key: logoKey,
-      //                                   child: Container(
-      //                                     color: Colors.transparent,
-      //                                     child: SizedBox(
-      //                                       height: constraints.maxWidth * 0.15,
-      //                                       child: Image.asset(
-      //                                         _currentIndex == 0 ? 'assets/images/hani/hani_logo_co.png' : 'assets/images/hani/hani_logo_co.png',
-      //                                       ),
-      //                                     ),
-      //                                   ),
-      //                                 ),
-      //                               ],
-      //                             );
-      //                           },
-      //                         ),
-      //                       ),
-      //                     ),
-      //                   ),
-      //                   Visibility(
-      //                     visible: isBookiExist,
-      //                     child: GestureDetector(
-      //                       onTap: () async {
-      //                         setState(() {
-      //                           _currentIndex = 1;
-      //                         });
-      //                         carouselController.jumpToPage(0);
-      //                         await _checkAndShowDialog();
-      //                       },
-      //                       child: Padding(
-      //                         padding: const EdgeInsets.symmetric(vertical: 4.0),
-      //                         child: LayoutBuilder(
-      //                           builder: (context, constraints) {
-      //                             return Stack(
-      //                               clipBehavior: Clip.none,
-      //                               alignment: Alignment.centerLeft,
-      //                               children: [
-      //                                 AnimatedContainer(
-      //                                   duration: Duration(milliseconds: 500),
-      //                                   curve: Curves.easeInOut,
-      //                                   width: _currentIndex == 1 ? constraints.maxWidth : 0,
-      //                                   decoration: BoxDecoration(
-      //                                     color: mBackWhite,
-      //                                     borderRadius: BorderRadius.horizontal(
-      //                                       right: Radius.circular(50),
-      //                                     ),
-      //                                     boxShadow: [
-      //                                       BoxShadow(
-      //                                         color: Colors.black.withOpacity(0.2),
-      //                                         offset: Offset(2, 2),
-      //                                         blurRadius: 4,
-      //                                         spreadRadius: 1,
-      //                                       ),
-      //                                     ],
-      //                                   ),
-      //                                   child: SizedBox(
-      //                                     height: constraints.maxWidth * 0.3,
-      //                                   ),
-      //                                 ),
-      //                                 Center(
-      //                                   child: Container(
-      //                                     height: constraints.maxWidth * 0.15,
-      //                                     alignment: Alignment.center,
-      //                                     child: Image.asset(
-      //                                       _currentIndex == 1 ? 'assets/images/booki/booki_logo_co.png' : 'assets/images/booki/booki_logo_co.png',
-      //                                       fit: BoxFit.contain,
-      //                                     ),
-      //                                   ),
-      //                                 ),
-      //                               ],
-      //                             );
-      //                           },
-      //                         ),
-      //                       ),
-      //                     ),
-      //                   ),
-      //                   Expanded(
-      //                     flex: 1,
-      //                     child: GestureDetector(
-      //                       onTap: () async {
-      //                         if (keyCode.isEmpty) {
-      //                           oneButtonDialog(
-      //                             title: '학습기록',
-      //                             content: '확인 가능한 학습기록이 없습니다.',
-      //                             onTap: () {
-      //                               Get.back();
-      //                             },
-      //                             buttonText: '확인',
-      //                           );
-      //                         }
-      //                         await getRecordList(keyCode, _currentIndex == 0 ? 'hani' : 'booki');
-      //                         await contentStarService(keyCode, _currentIndex == 0 ? 'hani' : 'booki');
-      //                         Get.to(() => RecordScreen(
-      //                               keyCode: keyCode,
-      //                               type: _currentIndex == 0 ? 'hani' : 'booki',
-      //                             ));
-      //                       },
-      //                       child: Center(
-      //                         child: SizedBox(
-      //                             height: screenHeight * 0.25,
-      //                             child: Image.asset(_currentIndex == 1 ? 'assets/images/icons/main_report2.png' : 'assets/images/icons/main_report1.png')),
-      //                       ),
-      //                     ),
-      //                   )
-      //                 ],
-      //               ),
-      //             ],
-      //           ),
-      //         ),
-      //         Expanded(
-      //           flex: 3,
-      //           child: Stack(
-      //             children: [
-      //               Center(
-      //                 child: Obx(() {
-      //                   final characterController = Get.find<CharacterDataController>();
-      //                   final asset = characterLottieAsset(characterController.myCharacter.value);
-      //                   return Stack(
-      //                     children: [
-      //                       if (asset.isEmpty)
-      //                         Lottie.asset(
-      //                           _currentIndex == 1 ? 'assets/lottie/booki_default.json' : 'assets/lottie/hani_default.json',
-      //                         ),
-      //                       if (asset.isNotEmpty)
-      //                         Transform.scale(
-      //                           scale: 1.3,
-      //                           child: Lottie.asset(asset),
-      //                         ),
-      //                     ],
-      //                   );
-      //                 }),
-      //               ),
-      //               Positioned(
-      //                 right: 0,
-      //                 bottom: 40,
-      //                 child: AnimatedBuilder(
-      //                   animation: _floatAnimation,
-      //                   builder: (context, child) {
-      //                     return Transform.translate(
-      //                       offset: Offset(0, _floatAnimation.value),
-      //                       child: child,
-      //                     );
-      //                   },
-      //                   child: Visibility(
-      //                     visible: userDataController.userData!.appRankingView == 'Y',
-      //                     child: GestureDetector(
-      //                       onTap: () async {
-      //                         final String month = DateTime.now().month.toString().padLeft(2, '0');
-      //
-      //                         if (!Get.isRegistered<RankDataController>()) {
-      //                           Get.put(RankDataController());
-      //                         }
-      //                         await rankService(month);
-      //                         Get.to(() => RankScreen(hosu: month));
-      //                       },
-      //                       child: Image.asset(
-      //                         'assets/images/rank/rank.png',
-      //                         scale: screenWidth > 1000 ? 7 : 10,
-      //                       ),
-      //                     ),
-      //                   ),
-      //                 ),
-      //               )
-      //             ],
-      //           ),
-      //         ),
-      //         Expanded(
-      //           flex: 5,
-      //           child: HomeCarouselSlider(
-      //             key: carouselKey,
-      //             currentIndex: _currentIndex,
-      //             carouselController: carouselController,
-      //           ),
-      //         )
-      //       ],
-      //     ),
-      //   ),
-      // ),
+      // body: NavigatorDev(),
+      body: Center(
+        child: Container(
+          width: Platform.isIOS && screenWidth <= 1000 ? MediaQuery.of(context).size.width * 0.9 : double.infinity,
+          decoration: BoxDecoration(
+            color: _currentIndex == 1 ? bookiColor : haniColor,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Stack(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Spacer(
+                          flex: 1,
+                        ),
+                        Visibility(
+                          visible: isHaniExist,
+                          child: GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                _currentIndex = 0;
+                              });
+                              carouselController.jumpToPage(0);
+                              await _checkAndShowDialog();
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return Stack(
+                                    clipBehavior: Clip.none,
+                                    alignment: Alignment.centerLeft,
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: Duration(milliseconds: 500),
+                                        curve: Curves.easeInOut,
+                                        width: _currentIndex == 0 ? constraints.maxWidth : 0,
+                                        decoration: BoxDecoration(
+                                          color: mBackWhite,
+                                          borderRadius: BorderRadius.horizontal(
+                                            right: Radius.circular(50),
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.2),
+                                              offset: Offset(2, 2),
+                                              blurRadius: 4,
+                                              spreadRadius: 1,
+                                            ),
+                                          ],
+                                        ),
+                                        child: SizedBox(
+                                          height: constraints.maxWidth * 0.3,
+                                        ),
+                                      ),
+                                      Center(
+                                        key: logoKey,
+                                        child: Container(
+                                          color: Colors.transparent,
+                                          child: SizedBox(
+                                            height: constraints.maxWidth * 0.15,
+                                            child: Image.asset(
+                                              _currentIndex == 0 ? 'assets/images/hani/hani_logo_co.png' : 'assets/images/hani/hani_logo_co.png',
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: isBookiExist,
+                          child: GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                _currentIndex = 1;
+                              });
+                              carouselController.jumpToPage(0);
+                              await _checkAndShowDialog();
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return Stack(
+                                    clipBehavior: Clip.none,
+                                    alignment: Alignment.centerLeft,
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: Duration(milliseconds: 500),
+                                        curve: Curves.easeInOut,
+                                        width: _currentIndex == 1 ? constraints.maxWidth : 0,
+                                        decoration: BoxDecoration(
+                                          color: mBackWhite,
+                                          borderRadius: BorderRadius.horizontal(
+                                            right: Radius.circular(50),
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.2),
+                                              offset: Offset(2, 2),
+                                              blurRadius: 4,
+                                              spreadRadius: 1,
+                                            ),
+                                          ],
+                                        ),
+                                        child: SizedBox(
+                                          height: constraints.maxWidth * 0.3,
+                                        ),
+                                      ),
+                                      Center(
+                                        child: Container(
+                                          height: constraints.maxWidth * 0.15,
+                                          alignment: Alignment.center,
+                                          child: Image.asset(
+                                            _currentIndex == 1 ? 'assets/images/booki/booki_logo_co.png' : 'assets/images/booki/booki_logo_co.png',
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: GestureDetector(
+                            onTap: () async {
+                              if (keyCode.isEmpty) {
+                                oneButtonDialog(
+                                  title: '학습기록',
+                                  content: '확인 가능한 학습기록이 없습니다.',
+                                  onTap: () {
+                                    Get.back();
+                                  },
+                                  buttonText: '확인',
+                                );
+                              }
+                              await getRecordList(keyCode, _currentIndex == 0 ? 'hani' : 'booki');
+                              await contentStarService(keyCode, _currentIndex == 0 ? 'hani' : 'booki');
+                              Get.to(() => RecordScreen(
+                                    keyCode: keyCode,
+                                    type: _currentIndex == 0 ? 'hani' : 'booki',
+                                  ));
+                            },
+                            child: Center(
+                              child: SizedBox(
+                                  height: screenHeight * 0.25,
+                                  child: Image.asset(_currentIndex == 1 ? 'assets/images/icons/main_report2.png' : 'assets/images/icons/main_report1.png')),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Obx(() {
+                        final characterController = Get.find<CharacterDataController>();
+                        final asset = characterLottieAsset(characterController.myCharacter.value);
+                        return Stack(
+                          children: [
+                            if (asset.isEmpty)
+                              Lottie.asset(
+                                _currentIndex == 1 ? 'assets/lottie/booki_default.json' : 'assets/lottie/hani_default.json',
+                              ),
+                            if (asset.isNotEmpty)
+                              Transform.scale(
+                                scale: 1.3,
+                                child: Lottie.asset(asset),
+                              ),
+                          ],
+                        );
+                      }),
+                    ),
+                    Positioned(
+                      right: 0,
+                      bottom: 40,
+                      child: AnimatedBuilder(
+                        animation: _floatAnimation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, _floatAnimation.value),
+                            child: child,
+                          );
+                        },
+                        child: Visibility(
+                          visible: userDataController.userData!.appRankingView == 'Y',
+                          child: GestureDetector(
+                            onTap: () async {
+                              final String month = DateTime.now().month.toString().padLeft(2, '0');
+
+                              if (!Get.isRegistered<RankDataController>()) {
+                                Get.put(RankDataController());
+                              }
+                              await rankService(month);
+                              Get.to(() => RankScreen(hosu: month));
+                            },
+                            child: Image.asset(
+                              'assets/images/rank/rank.png',
+                              scale: screenWidth > 1000 ? 7 : 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 5,
+                child: HomeCarouselSlider(
+                  key: carouselKey,
+                  currentIndex: _currentIndex,
+                  carouselController: carouselController,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

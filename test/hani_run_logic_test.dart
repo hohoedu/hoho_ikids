@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -5,15 +6,25 @@ import 'package:hani_booki/screens/hani/hari_run/hani_run_data.dart';
 import 'package:hani_booki/screens/hani/hari_run/hani_run_logic.dart';
 
 void main() {
-  test('8급 한자 50자가 겹치지 않는다', () {
-    expect(hanja8, hasLength(50));
-    expect(hanja8.map((h) => h.char).toSet(), hasLength(50));
-    expect(hanja8.first.reading, '불 화');
+  test('과정별 동전 목록: 번호·훈음이 안 겹치고, 동전 이미지가 모두 있음', () {
+    for (final (list, prefix, count) in [(runHanjaY, 'y', 64), (runHanjaS, 's', 60)]) {
+      expect(list, hasLength(count));
+      expect(list.map((h) => h.no).toSet(), hasLength(count));
+      expect(list.map((h) => h.text).toSet(), hasLength(count));
+      for (var i = 0; i < count; i++) {
+        expect(list[i].no, '$prefix${(i + 1).toString().padLeft(2, '0')}');
+        expect(File('assets/images/hani/run/coin-${list[i].no}.png').existsSync(), isTrue, reason: list[i].no);
+      }
+    }
+    expect(runHanjaY.first.text, '달 월');
+    expect(runHanjaFor('S011'), same(runHanjaS));
+    expect(runHanjaFor('Y011'), same(runHanjaY));
+    expect(runHanjaFor('G011'), same(runHanjaY)); // G는 세트가 없어 y
   });
 
   group('HanjaQuiz', () {
     test('첫 문제를 고정할 수 있다', () {
-      final first = HanjaQuestion(hanja8[0], hanja8[1], Side.left);
+      final first = HanjaQuestion(runHanjaY[0], runHanjaY[1], Side.left);
       final quiz = HanjaQuiz(firstQuestion: first, random: Random(1));
       expect(quiz.next(), same(first));
       expect(quiz.next(), isNot(same(first)));
@@ -56,7 +67,7 @@ void main() {
       expect(run.onCorrect(), 10);
       final second = run.onCorrect();
       expect(second, inInclusiveRange(10, 11));
-      run.onMistake(hanja8[0]);
+      run.onMistake(runHanjaY[0]);
       expect(run.streak, 0);
       expect(run.onCorrect(), greaterThanOrEqualTo(second));
       for (var i = 0; i < 30; i++) {
@@ -76,15 +87,15 @@ void main() {
 
     test('하트 3개를 잃으면 끝나고, 틀린 한자는 한 번씩만 기록된다', () {
       final run = HanjaRun();
-      run.onMistake(hanja8[0]);
-      run.onMistake(hanja8[0]);
+      run.onMistake(runHanjaY[0]);
+      run.onMistake(runHanjaY[0]);
       expect(run.isOver, isFalse);
-      run.onMistake(hanja8[1]);
+      run.onMistake(runHanjaY[1]);
       expect(run.isOver, isTrue);
       expect(run.hearts, 0);
-      run.onMistake(hanja8[2]);
+      run.onMistake(runHanjaY[2]);
       expect(run.hearts, 0);
-      expect(run.mistakes, [hanja8[0], hanja8[1]]);
+      expect(run.mistakes, [runHanjaY[0], runHanjaY[1]]);
     });
 
     test('장애물에 부딪히면 하트만 잃고 복습 목록엔 안 들어간다', () {

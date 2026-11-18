@@ -44,6 +44,8 @@ class _RelicsScreenState extends State<RelicsScreen> {
       return;
     }
     SoundManager.playCorrect();
+    // shortcut: 샘플 문제 하나라 음성도 하나, 서버 데이터 붙일 때 문제별 음성으로 교체
+    SoundManager.playVoice('assets/audio/voice/relics_correct.mp3');
     setState(() => _solved = true);
     Future.delayed(const Duration(milliseconds: 800), () {
       if (!mounted) return;
