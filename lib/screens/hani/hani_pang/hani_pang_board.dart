@@ -1,7 +1,7 @@
 import 'dart:math';
 
 /// 특수 블록 종류.
-enum Special { none, laserH, laserV, blackHole }
+enum Special { none, arrowH, arrowV, firework }
 
 /// 보드 위의 블록 하나. [id]는 화면 컴포넌트와 연결할 때 쓰는 고유 번호다.
 class Tile {
@@ -124,10 +124,10 @@ class _Group {
   late final int color;
 
   Special get specialType {
-    if (cells.length >= 5) return Special.blackHole;
+    if (cells.length >= 5) return Special.firework;
     for (final run in runs) {
       if (run.cells.length == 4) {
-        return run.horizontal ? Special.laserH : Special.laserV;
+        return run.horizontal ? Special.arrowH : Special.arrowV;
       }
     }
     return Special.none;
@@ -343,15 +343,15 @@ class Board {
 
   Iterable<Pos> _blastArea(Pos p, Special type) sync* {
     switch (type) {
-      case Special.laserH:
+      case Special.arrowH:
         for (var c = 0; c < cols; c++) {
           yield Pos(p.row, c);
         }
-      case Special.laserV:
+      case Special.arrowV:
         for (var r = 0; r < rows; r++) {
           yield Pos(r, p.col);
         }
-      case Special.blackHole:
+      case Special.firework:
         for (var r = p.row - 1; r <= p.row + 1; r++) {
           for (var c = p.col - 1; c <= p.col + 1; c++) {
             final q = Pos(r, c);

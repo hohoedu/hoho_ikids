@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:hani_booki/_data/booki/booki_story_board_data.dart';
 import 'package:hani_booki/screens/booki/story_board/story_board_screen.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
+import 'package:hani_booki/utils/text_format.dart';
 
 // 서버 응답 모양 그대로, 그림만 앱 에셋으로 (테스트에선 네트워크를 못 씀)
 List<BookiStoryBoardData> _stories(int count) => [
@@ -35,7 +36,7 @@ Future<void> _settle(WidgetTester tester) async {
 Future<void> _solveRound(WidgetTester tester) async {
   final List<BookiStoryScene> scenes = _state(tester).scenes;
   for (var i = 1; i < scenes.length; i++) {
-    final card = tester.getCenter(find.text(scenes[i].text));
+    final card = tester.getCenter(find.text(keepWords(scenes[i].text)));
     final slot = tester.getCenter(find.byType(DragTarget<int>).at(i));
     final g = await tester.startGesture(card);
     await tester.pump(const Duration(milliseconds: 50));
@@ -81,6 +82,13 @@ void main() {
     await _settle(tester);
     expect(_state(tester).round, 0);
     expect(find.text('1 / 7'), findsOneWidget);
+  });
+
+  test('줄바꿈은 띄어쓰기에서만: 단어 안 글자 사이에 줄바꿈 금지 문자', () {
+    expect(keepWords('전국으로 만세 운동이 퍼졌어요.'),
+        ['전국으로', '만세', '운동이', '퍼졌어요.'].map((w) => w.split('').join(wordJoiner)).join(' '));
+    expect(keepWords('3·1').replaceAll(wordJoiner, ''), '3·1');
+    expect(keepWords(''), '');
   });
 
   test('서버 응답 항목을 장면 4개로 묶음', () {

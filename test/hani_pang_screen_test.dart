@@ -21,12 +21,12 @@ Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {int seed = 3
     designSize: const Size(360, 722), // main.dart 와 같게 (결과 다이얼로그가 씀)
     builder: (_, __) => GetMaterialApp(home: HaniPangScreen(keyCode: keyCode, random: Random(seed))),
   ));
-  // 하는 방법 안내 → 1, 2, 3 동안은 시간이 안 흐름 → 시작!
+  // 하는 방법 안내 → 3, 2, 1 동안은 시간이 안 흐름 → 시작!
   final dynamic state = tester.state(find.byType(HaniPangScreen));
   expect(find.text('시작하기'), findsOneWidget);
   await tester.tap(find.text('시작하기'));
   await tester.pump();
-  for (final label in ['1', '2', '3']) {
+  for (final label in ['3', '2', '1']) {
     expect(find.text(label), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 800));
   }
@@ -49,6 +49,21 @@ void main() {
   setUpAll(() {
     Get.testMode = true;
     Get.put<BgmController>(_NoAudioBgm());
+  });
+
+  testWidgets('뒤로가기 안내가 떠 있는 동안 시간이 멈추고, 계속 하기면 이어서 흐름', (tester) async {
+    final (size, pad) = devices.values.first;
+    await _pump(tester, size, pad);
+    final dynamic state = tester.state(find.byType(HaniPangScreen));
+    await tester.tap(find.descendant(of: find.byType(AppBar), matching: find.byType(GestureDetector)).first);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('계속 하기'), findsOneWidget);
+    final paused = state.timeValue;
+    await _run(tester, const Duration(seconds: 3));
+    expect(state.timeValue, paused);
+    await tester.tap(find.text('계속 하기'));
+    await _run(tester, const Duration(seconds: 1));
+    expect(state.timeValue, greaterThan(paused));
   });
 
   for (final MapEntry(key: name, value: (size, pad)) in devices.entries) {
@@ -135,8 +150,8 @@ void main() {
     await _run(tester, const Duration(milliseconds: 400));
     expect(find.textContaining('스타', findRichText: true), findsNothing);
     expect(find.text('0점'), findsOneWidget);
-    // 다시하기도 1, 2, 3, 시작! 뒤에 시간이 흐름
-    expect(find.text('1'), findsOneWidget);
+    // 다시하기도 3, 2, 1, 시작! 뒤에 시간이 흐름
+    expect(find.text('3'), findsOneWidget);
     expect(state.timeValue, 0);
     await _run(tester, const Duration(milliseconds: 2400));
     expect(find.text('시작!'), findsOneWidget);

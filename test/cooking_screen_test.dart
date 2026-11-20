@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/hani/hani_cooking_data.dart';
 import 'package:hani_booki/screens/hani/cooking/cooking_screen.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 
@@ -17,6 +18,15 @@ const _cards = [
   'cooking_card_orchard',
   'cooking_card_stream',
   'cooking_card_pediatrics',
+];
+// 서버 문제 대신 앱 샘플 카드 (주제 자연: 빙산·산·개울·과수원이 정답, 역도·소아과가 오답)
+final _problems = [
+  HaniCookingData(ilno: 1, topic: '자연', answers: [
+    for (final c in ['cooking_card_iceberg', 'cooking_card_mountain', 'cooking_card_stream', 'cooking_card_orchard'])
+      (word: c, img: '$_dir/$c.png'),
+  ], wrongs: [
+    for (final c in ['cooking_card_weightlifting', 'cooking_card_pediatrics']) (word: c, img: '$_dir/$c.png'),
+  ]),
 ];
 const _title = '아래의 주제와 관련된 것을 요리볼에 담아보세요.';
 
@@ -37,7 +47,7 @@ Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {int seed = 0
   addTearDown(tester.view.reset);
   await tester.pumpWidget(ScreenUtilInit(
     designSize: const Size(360, 722), // main.dart 와 같게 (결과 다이얼로그가 씀)
-    builder: (_, __) => GetMaterialApp(home: CookingScreen(random: Random(seed))),
+    builder: (_, __) => GetMaterialApp(home: CookingScreen(problems: _problems, random: Random(seed))),
   ));
 }
 

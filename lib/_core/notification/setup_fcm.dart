@@ -45,7 +45,7 @@ Future<void> setupFcm() async {
           AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
-  await flutterLocalNotificationsPlugin.initialize(const InitializationSettings(
+  await flutterLocalNotificationsPlugin.initialize(settings: const InitializationSettings(
       android: AndroidInitializationSettings("@mipmap/ic_launcher"),
       iOS: DarwinInitializationSettings(
         requestAlertPermission: true,

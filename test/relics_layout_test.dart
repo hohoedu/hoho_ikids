@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/hani/hani_relics_data.dart';
 import 'package:hani_booki/screens/hani/relics/relics_screen.dart';
 import 'package:hani_booki/utils/bgm_controller.dart';
 import 'package:hani_booki/screens/hani/relics/relics_widgets/spray_scratcher.dart';
+
+// 서버 문제 대신 앱 샘플 그림 (그림 속 한자 間 = 정답 bottom_btn, 門 = 오답 top_btn)
+const _dir = 'assets/images/hani/relics';
+final _problems = [
+  HaniRelicsData(ilno: 1, seekImg: '$_dir/relics_sample.png', answerImg: '$_dir/bottom_btn.png', wrongImg: '$_dir/top_btn.png'),
+];
 
 // 가로 모드 논리 해상도와 안전영역(노치·홈 인디케이터)
 const devices = <String, (Size, EdgeInsets)>{
@@ -31,7 +38,7 @@ void main() {
         ..padding = FakeViewPadding(left: pad.left, top: pad.top, right: pad.right, bottom: pad.bottom);
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(const GetMaterialApp(home: RelicsScreen()));
+      await tester.pumpWidget(GetMaterialApp(home: RelicsScreen(problems: _problems)));
       expect(tester.takeException(), isNull); // overflow 등 레이아웃 에러 없음
 
       final frame = tester.getRect(find.byType(AspectRatio).first);
@@ -65,11 +72,11 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(ScreenUtilInit(
       designSize: const Size(360, 722),
-      builder: (_, __) => const GetMaterialApp(home: RelicsScreen()),
+      builder: (_, __) => GetMaterialApp(home: RelicsScreen(problems: _problems)),
     ));
     final dialog = find.textContaining('스타', findRichText: true);
 
-    await tester.tap(find.byKey(const ValueKey('choice1')));
+    await tester.tap(find.byKey(const ValueKey('$_dir/bottom_btn.png')));
     await tester.pump(const Duration(seconds: 1));
     expect(dialog, findsNothing, reason: '긁기 전');
 
@@ -81,11 +88,11 @@ void main() {
     await tester.dragFrom(Offset(area.left + 2, area.bottom - 3), Offset(area.width - 4, 0));
     await tester.pump();
 
-    await tester.tap(find.byKey(const ValueKey('choice0'))); // 門 오답
+    await tester.tap(find.byKey(const ValueKey('$_dir/top_btn.png'))); // 門 오답
     await tester.pump(const Duration(seconds: 1));
     expect(dialog, findsNothing, reason: '오답');
 
-    await tester.tap(find.byKey(const ValueKey('choice1'))); // 間 정답
+    await tester.tap(find.byKey(const ValueKey('$_dir/bottom_btn.png'))); // 間 정답
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 400));
     expect(dialog, findsOneWidget);

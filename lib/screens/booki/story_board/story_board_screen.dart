@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/booki/booki_story_board_data.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/sound_button.dart';
 import 'package:hani_booki/widgets/source_image.dart';
 
-// 디자인 기준 캔버스(2000x924) 좌표. 화면 크기에 맞춰 비율로 스케일됨.
 const _designW = 2000.0;
 const _designH = 924.0;
 
@@ -20,7 +20,6 @@ const _pink = Color(0xFFF77FA3);
 const _dash = Color(0xFFD9B9AC);
 const _text = Color(0xFF3A3A3A);
 
-/// 한 판에 내는 이야기 수 (서버는 10개를 줌)
 const _storiesPerGame = 7;
 
 class StoryBoardScreen extends StatefulWidget {
@@ -266,7 +265,7 @@ class _StoryBoardScreenState extends State<StoryBoardScreen> {
               padding: EdgeInsets.symmetric(horizontal: 14 * s),
               child: Center(
                 child: Text(
-                  _scenes[scene].text,
+                  keepWords(_scenes[scene].text),
                   textAlign: TextAlign.center,
                   // 폰에서도 읽히게 크고 굵게, 긴 문장(예: 갈라파고스 제도에서…)은 3줄까지
                   maxLines: 3,

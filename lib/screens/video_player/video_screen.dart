@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
@@ -35,13 +37,14 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin, StarEventMixin<VideoScreen> {
-  InAppWebViewController? _controller;
+  late final WebViewController _controller;
   String accessToken = '';
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _controller = _buildController();
     Get.find<BgmController>().pauseBgm();
     _fetchAccessToken();
     Logger().d('widget.content = ${widget.content}');
@@ -59,9 +62,32 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
     );
   }
 
+  WebViewController _buildController() {
+    // 사용자 탭 없이 자동재생 허용 (기존 inappwebview mediaPlaybackRequiresUserGesture: false 대응)
+    final params = WebViewPlatform.instance is WebKitWebViewPlatform
+        ? WebKitWebViewControllerCreationParams(mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{})
+        : const PlatformWebViewControllerCreationParams();
+    final controller = WebViewController.fromPlatformCreationParams(params)
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setOnConsoleMessage((m) => debugPrint("Console Message: ${m.message}"))
+      ..addJavaScriptChannel('videoEnded', onMessageReceived: (_) {
+        debugPrint("videoEnded 핸들러 호출됨");
+        _showResultDialog();
+      })
+      ..setNavigationDelegate(NavigationDelegate(
+        onPageFinished: (_) => _controller.runJavaScript(_injectedJs),
+      ));
+    final platform = controller.platform;
+    if (platform is AndroidWebViewController) {
+      platform.setMediaPlaybackRequiresUserGesture(false);
+    }
+    return controller;
+  }
+
   Future<void> _fetchAccessToken() async {
     try {
       final token = await fetchVimeoVideoUrl(widget.videoId);
+      await _controller.loadRequest(Uri.parse(token), headers: {"Referer": "https://hohoedu.co.kr"});
       setState(() {
         accessToken = token;
         isLoading = false;
@@ -93,10 +119,11 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
         title: ' ',
         isContent: true,
         onTapBackIcon: () async {
-          final result = await _controller?.evaluateJavascript(
-            source: "typeof checkVideoWatched === 'function' ? checkVideoWatched() : false",
+          final result = await _controller.runJavaScriptReturningResult(
+            "typeof checkVideoWatched === 'function' ? checkVideoWatched() : false",
           );
-          if (result == true) {
+          // iOS는 bool/1, Android는 문자열 'true'로 돌아옴
+          if (result == true || result == 1 || result.toString() == 'true') {
             _showResultDialog();
           } else {
             showBackDialog(false);
@@ -105,35 +132,62 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
       ),
       body: Stack(
         children: [
-          InAppWebView(
-            initialUrlRequest: URLRequest(
-              url: WebUri(accessToken),
-              headers: {"Referer": "https://hohoedu.co.kr"},
-            ),
-            initialOptions: InAppWebViewGroupOptions(
-              crossPlatform: InAppWebViewOptions(
-                javaScriptEnabled: true,
-                mediaPlaybackRequiresUserGesture: false,
-              ),
-            ),
-            // 콘솔 메시지 확인 (디버그 콘솔에 출력됨)
-            onConsoleMessage: (controller, consoleMessage) {
-              debugPrint("Console Message: ${consoleMessage.message}");
-            },
-            onWebViewCreated: (controller) {
-              _controller = controller;
-              _controller?.addJavaScriptHandler(
-                handlerName: 'videoEnded',
-                callback: (args) {
-                  debugPrint("videoEnded 핸들러 호출됨");
-                  _showResultDialog();
-                  return;
-                },
-              );
-            },
+          WebViewWidget(controller: _controller),
+          ...buildStarWidgets(widget.keyCode),
+        ],
+      ),
+    );
+  }
 
-            onLoadStop: (controller, url) async {
-              await controller.evaluateJavascript(source: '''function mergeTimeRanges(timeRanges, tolerance = 0.1) {
+  Future<void> _refreshHomeData() async {
+    final userData = Get.find<UserDataController>();
+    final first = widget.keyCode.substring(0, 1);
+    if (['Y', 'G', 'S'].contains(first)) {
+      await haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+      // 서버 edate 반영이 늦는 경우가 있어 방금 완료한 시점으로 즉시 덮어써 아이콘이 바로 보이게 함
+      Get.find<HaniHomeDataController>().markJustPlayed(widget.content);
+    } else {
+      await bookiContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
+      Get.find<BookiHomeDataController>().markJustPlayed(widget.content);
+    }
+  }
+
+  void _showResultDialog() async {
+    final starResult = await starUpdateService(widget.content, widget.keyCode);
+    final result = await missionSaveService(missionNum: 2, gb: widget.content, keycode: widget.keyCode);
+
+    if (result.success) {
+      await showStampDialog(widget.keyCode);
+    }
+
+    Logger().d("starResult.result = ${starResult.result}");
+    if (starResult.result == '0000') {
+      lottieDialog(
+        onMain: () {
+          Get.back();
+          _refreshHomeData();
+        },
+      );
+    } else if (starResult.result == '8888') {
+      cooltimeDialog(
+        lastTime: starResult.edate ?? '',
+        onMain: () {
+          Get.back();
+          _refreshHomeData();
+        },
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    Get.find<BgmController>().resumeBgm();
+    disposeStarEvent();
+    super.dispose();
+  }
+}
+
+const String _injectedJs = r'''function mergeTimeRanges(timeRanges, tolerance = 0.1) {
   let ranges = [];
   for (let i = 0; i < timeRanges.length; i++) {
     ranges.push([timeRanges.start(i), timeRanges.end(i)]);
@@ -198,7 +252,7 @@ function handleVideo(video) {
     exitNativeFullscreen(video);
     if (hasPlayedEntireVideo(video)) {
       console.log("전체 재생 완료 (90% 이상 시청)");
-      window.flutter_inappwebview.callHandler('videoEnded');
+      videoEnded.postMessage('');
     } else {
       console.log("재생되지 않은 구간이 있습니다");
     }
@@ -222,59 +276,4 @@ var observer = new MutationObserver(function(mutations) {
   });
 });
 observer.observe(document.body, { childList: true, subtree: true });
-''');
-            },
-          ),
-          ...buildStarWidgets(widget.keyCode),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _refreshHomeData() async {
-    final userData = Get.find<UserDataController>();
-    final first = widget.keyCode.substring(0, 1);
-    if (['Y', 'G', 'S'].contains(first)) {
-      await haniContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
-      // 서버 edate 반영이 늦는 경우가 있어 방금 완료한 시점으로 즉시 덮어써 아이콘이 바로 보이게 함
-      Get.find<HaniHomeDataController>().markJustPlayed(widget.content);
-    } else {
-      await bookiContentService(widget.keyCode, userData.userData!.id, userData.userData!.year);
-      Get.find<BookiHomeDataController>().markJustPlayed(widget.content);
-    }
-  }
-
-  void _showResultDialog() async {
-    final starResult = await starUpdateService(widget.content, widget.keyCode);
-    final result = await missionSaveService(missionNum: 2, gb: widget.content, keycode: widget.keyCode);
-
-    if (result.success) {
-      await showStampDialog(widget.keyCode);
-    }
-
-    Logger().d("starResult.result = ${starResult.result}");
-    if (starResult.result == '0000') {
-      lottieDialog(
-        onMain: () {
-          Get.back();
-          _refreshHomeData();
-        },
-      );
-    } else if (starResult.result == '8888') {
-      cooltimeDialog(
-        lastTime: starResult.edate ?? '',
-        onMain: () {
-          Get.back();
-          _refreshHomeData();
-        },
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    Get.find<BgmController>().resumeBgm();
-    disposeStarEvent();
-    super.dispose();
-  }
-}
+''';

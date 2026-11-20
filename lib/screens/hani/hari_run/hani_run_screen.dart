@@ -69,9 +69,8 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
   // 시작 전 안내: true면 시각 데모, false면 텍스트 안내(지금은 텍스트)
   static const _visualGuide = false;
   // 시작 전 시각 안내 데모 한 바퀴(손가락 톡 → 하니 위로 → 동전 ✓)
-  late final AnimationController _demo =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 2600))
-        ..addListener(() => setState(() {}));
+  late final AnimationController _demo = AnimationController(vsync: this, duration: const Duration(milliseconds: 2600))
+    ..addListener(() => setState(() {}));
   Duration _last = Duration.zero;
 
   late HanjaRun _run;
@@ -89,9 +88,22 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
   double _time = 0;
   ({String text, Color color, double at})? _toast;
   bool _over = false;
-  bool _started = false; // 하는 방법 안내 → 1, 2, 3, 시작! 뒤에 달리기 시작
+  bool _started = false; // 하는 방법 안내 → 3, 2, 1, 시작! 뒤에 달리기 시작
   bool _counting = false; // 시작하기 누른 뒤(안내 닫힘)
   String? _countdown;
+  bool _paused = false; // 뒤로가기 안내가 떠 있는 동안
+
+  /// 뒤로가기: 저장 안 된다는 안내 동안 하니·길을 멈추고, 계속 하기면 이어서 달림
+  Future<void> _onBack() async {
+    if (!_counting || _over) return Get.back(); // 시작 전·끝난 뒤엔 잃을 게 없음
+    if (_paused) return;
+    _paused = true;
+    _ticker.stop();
+    await showBackDialog(false);
+    _paused = false;
+    if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? false)) return; // 나가기
+    if (_started && !_ticker.isActive) _ticker.start();
+  }
 
   Size _size = Size.zero;
   double _charX = 0;
@@ -117,15 +129,15 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
     _countdownThenRun();
   }
 
-  /// 1, 2, 3, 시작! 을 보여 준 뒤 달리기 시작(처음·다시하기 공통)
+  /// 3, 2, 1, 시작! 을 보여 준 뒤 달리기 시작(처음·다시하기 공통)
   Future<void> _countdownThenRun() async {
     _started = false;
     _ticker.stop();
-    for (final label in const ['1', '2', '3', '시작!']) {
+    for (final label in const ['3', '2', '1', '시작!']) {
       setState(() => _countdown = label);
       if (label == '시작!') {
         _started = true;
-        _ticker.start();
+        if (!_paused) _ticker.start(); // 안내 중이면 계속 하기에서 출발
       }
       await Future.delayed(const Duration(milliseconds: 800));
       if (!mounted) return;
@@ -133,8 +145,15 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
     setState(() => _countdown = null);
   }
 
+  // shortcut: 앱에 넣은 s 과정 음성(s1~s60 = 동전 s01~s60)만 있음, y 과정은 무음. 서버 음성 URL이 정해지면 그걸로 교체
+  String? _voiceOf(HanjaQuestion q) {
+    final no = q.target.no;
+    return no.startsWith('s') ? 'assets/audio/voice/s${int.parse(no.substring(1))}.mp3' : null;
+  }
+
   @override
   void dispose() {
+    SoundManager.stopVoice(); // 나가면 읽던 음성도 끔
     _ticker.dispose();
     _demo.dispose();
     super.dispose();
@@ -190,6 +209,8 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
   void _spawn() {
     final q = _quiz.next();
     _question = q;
+    final voice = _voiceOf(q);
+    if (voice != null) SoundManager.playVoice(voice); // 새 문제 한자 읽어 주기
     var x = _size.width + _coinSize;
     // 바로 앞에 장애물이 있으면 피한 뒤 고를 시간만큼 동전을 뒤로 미룸
     final clear = _speed * _clearSec;
@@ -260,8 +281,9 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
 
   void _afterMistake() {
     if (_run.isOver && !_over) {
-      // 마지막 부딪힘 모션(3초)을 다 보여 준 뒤 점수 화면
-      Future.delayed(Duration(milliseconds: (_hitSec * 1000).round()), () async {
+      // 마지막 모션(부딪힘 3초, 500점 완주면 정답 1초)을 다 보여 준 뒤 점수 화면
+      final wait = _run.isCleared ? _heartSec : _hitSec;
+      Future.delayed(Duration(milliseconds: (wait * 1000).round()), () async {
         if (!mounted) return;
         setState(() => _over = true);
         // 점수·별 먼저 보여 주고, 부키 콘텐츠와 같은 결과 다이얼로그
@@ -292,40 +314,46 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: const MainAppBar(isContent: false, title: ''),
-      body: LayoutBuilder(
-        builder: (context, c) {
-          final safe = MediaQuery.paddingOf(context);
-          final side = max(16.0, max(safe.left, safe.right));
-          _size = c.biggest;
-          final h = _size.height;
-          _charX = max(side + h * 0.12, _size.width * 0.16);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _onBack(); // 안드로이드 뒤로가기 버튼도 같은 안내
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: MainAppBar(isContent: true, title: '', onTapBackIcon: _onBack),
+        body: LayoutBuilder(
+          builder: (context, c) {
+            final safe = MediaQuery.paddingOf(context);
+            final side = max(16.0, max(safe.left, safe.right));
+            _size = c.biggest;
+            final h = _size.height;
+            _charX = max(side + h * 0.12, _size.width * 0.16);
 
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (d) => _setLane(d.localPosition.dy < h * _dashY ? 0 : 1),
-            onVerticalDragUpdate: (d) {
-              if (d.delta.dy.abs() > 2) _setLane(d.delta.dy < 0 ? 0 : 1);
-            },
-            child: Stack(
-              fit: StackFit.expand,
-              clipBehavior: Clip.hardEdge,
-              children: [
-                ..._buildBackground(),
-                for (final t in _things) _buildThing(t),
-                _buildCharacter(),
-                _buildBubble(),
-                _buildToast(),
-                _buildLostHeart(),
-                Positioned(top: h * 0.03, right: side, height: h * 0.11, child: _buildHud(h * 0.11)),
-                if (!_counting) _visualGuide ? _buildVisualGuide() : _buildGuide(),
-                if (_countdown != null) _buildCountdown(),
-              ],
-            ),
-          );
-        },
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (d) => _setLane(d.localPosition.dy < h * _dashY ? 0 : 1),
+              onVerticalDragUpdate: (d) {
+                if (d.delta.dy.abs() > 2) _setLane(d.delta.dy < 0 ? 0 : 1);
+              },
+              child: Stack(
+                fit: StackFit.expand,
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  ..._buildBackground(),
+                  for (final t in _things) _buildThing(t),
+                  _buildCharacter(),
+                  _buildBubble(),
+                  _buildToast(),
+                  _buildLostHeart(),
+                  Positioned(top: h * 0.03, right: side, height: h * 0.11, child: _buildHud(h * 0.11)),
+                  if (!_counting) _visualGuide ? _buildVisualGuide() : _buildGuide(),
+                  if (_countdown != null) _buildCountdown(),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -396,10 +424,10 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
     final h = _size.height;
     final ch = h * 0.30, cw = ch; // 하니 로티 3종 모두 900x900
     final hurt = _time < _hurtUntil;
-    // 게임 끝 > 오답·장애물 > 정답 > 평상시 달리기
-    final motion = _run.isOver || _time < _hitUntil
+    // 하트 다 잃음 > 오답·장애물 > 500점 완주·정답 > 평상시 달리기
+    final motion = _run.hearts <= 0 || _time < _hitUntil
         ? 'hanihit'
-        : _time < _heartUntil
+        : _run.isCleared || _time < _heartUntil
             ? 'hanirunheart'
             : 'hanirun';
     return AnimatedPositioned(
@@ -445,9 +473,9 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
           fit: StackFit.expand,
           children: [
             Image.asset('$_dir/blank.png'),
-            // 구름 몸통(꼬리·반짝이 빼고) 가운데
+            // 구름 몸통(꼬리·반짝이 빼고) 가운데. 위쪽 볼록한 테두리 때문에 그림 정중앙보다 살짝 아래가 가운데로 보임
             Align(
-              alignment: const Alignment(-0.08, -0.12),
+              alignment: const Alignment(-0.08, 0.06),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: bw * 0.12),
                 child: FittedBox(
@@ -464,7 +492,7 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
 
   Widget _buildToast() {
     final t = _toast;
-    if (t == null || _time - t.at > 1.2) return const SizedBox.shrink(); 
+    if (t == null || _time - t.at > 1.2) return const SizedBox.shrink();
     final h = _size.height, v = (_time - t.at) / 1.2;
     return Positioned(
       left: _charX + h * 0.15,
@@ -671,7 +699,7 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
     );
   }
 
-  /// 1, 2, 3, 시작! 숫자마다 크게 나타났다 작아짐
+  /// 3, 2, 1, 시작! 숫자마다 크게 나타났다 작아짐
   Widget _buildCountdown() {
     final h = _size.height;
     return IgnorePointer(
@@ -701,7 +729,7 @@ class _HaniRunScreenState extends State<HaniRunScreen> with TickerProviderStateM
 
   static const _brown = Color(0xFF4E321C);
 
-  TextStyle _text(double size) => TextStyle(fontFamily: 'BMJUA', fontSize: size, color: _brown, height: 1.1);
+  TextStyle _text(double size) => TextStyle(fontFamily: 'NANUM-EB', fontSize: size, color: _brown, height: 1.1);
 
   Widget _buildHud(double h) {
     return Container(

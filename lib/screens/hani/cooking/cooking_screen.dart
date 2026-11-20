@@ -2,16 +2,22 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/hani/hani_cooking_data.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:hani_booki/widgets/source_image.dart';
 
-typedef CookingCard = ({String asset, double aspect, bool correct, Offset center});
+/// 카드 하나: 서버 그림 주소(또는 테스트용 에셋)와 정답 여부
+typedef CookingCard = ({String img, bool correct});
 
 class CookingScreen extends StatefulWidget {
-  const CookingScreen({super.key, this.random});
+  /// [problems] 를 안 주면 haniCookingService 가 받아 둔 목록을 씀
+  const CookingScreen({super.key, this.problems, this.random});
 
-  /// 테스트에서 카드 자리를 고정할 때만 넘김
+  final List<HaniCookingData>? problems;
+
+  /// 테스트에서 문제·카드 자리를 고정할 때만 넘김
   final Random? random;
 
   @override
@@ -21,17 +27,15 @@ class CookingScreen extends StatefulWidget {
 class _CookingScreenState extends State<CookingScreen> {
   static const _dir = 'assets/images/hani/cooking';
 
-  // shortcut: 샘플 문제 하드코딩, 서버 데이터 붙일 때 교체
-  static const _topic = '자연';
-
-  // center는 무대(stage) 기준 비율 좌표(카드 자리), aspect는 이미지 가로/세로. 자리는 판마다 섞음
-  static const List<CookingCard> _cards = [
-    (asset: '$_dir/cooking_card_iceberg.png', aspect: 369 / 334, correct: true, center: Offset(0.085, 0.40)),
-    (asset: '$_dir/cooking_card_weightlifting.png', aspect: 382 / 341, correct: false, center: Offset(0.258, 0.175)),
-    (asset: '$_dir/cooking_card_mountain.png', aspect: 369 / 385, correct: true, center: Offset(0.20, 0.80)),
-    (asset: '$_dir/cooking_card_stream.png', aspect: 369 / 352, correct: true, center: Offset(0.735, 0.175)),
-    (asset: '$_dir/cooking_card_orchard.png', aspect: 395 / 334, correct: true, center: Offset(0.905, 0.42)),
-    (asset: '$_dir/cooking_card_pediatrics.png', aspect: 435 / 410, correct: false, center: Offset(0.82, 0.80)),
+  // 카드 자리 6곳: center는 무대(stage) 기준 비율 좌표, aspect는 그 자리 칸의 가로/세로. 카드는 판마다 자리를 섞음
+  // 서버 그림 비율은 모르므로 그림은 칸 안에 맞춰 넣음(칸끼리는 안 겹치게 잡혀 있음)
+  static const List<({Offset center, double aspect})> _spots = [
+    (center: Offset(0.085, 0.40), aspect: 369 / 334),
+    (center: Offset(0.258, 0.175), aspect: 382 / 341),
+    (center: Offset(0.20, 0.80), aspect: 369 / 385),
+    (center: Offset(0.735, 0.175), aspect: 369 / 352),
+    (center: Offset(0.905, 0.42), aspect: 395 / 334),
+    (center: Offset(0.82, 0.80), aspect: 435 / 410),
   ];
 
   static const _stageAspect = 2.2;
@@ -42,7 +46,31 @@ class _CookingScreenState extends State<CookingScreen> {
   int _shakeSeq = 0;
   bool _hovering = false;
   late final Random _rand = widget.random ?? Random();
+  late final List<HaniCookingData> _all = widget.problems ?? Get.find<HaniCookingDataController>().haniCookingDataList;
+
+  // 한 판 = 받은 문제(10개)를 섞어 7개를 차례로. 다시 하기면 새로 7개
+  static const _problemsPerGame = 7;
+  late List<HaniCookingData> _game = _newGame();
+  int _index = 0; // 이번 판 몇 번째 문제인지
+  HaniCookingData get _problem => _game[_index];
+  late List<CookingCard> _cards = _cardsOf(_problem);
   late List<int> _spotOf = _shuffleSpots(); // 카드 i 가 놓일 자리 번호 (basket 과 같은 방식)
+
+  List<HaniCookingData> _newGame() => (List.of(_all)..shuffle(_rand)).take(_problemsPerGame).toList();
+
+  void _showProblem(int index) {
+    _index = index;
+    _found.clear();
+    _shaking = null;
+    _cards = _cardsOf(_problem);
+    _spotOf = _shuffleSpots();
+  }
+
+  // 정답 4 + 오답 2. 자리가 6곳뿐이라 넘치면 자름
+  List<CookingCard> _cardsOf(HaniCookingData p) => [
+        for (final c in p.answers) (img: c.img, correct: true),
+        for (final c in p.wrongs) (img: c.img, correct: false),
+      ].take(_spots.length).toList();
 
   List<int> _shuffleSpots() => List.generate(_cards.length, (i) => i)..shuffle(_rand);
 
@@ -53,12 +81,10 @@ class _CookingScreenState extends State<CookingScreen> {
       _hovering = false;
       if (card.correct) {
         SoundManager.playCorrect();
-        // 정답 음성 = 카드 이름 (cooking_card_iceberg.png → assets/audio/voice/cooking_card_iceberg.mp3)
-        SoundManager.playVoice('assets/audio/voice/${card.asset.split('/').last.replaceAll('.png', '.mp3')}');
-        _found.add(card.asset);
+        _found.add(card.img);
       } else {
         SoundManager.playNo();
-        _shaking = card.asset;
+        _shaking = card.img;
         _shakeSeq++;
       }
     });
@@ -66,12 +92,16 @@ class _CookingScreenState extends State<CookingScreen> {
       // 마지막 체크 표시를 잠깐 보여 준 뒤
       Future.delayed(const Duration(milliseconds: 600), () {
         if (!mounted) return;
+        if (_index + 1 < _game.length) {
+          setState(() => _showProblem(_index + 1)); // 다음 문제
+          return;
+        }
         lottieDialog(
           onReset: () {
             Get.back();
             setState(() {
-              _found.clear();
-              _spotOf = _shuffleSpots();
+              _game = _newGame();
+              _showProblem(0);
             });
           },
           onMain: () {
@@ -150,7 +180,7 @@ class _CookingScreenState extends State<CookingScreen> {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
-                      _topic,
+                      _problem.topic,
                       style: TextStyle(
                         fontSize: signW * 0.17,
                         fontWeight: FontWeight.w900,
@@ -201,19 +231,17 @@ class _CookingScreenState extends State<CookingScreen> {
           ),
         ),
         for (final card in _cards)
-          if (!_found.contains(card.asset)) _buildCard(card, w, h),
+          if (!_found.contains(card.img)) _buildCard(card, w, h),
       ],
     );
   }
 
   Widget _buildCard(CookingCard card, double w, double h) {
-    // 자리마다 원래 그 자리 카드 크기 칸을 쓰고, 넓은 카드는 그 칸에 맞춰 살짝 줄여서 요리볼·옆 카드와 안 겹치게
-    final spotCard = _cards[_spotOf[_cards.indexOf(card)]];
-    final spot = spotCard.center;
-    final boxH = h * _cardH;
-    final s = min(1.0, spotCard.aspect / card.aspect);
-    final ch = boxH * s, cw = ch * card.aspect;
-    final image = Image.asset(card.asset, width: cw, height: ch);
+    // 카드는 놓인 자리의 칸 크기를 쓰고, 그림은 칸 안에 맞춰 넣음(요리볼·옆 카드와 안 겹치게)
+    final spotOf = _spots[_spotOf[_cards.indexOf(card)]];
+    final spot = spotOf.center;
+    final ch = h * _cardH, cw = ch * spotOf.aspect;
+    final image = sourceImage(card.img, width: cw, height: ch, fit: BoxFit.contain);
 
     Widget child = Draggable<CookingCard>(
       data: card,
@@ -223,7 +251,7 @@ class _CookingScreenState extends State<CookingScreen> {
     );
 
     // 틀린 카드는 제자리로 돌아와 좌우로 흔들림
-    if (_shaking == card.asset) {
+    if (_shaking == card.img) {
       child = TweenAnimationBuilder<double>(
         key: ValueKey(_shakeSeq),
         tween: Tween(begin: 0, end: 1),
@@ -234,7 +262,7 @@ class _CookingScreenState extends State<CookingScreen> {
     }
 
     return Positioned(
-      key: ValueKey(card.asset),
+      key: ValueKey(card.img),
       left: spot.dx * w - cw / 2,
       top: spot.dy * h - ch / 2,
       width: cw,

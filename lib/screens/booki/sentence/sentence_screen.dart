@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/booki/booki_sentence_data.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/sound_button.dart';
@@ -163,9 +164,10 @@ class _SentenceScreenState extends State<SentenceScreen> {
                   width: 1050 * s,
                   child: Text.rich(
                     TextSpan(children: [
-                      TextSpan(text: q.before),
+                      // 띄어쓰기에서만 줄바꿈, 빈칸 뒤 조사(?을 → [박스]을)는 박스에 붙여 둠
+                      TextSpan(text: keepWords(q.before)),
                       WidgetSpan(alignment: PlaceholderAlignment.middle, child: _buildBlank(s)),
-                      TextSpan(text: q.after),
+                      TextSpan(text: (q.after.startsWith(' ') ? '' : wordJoiner) + keepWords(q.after)),
                     ]),
                     style: sentenceStyle,
                   ),

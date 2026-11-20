@@ -5,7 +5,7 @@ import 'package:hani_booki/_data/auth/user_data.dart';
 import 'package:hani_booki/_data/booki/booki_home_data.dart';
 import 'package:hani_booki/_data/mission/mission_data.dart';
 import 'package:hani_booki/main.dart';
-import 'package:hani_booki/screens/booki/basket/basket_screen.dart';
+import 'package:hani_booki/services/booki/booki_basket_service.dart';
 import 'package:hani_booki/services/booki/booki_proviso_service.dart';
 import 'package:hani_booki/services/booki/booki_song_service.dart';
 import 'package:hani_booki/services/booki/booki_story_board_service.dart';
@@ -104,6 +104,13 @@ class _BookiHomeScreenElevenState extends State<BookiHomeScreenEleven> with Widg
     playBgm(widget.keyCode);
   }
 
+  // 콘텐츠 화면이 위로 올라가면 메인 BGM 정지 (돌아오면 didPopNext에서 다시 재생)
+  @override
+  void didPushNext() {
+    super.didPushNext();
+    bgmController.stopBgm();
+  }
+
   Widget _tile(String asset, VoidCallback onTap, {Alignment alignment = Alignment.center}) {
     return Expanded(
       child: GestureDetector(
@@ -163,7 +170,7 @@ class _BookiHomeScreenElevenState extends State<BookiHomeScreenEleven> with Widg
                                 children: [
                                   _tile(
                                     'assets/images/basket.png',
-                                    () => Get.to(() => const BasketScreen()),
+                                    () => bookiBasketService(userData.userData!.id, widget.keyCode, userData.userData!.year),
                                     alignment: Alignment.bottomCenter,
                                   ),
                                   _tile(

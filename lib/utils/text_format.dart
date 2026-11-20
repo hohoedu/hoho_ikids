@@ -208,3 +208,10 @@ String formatDateDifference(String dateString) {
     return "${months}달 전";
   }
 }
+
+/// 줄바꿈 금지 문자(워드 조이너). 화면엔 안 보임
+const wordJoiner = '⁠';
+
+/// 한글은 아무 글자 사이에서나 줄이 바뀌어서(퍼|졌어요, 선|언서) 띄어쓰기에서만 바뀌도록
+/// 단어 안 글자 사이에 줄바꿈 금지 문자를 넣음. 한 줄보다 긴 단어는 그래도 잘려서 넘침은 없음
+String keepWords(String text) => text.split(' ').map((w) => w.characters.join(wordJoiner)).join(' ');

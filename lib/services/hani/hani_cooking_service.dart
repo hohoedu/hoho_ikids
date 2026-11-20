@@ -10,13 +10,13 @@ import 'package:logger/logger.dart';
 
 // 하니 요리
 Future<void> haniCookingService(id, keyCode, year) async {
-  // TODO: .env·env.dart 에 HANI_COOKING_URL 추가 후 build_runner (없으면 Env.get 이 예외)
   String url = Env.get('HANI_COOKING_URL');
-
+  String gamok = keyCode.toString().substring(0, 1);
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,
     'yy': year,
+    'gamok': gamok,
   };
 
   try {
@@ -25,16 +25,17 @@ Future<void> haniCookingService(id, keyCode, year) async {
 
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
-      // TODO: 응답이 리스트인지 맵인지 스펙 확인
-      final List<dynamic> resultList = json.decode(response.data);
-      final resultValue = resultList[0]['result'];
-
+      // 응답 {"result": "0000", "gamok": "S", "main_img": ..., "count": 10, "list": [{gamok, ilno, munje, ans1~4·ans1~4_img, wrong1~2·wrong1~2_img}, ...]}
+      final Map<String, dynamic> resultList = json.decode(response.data);
+      final resultValue = resultList['result'];
+      final List<dynamic> list = resultList['list'] ?? [];
+      Logger().d(response);
       // 응답 결과가 있는 경우
-      if (resultValue == "0000") {
-        List<HaniCookingData> haniCookingDataList = resultList.map((item) => HaniCookingData.fromJson(item)).toList();
+      if (resultValue == "0000" && list.isNotEmpty) {
+        List<HaniCookingData> dataList = list.map((item) => HaniCookingData.fromJson(item)).toList();
 
         final HaniCookingDataController haniCookingDataController = Get.put(HaniCookingDataController());
-        haniCookingDataController.setHaniCookingDataList(haniCookingDataList);
+        haniCookingDataController.setHaniCookingDataList(dataList, mainImg: resultList['main_img'] ?? '');
 
         Get.to(() => const CookingScreen());
       }

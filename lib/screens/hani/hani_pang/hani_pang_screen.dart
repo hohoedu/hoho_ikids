@@ -84,9 +84,22 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   (Pos, Pos)? _hint; // 깜빡이는 힌트 두 칸
   Pos? _dragFrom;
   Offset _dragOrigin = Offset.zero;
-  bool _started = false; // 하는 방법 안내 → 1, 2, 3, 시작! 뒤에 시간이 흐르고 블록을 움직일 수 있음
+  bool _started = false; // 하는 방법 안내 → 3, 2, 1, 시작! 뒤에 시간이 흐르고 블록을 움직일 수 있음
   bool _counting = false; // 시작하기 누른 뒤(안내 닫힘)
   String? _countdown;
+  bool _paused = false; // 뒤로가기 안내가 떠 있는 동안
+
+  /// 뒤로가기: 저장 안 된다는 안내 동안 시간을 멈추고, 계속 하기면 이어서 흐름
+  Future<void> _onBack() async {
+    if (!_counting || _over) return Get.back(); // 시작 전·끝난 뒤엔 잃을 게 없음
+    if (_paused) return;
+    _paused = true;
+    _timer.stop();
+    await showBackDialog(false);
+    _paused = false;
+    if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? false)) return; // 나가기
+    if (_started && !_over) _timer.forward();
+  }
 
   @override
   void initState() {
@@ -102,14 +115,15 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
     _countdownThenRun();
   }
 
-  /// 1, 2, 3, 시작! 을 보여 준 뒤 시간 시작(처음·다시하기 공통)
+  /// 3, 2, 1, 시작! 을 보여 준 뒤 시간 시작(처음·다시하기 공통)
   Future<void> _countdownThenRun() async {
     _started = false;
-    for (final label in const ['1', '2', '3', '시작!']) {
+    for (final label in const ['3', '2', '1', '시작!']) {
       setState(() => _countdown = label);
       if (label == '시작!') {
         _started = true;
-        _timer.forward(from: 0);
+        _timer.value = 0;
+        if (!_paused) _timer.forward(); // 안내 중이면 계속 하기에서 흐름
         _resetHint();
       }
       await Future.delayed(const Duration(milliseconds: 800));
@@ -205,7 +219,9 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   void _drag(Pos from, Offset delta, double cell) {
     if (delta.distance < cell * 0.3) return;
     _dragFrom = null;
-    final to = delta.dx.abs() > delta.dy.abs() ? Pos(from.row, from.col + delta.dx.sign.toInt()) : Pos(from.row + delta.dy.sign.toInt(), from.col);
+    final to = delta.dx.abs() > delta.dy.abs()
+        ? Pos(from.row, from.col + delta.dx.sign.toInt())
+        : Pos(from.row + delta.dy.sign.toInt(), from.col);
     _trySwap(from, to);
   }
 
@@ -305,26 +321,32 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
     final safe = MediaQuery.paddingOf(context);
     final side = max(16.0, max(safe.left, safe.right)); // 가장자리 블록·막대가 노치에 안 가리게
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: const MainAppBar(isContent: false, title: ''),
-      body: Stack(
-        children: [
-          Positioned.fill(child: Image.asset('$_dir/pang_bg.png', fit: BoxFit.cover)),
-          Padding(
-            padding: EdgeInsets.fromLTRB(side, 8, side, max(8, safe.bottom)),
-            child: LayoutBuilder(
-              builder: (context, c) {
-                final w = min(c.maxWidth, c.maxHeight * _stageAspect);
-                return Center(
-                  child: SizedBox(width: w, height: w / _stageAspect, child: _buildStage(w, w / _stageAspect)),
-                );
-              },
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _onBack(); // 안드로이드 뒤로가기 버튼도 같은 안내
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: MainAppBar(isContent: true, title: '', onTapBackIcon: _onBack),
+        body: Stack(
+          children: [
+            Positioned.fill(child: Image.asset('$_dir/pang_bg.png', fit: BoxFit.cover)),
+            Padding(
+              padding: EdgeInsets.fromLTRB(side, 8, side, max(8, safe.bottom)),
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  final w = min(c.maxWidth, c.maxHeight * _stageAspect);
+                  return Center(
+                    child: SizedBox(width: w, height: w / _stageAspect, child: _buildStage(w, w / _stageAspect)),
+                  );
+                },
+              ),
             ),
-          ),
-          if (!_counting) Positioned.fill(child: _buildGuide(MediaQuery.sizeOf(context).height)),
-          if (_countdown != null) Positioned.fill(child: _buildCountdown(MediaQuery.sizeOf(context).height)),
-        ],
+            if (!_counting) Positioned.fill(child: _buildGuide(MediaQuery.sizeOf(context).height)),
+            if (_countdown != null) Positioned.fill(child: _buildCountdown(MediaQuery.sizeOf(context).height)),
+          ],
+        ),
       ),
     );
   }
@@ -380,8 +402,11 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
                   ),
                   row(Icon(Icons.swipe_rounded, size: icon, color: _brown), '블록을 밀거나, 두 블록을 차례로 눌러서 바꿔요'),
                   row(
-                    Row(children: [Expanded(child: block(1, Special.laserH)), Expanded(child: block(2, Special.blackHole))]),
-                    '4개를 맞추면 레이저, 5개를 맞추면 블랙홀 블록이 생겨요',
+                    Row(children: [
+                      Expanded(child: block(1, Special.arrowH)),
+                      Expanded(child: block(2, Special.firework))
+                    ]),
+                    '4개를 맞추면 화살 블록, 5개를 맞추면 폭죽 블록이 생겨요',
                   ),
                   row(Image.asset(_blockAsset(_bonusColor)), '보너스 블럭을 터뜨리면 점수가 2배예요'),
                   row(Icon(Icons.timer_rounded, size: icon, color: _brown), '60초 동안 점수를 최대한 모아요'),
@@ -403,7 +428,7 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
     );
   }
 
-  /// 1, 2, 3, 시작! 숫자마다 크게 나타났다 작아짐
+  /// 3, 2, 1, 시작! 숫자마다 크게 나타났다 작아짐
   Widget _buildCountdown(double h) {
     return IgnorePointer(
       child: Center(
@@ -633,8 +658,8 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
 
   Widget _buildFx(_Fx f, double cell) {
     final Rect area = switch (f.type) {
-      Special.laserH => Rect.fromLTWH(0, f.pos.row * cell, cols * cell, cell),
-      Special.laserV => Rect.fromLTWH(f.pos.col * cell, 0, cell, rows * cell),
+      Special.arrowH => Rect.fromLTWH(0, f.pos.row * cell, cols * cell, cell),
+      Special.arrowV => Rect.fromLTWH(f.pos.col * cell, 0, cell, rows * cell),
       _ => Rect.fromLTWH((f.pos.col - 1) * cell, (f.pos.row - 1) * cell, cell * 3, cell * 3),
     };
     return Positioned.fromRect(
@@ -646,25 +671,26 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
           duration: const Duration(milliseconds: 380),
           builder: (context, t, _) => Opacity(
             opacity: (1 - t).clamp(0, 1),
-            child: f.type == Special.blackHole
+            child: f.type == Special.firework
                 ? Transform.scale(
                     scale: 0.3 + t,
                     child: const DecoratedBox(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: RadialGradient(colors: [Color(0xFF1B0B36), Color(0xCC8E5BFF), Color(0x008E5BFF)]),
+                        gradient: RadialGradient(
+                            colors: [Colors.white, Color(0xEEFFD21F), Color(0x99FF8A1F), Color(0x00FF4D4D)]),
                       ),
                     ),
                   )
                 : Transform.scale(
-                    scaleX: f.type == Special.laserH ? 1 : 0.4 + t * 0.6,
-                    scaleY: f.type == Special.laserV ? 1 : 0.4 + t * 0.6,
+                    scaleX: f.type == Special.arrowH ? 1 : 0.4 + t * 0.6,
+                    scaleY: f.type == Special.arrowV ? 1 : 0.4 + t * 0.6,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(cell),
                         gradient: LinearGradient(
-                          begin: f.type == Special.laserH ? Alignment.topCenter : Alignment.centerLeft,
-                          end: f.type == Special.laserH ? Alignment.bottomCenter : Alignment.centerRight,
+                          begin: f.type == Special.arrowH ? Alignment.topCenter : Alignment.centerLeft,
+                          end: f.type == Special.arrowH ? Alignment.bottomCenter : Alignment.centerRight,
                           colors: const [Color(0x00FFF59D), Colors.white, Color(0x00FFF59D)],
                         ),
                       ),
@@ -677,7 +703,8 @@ class _HaniPangScreenState extends State<HaniPangScreen> with SingleTickerProvid
   }
 }
 
-/// 특수 블록 표시: 레이저는 가로/세로 빛줄기, 블랙홀은 가운데 소용돌이
+/// 특수 블록 표시: 블록 그림은 가리지 않고 테두리와 가장자리 표시만 덧그림
+/// 화살 = 금색 테두리 + 양끝 화살촉, 폭죽 = 무지개 테두리 + 모서리 별
 class _SpecialPainter extends CustomPainter {
   _SpecialPainter(this.type);
 
@@ -685,40 +712,70 @@ class _SpecialPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final c = size.center(Offset.zero);
     final s = size.shortestSide;
-    if (type == Special.blackHole) {
-      canvas.drawCircle(
-        c,
-        s * 0.3,
-        Paint()..shader = const RadialGradient(colors: [Color(0xFF12061F), Color(0xFF5A2DB8), Color(0x005A2DB8)]).createShader(Rect.fromCircle(center: c, radius: s * 0.3)),
-      );
-      canvas.drawCircle(
-        c,
-        s * 0.2,
+    final c = size.center(Offset.zero);
+    final frame = RRect.fromRectAndRadius((Offset.zero & size).deflate(s * 0.03), Radius.circular(s * 0.24));
+    final outline = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = s * 0.035
+      ..color = const Color(0xFF6B3A10);
+
+    if (type == Special.firework) {
+      canvas.drawRRect(
+        frame,
         Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = s * 0.04
-          ..color = Colors.white70,
+          ..strokeWidth = s * 0.08
+          ..shader = const SweepGradient(colors: [
+            Color(0xFFFF4D4D),
+            Color(0xFFFFB31F),
+            Color(0xFFFFF04D),
+            Color(0xFF4DD96B),
+            Color(0xFF4DB8FF),
+            Color(0xFFB36BFF),
+            Color(0xFFFF4D4D),
+          ]).createShader(Offset.zero & size),
       );
+      final star = _star(Offset(s * 0.8, s * 0.2), s * 0.17);
+      canvas.drawPath(star, Paint()..color = const Color(0xFFFFD21F));
+      canvas.drawPath(star, outline);
       return;
     }
-    final horizontal = type == Special.laserH;
-    final glow = Paint()
-      ..color = Colors.white.withValues(alpha: 0.7)
-      ..strokeWidth = s * 0.16
-      ..strokeCap = StrokeCap.round
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, s * 0.06);
-    final core = Paint()
-      ..color = Colors.white
-      ..strokeWidth = s * 0.07
-      ..strokeCap = StrokeCap.round;
-    for (final d in [-0.22, 0.22]) {
-      final a = horizontal ? Offset(s * 0.12, c.dy + s * d) : Offset(c.dx + s * d, s * 0.12);
-      final b = horizontal ? Offset(s * 0.88, c.dy + s * d) : Offset(c.dx + s * d, s * 0.88);
-      canvas.drawLine(a, b, glow);
-      canvas.drawLine(a, b, core);
+
+    canvas.drawRRect(
+      frame,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = s * 0.07
+        ..color = const Color(0xFFFFC21F),
+    );
+    final horizontal = type == Special.arrowH;
+    final fill = Paint()..color = Colors.white;
+    for (final dir in [-1.0, 1.0]) {
+      // 블록 바깥쪽을 가리키는 삼각형
+      final tip = horizontal ? Offset(c.dx + dir * s * 0.47, c.dy) : Offset(c.dx, c.dy + dir * s * 0.47);
+      final back = horizontal ? Offset(c.dx + dir * s * 0.31, c.dy) : Offset(c.dx, c.dy + dir * s * 0.31);
+      final side = horizontal ? Offset(0, s * 0.13) : Offset(s * 0.13, 0);
+      final arrow = Path()
+        ..moveTo(tip.dx, tip.dy)
+        ..lineTo(back.dx + side.dx, back.dy + side.dy)
+        ..lineTo(back.dx - side.dx, back.dy - side.dy)
+        ..close();
+      canvas.drawPath(arrow, fill);
+      canvas.drawPath(arrow, outline);
     }
+  }
+
+  static Path _star(Offset c, double r) {
+    final path = Path();
+    for (var i = 0; i < 10; i++) {
+      final rad = i.isEven ? r : r * 0.45;
+      final a = -pi / 2 + i * pi / 5;
+      final p = c + Offset(cos(a) * rad, sin(a) * rad);
+      i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
+    }
+    return path..close();
   }
 
   @override
@@ -745,6 +802,6 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      ScaleTransition(key: const ValueKey('hint'), scale: Tween(begin: 1.0, end: 1.15).animate(_c), child: widget.child);
+  Widget build(BuildContext context) => ScaleTransition(
+      key: const ValueKey('hint'), scale: Tween(begin: 1.0, end: 1.15).animate(_c), child: widget.child);
 }

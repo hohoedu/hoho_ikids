@@ -28,8 +28,8 @@ Future<void> _pump(WidgetTester tester, Size size, EdgeInsets pad, {bool obstacl
   await tester.tap(find.text('시작하기'));
   await tester.pump();
   expect(find.text('시작하기'), findsNothing);
-  // 1, 2, 3 동안은 아직 안 달림, 시작! 에서 출발
-  for (final label in ['1', '2', '3']) {
+  // 3, 2, 1 동안은 아직 안 달림, 시작! 에서 출발
+  for (final label in ['3', '2', '1']) {
     expect(find.text(label), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 800));
   }
@@ -61,6 +61,19 @@ void main() {
   setUpAll(() {
     Get.testMode = true;
     Get.put<BgmController>(_NoAudioBgm());
+  });
+
+  testWidgets('뒤로가기 안내가 떠 있는 동안 하니가 멈추고, 계속 하기면 이어서 달림', (tester) async {
+    final (size, pad) = devices.values.first;
+    await _pump(tester, size, pad);
+    await tester.tap(find.descendant(of: find.byType(AppBar), matching: find.byType(GestureDetector)).first);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('계속 하기'), findsOneWidget);
+    await _run(tester, const Duration(seconds: 3));
+    expect(_state(tester).question, isNull); // 달리고 있었다면 1초 만에 첫 문제가 나옴
+    await tester.tap(find.text('계속 하기'));
+    await _run(tester, const Duration(seconds: 3), until: () => _state(tester).question != null);
+    expect(_state(tester).question, isNotNull);
   });
 
   for (final MapEntry(key: name, value: (size, pad)) in devices.entries) {
@@ -121,9 +134,9 @@ void main() {
     expect(find.textContaining('스타', findRichText: true), findsNothing);
     expect(_state(tester).run.hearts, 3);
     expect(_state(tester).run.score, 0);
-    // 다시하기도 안내 없이 1, 2, 3, 시작! 뒤에 출발
+    // 다시하기도 안내 없이 3, 2, 1, 시작! 뒤에 출발
     expect(find.text('시작하기'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
     await _run(tester, const Duration(milliseconds: 2000));
     expect(_state(tester).question, isNull);
     expect(find.text('시작!'), findsOneWidget);

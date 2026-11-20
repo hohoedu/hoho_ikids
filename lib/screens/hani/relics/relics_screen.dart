@@ -2,13 +2,19 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/hani/hani_relics_data.dart';
 import 'package:hani_booki/screens/hani/relics/relics_widgets/spray_scratcher.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:hani_booki/widgets/source_image.dart';
 
 class RelicsScreen extends StatefulWidget {
-  const RelicsScreen({super.key});
+  /// [problems] 를 안 주면 haniRelicsService 가 받아 둔 목록을 씀
+  const RelicsScreen({super.key, this.problems, this.random});
+
+  final List<HaniRelicsData>? problems;
+  final Random? random;
 
   @override
   State<RelicsScreen> createState() => _RelicsScreenState();
@@ -21,13 +27,23 @@ class _RelicsScreenState extends State<RelicsScreen> {
   static const _frameAspect = 1542 / 938;
   static const _innerL = 105 / 1542, _innerR = 107 / 1542, _innerT = 103 / 938, _innerB = 105 / 938;
 
-  // shortcut: 샘플 문제 하드코딩(그림 속 한자 間 = 아래 보기), 서버 데이터 붙일 때 교체
-  static const _choices = [
-    (asset: 'assets/images/hani/relics/top_btn.png', correct: false), // 門
-    (asset: 'assets/images/hani/relics/bottom_btn.png', correct: true), // 間
-  ];
+  late final Random _rand = widget.random ?? Random();
+  late final List<HaniRelicsData> _all = widget.problems ?? Get.find<HaniRelicsDataController>().haniRelicsDataList;
 
-  int _round = 0; // 다시 하기 때 덮개를 새로 깔기 위한 키
+  // 한 판 = 받은 문제(10개)를 섞어 7개를 차례로. 다시 하기면 새로 7개
+  static const _problemsPerGame = 7;
+  late List<HaniRelicsData> _game = _newGame();
+  int _index = 0; // 이번 판 몇 번째 문제인지
+  HaniRelicsData get _problem => _game[_index];
+  // 정답·오답 보기 자리는 문제마다 섞음
+  late List<({String img, bool correct})> _choices = _shuffleChoices();
+
+  List<HaniRelicsData> _newGame() => (List.of(_all)..shuffle(_rand)).take(_problemsPerGame).toList();
+
+  List<({String img, bool correct})> _shuffleChoices() =>
+      [(img: _problem.answerImg, correct: true), (img: _problem.wrongImg, correct: false)]..shuffle(_rand);
+
+  int _round = 0; // 문제가 바뀔 때 덮개를 새로 깔기 위한 키
   bool _cleared = false; // 다 긁어야 보기를 누를 수 있음
   bool _solved = false;
   int? _shaking; // 틀린 보기 흔들기
@@ -44,18 +60,19 @@ class _RelicsScreenState extends State<RelicsScreen> {
       return;
     }
     SoundManager.playCorrect();
-    // shortcut: 샘플 문제 하나라 음성도 하나, 서버 데이터 붙일 때 문제별 음성으로 교체
-    SoundManager.playVoice('assets/audio/voice/relics_correct.mp3');
     setState(() => _solved = true);
     Future.delayed(const Duration(milliseconds: 800), () {
       if (!mounted) return;
+      if (_index + 1 < _game.length) {
+        setState(() => _showProblem(_index + 1)); // 다음 문제
+        return;
+      }
       lottieDialog(
         onReset: () {
           Get.back();
           setState(() {
-            _round++;
-            _cleared = _solved = false;
-            _shaking = null;
+            _game = _newGame();
+            _showProblem(0);
           });
         },
         onMain: () {
@@ -64,6 +81,14 @@ class _RelicsScreenState extends State<RelicsScreen> {
         },
       );
     });
+  }
+
+  void _showProblem(int index) {
+    _index = index;
+    _round++;
+    _choices = _shuffleChoices();
+    _cleared = _solved = false;
+    _shaking = null;
   }
 
   @override
@@ -119,7 +144,7 @@ class _RelicsScreenState extends State<RelicsScreen> {
       // 맞힌 보기는 살짝 커짐
       scale: _solved && _choices[i].correct ? 1.08 : 1,
       duration: const Duration(milliseconds: 200),
-      child: Image.asset(_choices[i].asset),
+      child: sourceImage(_choices[i].img, fit: BoxFit.contain),
     );
     if (_shaking == i) {
       child = TweenAnimationBuilder<double>(
@@ -136,7 +161,7 @@ class _RelicsScreenState extends State<RelicsScreen> {
         child: AspectRatio(
           aspectRatio: 603 / 406,
           child: GestureDetector(
-            key: ValueKey('choice$i'),
+            key: ValueKey(_choices[i].img), // 보기 그림 주소로 찾음(자리는 섞이므로)
             onTap: () => _onChoice(i),
             child: child,
           ),
@@ -165,7 +190,7 @@ class _RelicsScreenState extends State<RelicsScreen> {
                   brushSize: w * (1 - _innerL - _innerR) * 0.13,
                   threshold: 75,
                   coverAsset: 'assets/images/hani/relics/relics_scratch_bg.png',
-                  child: Image.asset('assets/images/hani/relics/relics_sample.png', fit: BoxFit.cover),
+                  child: sourceImage(_problem.seekImg, fit: BoxFit.cover),
                 ),
               ),
               Positioned.fill(

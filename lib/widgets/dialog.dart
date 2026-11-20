@@ -104,8 +104,9 @@ void showGameCompleteDialog({
 //       buttonColor: Colors.green);
 // }
 
-void showBackDialog(isPortraitMode) {
-  Get.generalDialog(
+/// 닫힐 때(나가기·계속 하기) 끝나는 Future: 게임 화면이 멈춘 시간을 다시 흐르게 할 때 씀
+Future<void> showBackDialog(isPortraitMode) {
+  return Get.generalDialog(
     // barrierDismissible: true,
     barrierLabel: 'Dialog',
     barrierColor: Colors.black26,

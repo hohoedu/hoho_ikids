@@ -4,13 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_core/colors.dart';
 import 'package:hani_booki/_core/constants.dart';
-import 'package:hani_booki/_data/auth/user_booki_data.dart';
-import 'package:hani_booki/_data/auth/user_hani_data.dart';
 import 'package:hani_booki/_data/star/content_star_data.dart';
 import 'package:hani_booki/main.dart';
 import 'package:hani_booki/services/content_star_service.dart';
 import 'package:hive/hive.dart';
-import 'package:logger/logger.dart';
 
 class RecordGraph extends StatefulWidget {
   final ContentStarDataController contentStar;
@@ -26,8 +23,7 @@ class RecordGraph extends StatefulWidget {
 }
 
 class _RecordGraphState extends State<RecordGraph> {
-  late UserHaniDataController haniData = UserHaniDataController();
-  late UserBookiDataController bookiData = UserBookiDataController();
+  // 선택한 막대: 그래프 목록에서 몇 번째인지(1부터). 0 이면 선택 없음
   int _currentIndex = 0;
   bool isGraphTap = false;
 
@@ -42,26 +38,6 @@ class _RecordGraphState extends State<RecordGraph> {
       return cleaned.substring(0, 3) + '\n' + cleaned.substring(3);
     }
     return cleaned;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.type == 'hani') {
-      haniData = Get.find<UserHaniDataController>();
-    } else {
-      bookiData = Get.find<UserBookiDataController>();
-    }
-    _setCurrentIndex();
-  }
-
-  void _setCurrentIndex() {
-    if (widget.type == 'hani') {
-      _currentIndex = haniData.userHaniDataList.length - 1;
-    } else {
-      _currentIndex = bookiData.userBookiDataList.length - 1;
-      Logger().d(_currentIndex);
-    }
   }
 
   @override
@@ -112,7 +88,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                         return GestureDetector(
                                           onTap: () {
                                             setState(() {
-                                              _currentIndex = int.parse(widget.contentStar.contentStarDataList[value.toInt()].index);
+                                              _currentIndex = value.toInt() + 1;
                                               isGraphTap = true;
                                               widget.isOnTap = false;
                                             });
@@ -120,7 +96,8 @@ class _RecordGraphState extends State<RecordGraph> {
                                           child: Container(
                                             width: constraints.maxWidth * 0.15,
                                             alignment: Alignment.center,
-                                            decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.vertical(bottom: Radius.circular(5))),
+                                            decoration:
+                                                BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.vertical(bottom: Radius.circular(5))),
                                             child: Text(
                                               formattedSubject(widget.contentStar.contentStarDataList[value.toInt()].subject),
                                               style: TextStyle(
@@ -176,9 +153,9 @@ class _RecordGraphState extends State<RecordGraph> {
                           );
                         },
                       ),
-                      Visibility(
-                        visible: isGraphTap,
-                        child: GestureDetector(
+                      // 상세 팝업: 숨겨 둬도 안쪽을 만들면 목록을 읽으므로, 선택한 막대가 목록 안에 있을 때만 만듦
+                      if (isGraphTap && _currentIndex >= 1 && _currentIndex <= widget.contentStar.contentStarDataList.length)
+                        GestureDetector(
                           onTap: () {
                             setState(() {
                               widget.isOnTap = false;
@@ -202,29 +179,31 @@ class _RecordGraphState extends State<RecordGraph> {
                                   Row(
                                     children: [
                                       Text(
-                                        widget.contentStar.contentStarDataList[_currentIndex-1].subject,
+                                        widget.contentStar.contentStarDataList[_currentIndex - 1].subject,
                                         style: TextStyle(
                                           fontSize: 8.sp,
                                           fontWeight: FontWeight.bold,
                                           color: widget.type == 'hani'
-                                              ? haniReportTextColor[widget.contentStar.contentStarDataList[_currentIndex-1].index]
-                                              : bookiReportColor[widget.contentStar.contentStarDataList[_currentIndex-1].index],
+                                              ? haniReportTextColor[widget.contentStar.contentStarDataList[_currentIndex - 1].index]
+                                              : bookiReportColor[widget.contentStar.contentStarDataList[_currentIndex - 1].index],
                                         ),
                                       ),
                                       ...List.generate(
-                                        widget.contentStar.contentStarDataList[_currentIndex-1].contentList.length,
+                                        widget.contentStar.contentStarDataList[_currentIndex - 1].contentList.length,
                                         (index) {
                                           return Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                  color: widget.type == 'hani' ? haniReportTextColor['$_currentIndex'] : bookiReportColor['$_currentIndex'],
+                                                  color: widget.type == 'hani'
+                                                      ? haniReportTextColor[widget.contentStar.contentStarDataList[_currentIndex - 1].index]
+                                                      : bookiReportColor[widget.contentStar.contentStarDataList[_currentIndex - 1].index],
                                                   borderRadius: BorderRadius.circular(5)),
                                               child: Center(
                                                 child: Padding(
                                                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                                                   child: Text(
-                                                    widget.contentStar.contentStarDataList[_currentIndex-1].contentList[index],
+                                                    widget.contentStar.contentStarDataList[_currentIndex - 1].contentList[index],
                                                     style: TextStyle(
                                                       color: fontWhite,
                                                       fontWeight: FontWeight.bold,
@@ -243,7 +222,7 @@ class _RecordGraphState extends State<RecordGraph> {
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        widget.contentStar.contentStarDataList[_currentIndex-1].note,
+                                        widget.contentStar.contentStarDataList[_currentIndex - 1].note,
                                         style: TextStyle(
                                           color: fontMain,
                                           fontSize: 6.5.sp,
@@ -258,7 +237,6 @@ class _RecordGraphState extends State<RecordGraph> {
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
           ),

@@ -7,6 +7,8 @@ part 'env.g.dart';
 
 @Envied(path: '.env', obfuscate: true)
 final class Env {
+  @EnviedField(varName: 'BOOKI_BASKET_URL')
+  static final String bookiBasketUrl = _Env.bookiBasketUrl;
   @EnviedField(varName: 'BOOKI_EBOOK_CONTENT_LIST_URL')
   static final String bookiEbookContentListUrl = _Env.bookiEbookContentListUrl;
   @EnviedField(varName: 'BOOKI_EBOOK_LIST_URL')
@@ -55,6 +57,8 @@ final class Env {
   static final String findStarSaveUrl = _Env.findStarSaveUrl;
   @EnviedField(varName: 'FIND_STAR_STATE_URL')
   static final String findStarStateUrl = _Env.findStarStateUrl;
+  @EnviedField(varName: 'HANI_COOKING_URL')
+  static final String haniCookingUrl = _Env.haniCookingUrl;
   @EnviedField(varName: 'HANI_EBOOK_CONTENT_LIST_URL')
   static final String haniEbookContentListUrl = _Env.haniEbookContentListUrl;
   @EnviedField(varName: 'HANI_EBOOK_LIST_URL')
@@ -83,6 +87,8 @@ final class Env {
   static final String haniQuizG5Url = _Env.haniQuizG5Url;
   @EnviedField(varName: 'HANI_QUIZ_Y5_URL')
   static final String haniQuizY5Url = _Env.haniQuizY5Url;
+  @EnviedField(varName: 'HANI_RELICS_URL')
+  static final String haniRelicsUrl = _Env.haniRelicsUrl;
   @EnviedField(varName: 'HANI_REPORT_HIGHFIVE_URL')
   static final String haniReportHighfiveUrl = _Env.haniReportHighfiveUrl;
   @EnviedField(varName: 'HANI_REPORT_HOME_URL')
@@ -212,6 +218,7 @@ final class Env {
 
   // 기존 조회 방식(문자열 키)과의 호환을 위한 조회 헬퍼
   static final Map<String, String> _map = {
+    'BOOKI_BASKET_URL': bookiBasketUrl,
     'BOOKI_EBOOK_CONTENT_LIST_URL': bookiEbookContentListUrl,
     'BOOKI_EBOOK_LIST_URL': bookiEbookListUrl,
     'BOOKI_FIND_DIFF_URL': bookiFindDiffUrl,
@@ -236,6 +243,7 @@ final class Env {
     'FCM_TOKEN_URL': fcmTokenUrl,
     'FIND_STAR_SAVE_URL': findStarSaveUrl,
     'FIND_STAR_STATE_URL': findStarStateUrl,
+    'HANI_COOKING_URL': haniCookingUrl,
     'HANI_EBOOK_CONTENT_LIST_URL': haniEbookContentListUrl,
     'HANI_EBOOK_LIST_URL': haniEbookListUrl,
     'HANI_ERASE_URL': haniEraseUrl,
@@ -250,6 +258,7 @@ final class Env {
     'HANI_PUZZLE_Y5_URL': haniPuzzleY5Url,
     'HANI_QUIZ_G5_URL': haniQuizG5Url,
     'HANI_QUIZ_Y5_URL': haniQuizY5Url,
+    'HANI_RELICS_URL': haniRelicsUrl,
     'HANI_REPORT_HIGHFIVE_URL': haniReportHighfiveUrl,
     'HANI_REPORT_HOME_URL': haniReportHomeUrl,
     'HANI_REPORT_LEARNING_URL': haniReportLearningUrl,

@@ -52,10 +52,10 @@ Future<void> showNotification(RemoteMessage message) async {
   Logger().d('$categoryKey 와 $index');
 
   notiPlugin.show(
-    0,
-    title,
-    body,
-    const NotificationDetails(
+    id: 0,
+    title: title,
+    body: body,
+    notificationDetails: const NotificationDetails(
       android: AndroidNotificationDetails(
         "high_importance_channel_v2",
         "high_importance_notification",

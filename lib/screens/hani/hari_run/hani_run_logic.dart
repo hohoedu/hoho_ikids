@@ -75,7 +75,7 @@ class HanjaQuiz {
 class HanjaRun {
   static const maxHearts = 3;
   static const baseSpeed = 260.0;
-  static const maxSpeed = 720.0;
+  static const maxSpeed = 560.0; // 494는 조금 느렸고 720은 너무 빨랐음(15번째 정답쯤 도달)
 
   int hearts = maxHearts;
   int score = 0;
@@ -85,7 +85,11 @@ class HanjaRun {
   /// 틀리거나 놓친 한자(게임이 끝나면 복습용으로 보여 준다).
   final List<Hanja> mistakes = [];
 
-  bool get isOver => hearts <= 0;
+  /// 하트를 다 잃었거나, 별 5개 점수를 채웠으면 게임 끝.
+  bool get isOver => hearts <= 0 || isCleared;
+
+  /// 별 5개 점수(500점) 달성: 끝없이 달리지 않게 여기서 완주.
+  bool get isCleared => score >= starScores.last;
 
   /// 맞힐 때마다 6%씩 빨라지고 [maxSpeed]에서 멈춘다.
   double get fallSpeed => min(baseSpeed * pow(1.06, correctCount), maxSpeed).toDouble();
@@ -99,7 +103,7 @@ class HanjaRun {
     return gained;
   }
 
-  /// 별 1~5개 받는 최소 점수. 약 5·10·15·20·30개 맞히면 받음(20개쯤에서 최고 속도).
+  /// 별 1~5개 받는 최소 점수. 약 5·10·14·19·29개 맞히면 받음(15개쯤에서 최고 속도).
   static const starScores = [50, 120, 200, 300, 500];
 
   int get stars => starScores.where((s) => score >= s).length;

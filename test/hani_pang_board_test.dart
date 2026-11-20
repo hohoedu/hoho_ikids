@@ -72,7 +72,7 @@ void main() {
       expect(step.damage, 3 * baseDamage);
     });
 
-    test('가로 4개를 맞추면 옮긴 칸에 가로 레이저가 생긴다', () {
+    test('가로 4개를 맞추면 옮긴 칸에 가로 화살 블록가 생긴다', () {
       final board = Board.fromLayout(
         layout(['00.0....', '..0.....', ...List.filled(6, '........')]),
       );
@@ -81,8 +81,8 @@ void main() {
       final step = result.steps.first;
       expect(step.created, hasLength(1));
       expect(step.created.first.pos, const Pos(0, 2));
-      expect(step.created.first.type, Special.laserH);
-      expect(moved.special, Special.laserH);
+      expect(step.created.first.type, Special.arrowH);
+      expect(moved.special, Special.arrowH);
       expect(clearedPositions(step), {
         const Pos(0, 0),
         const Pos(0, 1),
@@ -90,7 +90,7 @@ void main() {
       });
     });
 
-    test('세로 4개를 맞추면 세로 레이저가 생긴다', () {
+    test('세로 4개를 맞추면 세로 화살 블록가 생긴다', () {
       final board = Board.fromLayout(
         layout([
           '0.......',
@@ -102,11 +102,11 @@ void main() {
       );
       final result = board.swap(const Pos(2, 1), const Pos(2, 0));
       final step = result.steps.first;
-      expect(step.created.single.type, Special.laserV);
+      expect(step.created.single.type, Special.arrowV);
       expect(step.created.single.pos, const Pos(2, 0));
     });
 
-    test('L자 5개를 맞추면 블랙홀이 생긴다', () {
+    test('L자 5개를 맞추면 폭죽 블록이 생긴다', () {
       final board = Board.fromLayout(
         layout([
           '.0......',
@@ -117,7 +117,7 @@ void main() {
       );
       final result = board.swap(const Pos(2, 0), const Pos(2, 1));
       final step = result.steps.first;
-      expect(step.created.single.type, Special.blackHole);
+      expect(step.created.single.type, Special.firework);
       expect(step.created.single.pos, const Pos(2, 1));
       expect(clearedPositions(step), {
         const Pos(0, 1),
@@ -129,7 +129,7 @@ void main() {
   });
 
   group('special', () {
-    test('가로 레이저가 터지면 그 줄 전체가 지워진다', () {
+    test('가로 화살 블록가 터지면 그 줄 전체가 지워진다', () {
       final board = Board.fromLayout(
         layout([
           '........',
@@ -137,14 +137,14 @@ void main() {
           '00.0....',
           ...List.filled(5, '........'),
         ]),
-        specials: {const Pos(2, 0): Special.laserH},
+        specials: {const Pos(2, 0): Special.arrowH},
       );
       final step = board.swap(const Pos(2, 2), const Pos(2, 3)).steps.first;
-      expect(step.triggered.single.type, Special.laserH);
+      expect(step.triggered.single.type, Special.arrowH);
       expect(clearedPositions(step), {for (var c = 0; c < 8; c++) Pos(2, c)});
     });
 
-    test('블랙홀이 터지면 주변 3x3이 지워진다', () {
+    test('폭죽 블록이 터지면 주변 3x3이 지워진다', () {
       final board = Board.fromLayout(
         layout([
           '........',
@@ -153,17 +153,17 @@ void main() {
           '.00.0...',
           ...List.filled(4, '........'),
         ]),
-        specials: {const Pos(3, 2): Special.blackHole},
+        specials: {const Pos(3, 2): Special.firework},
       );
       final step = board.swap(const Pos(3, 3), const Pos(3, 4)).steps.first;
-      expect(step.triggered.single.type, Special.blackHole);
+      expect(step.triggered.single.type, Special.firework);
       expect(clearedPositions(step), {
         for (var r = 2; r <= 4; r++)
           for (var c = 1; c <= 3; c++) Pos(r, c),
       });
     });
 
-    test('레이저가 다른 특수 블록을 지나가면 연쇄로 발동한다', () {
+    test('화살 블록가 다른 특수 블록을 지나가면 연쇄로 발동한다', () {
       final board = Board.fromLayout(
         layout([
           '........',
@@ -172,14 +172,14 @@ void main() {
           ...List.filled(5, '........'),
         ]),
         specials: {
-          const Pos(2, 0): Special.laserH,
-          const Pos(2, 6): Special.laserV,
+          const Pos(2, 0): Special.arrowH,
+          const Pos(2, 6): Special.arrowV,
         },
       );
       final step = board.swap(const Pos(2, 2), const Pos(2, 3)).steps.first;
       expect(step.triggered.map((t) => t.type).toSet(), {
-        Special.laserH,
-        Special.laserV,
+        Special.arrowH,
+        Special.arrowV,
       });
       final cleared = clearedPositions(step);
       expect(cleared, containsAll([for (var r = 0; r < 8; r++) Pos(r, 6)]));
@@ -190,8 +190,8 @@ void main() {
       final board = Board.fromLayout(
         layout(List.filled(8, '........')),
         specials: {
-          const Pos(4, 4): Special.laserH,
-          const Pos(4, 5): Special.laserV,
+          const Pos(4, 4): Special.arrowH,
+          const Pos(4, 5): Special.arrowV,
         },
       );
       final result = board.swap(const Pos(4, 4), const Pos(4, 5));

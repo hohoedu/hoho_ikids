@@ -2,25 +2,17 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hani_booki/_data/booki/booki_basket_data.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
+import 'package:hani_booki/widgets/source_image.dart';
 
 const _path = 'assets/images/booki/basket';
 
 // 디자인 기준 캔버스(2000x924) 좌표. 화면 크기에 맞춰 비율로 스케일됨.
 const _designW = 2000.0;
 const _designH = 924.0;
-
-// shortcut: 유관순(inmul-07) 한 문제만 하드코딩, 다른 인물이 생기면 서버 데이터로 교체
-const _items = [
-  ('object03-1.png', false), // 구운몽
-  ('object07-1.png', true), // 무궁화
-  ('object07-3.png', true), // 만세운동
-  ('object07-2.png', true), // 일본 순사
-  ('object25-1.png', false), // 플라이어호
-  ('object10-1.png', false), // 다이너마이트
-];
 
 // 오브젝트를 놓을 자리 (left, top, width, height). 이미지는 자리 안에 비율 유지로 가운데 맞춤.
 const _spots = [
@@ -33,44 +25,81 @@ const _spots = [
 ];
 
 class BasketScreen extends StatefulWidget {
-  const BasketScreen({super.key});
+  /// [problems] 를 안 주면 bookiBasketService 가 받아 둔 목록을 씀
+  const BasketScreen({super.key, this.problems, this.random});
+
+  final List<BookiBasketData>? problems;
+
+  /// 테스트에서 문제·자리를 고정할 때만 넘김
+  final Random? random;
 
   @override
   State<BasketScreen> createState() => _BasketScreenState();
 }
 
 class _BasketScreenState extends State<BasketScreen> {
+  late final Random _rand = widget.random ?? Random();
+  late final List<BookiBasketData> _all = widget.problems ?? Get.find<BookiBasketDataController>().bookiBasketDataList;
+
+  // 한 판 = 받은 문제(10개)를 섞어 7개를 차례로. 다시 하기면 새로 7개
+  static const _problemsPerGame = 7;
+  late List<BookiBasketData> _game = _newGame();
+  int _index = 0; // 이번 판 몇 번째 문제인지
+  BookiBasketData get _problem => _game[_index];
+  late List<({String img, bool correct})> _items = _itemsOf(_problem);
   final Set<int> _placed = {};
-  final int _answerCount = _items.where((e) => e.$2).length;
+  int get _answerCount => _items.where((e) => e.correct).length;
 
   // _spotOf[아이템 인덱스] = 자리 인덱스
-  List<int> _spotOf = List.generate(_items.length, (i) => i)..shuffle();
+  late List<int> _spotOf = _shuffleSpots();
 
-  void _reset() {
+  List<BookiBasketData> _newGame() => (List.of(_all)..shuffle(_rand)).take(_problemsPerGame).toList();
+
+  // 정답 3 + 오답 3. 자리가 6곳뿐이라 넘치면 자름
+  List<({String img, bool correct})> _itemsOf(BookiBasketData p) => [
+        for (final img in p.answerImgs) (img: img, correct: true),
+        for (final img in p.wrongImgs) (img: img, correct: false),
+      ].take(_spots.length).toList();
+
+  List<int> _shuffleSpots() => List.generate(_items.length, (i) => i)..shuffle(_rand);
+
+  void _showProblem(int index) {
+    _index = index;
     _placed.clear();
-    _spotOf = List.generate(_items.length, (i) => i)..shuffle();
+    _items = _itemsOf(_problem);
+    _spotOf = _shuffleSpots();
   }
 
   void _onDrop(int index) {
-    if (!_items[index].$2) {
+    if (!_items[index].correct) {
       SoundManager.playNo(); // 오답은 받지 않으므로 아이템이 원래 자리로 돌아감
       return;
     }
     SoundManager.playCorrect();
     setState(() => _placed.add(index));
 
-    if (_placed.length == _answerCount) {
+    if (_placed.length < _answerCount) return;
+    // 마지막 체크 표시를 잠깐 보여 준 뒤 다음 문제, 7문제를 다 풀면 결과
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      if (_index + 1 < _game.length) {
+        setState(() => _showProblem(_index + 1));
+        return;
+      }
       lottieDialog(
         onReset: () {
           Get.back();
-          setState(_reset);
+          setState(() {
+            _game = _newGame();
+            _showProblem(0);
+          });
         },
         onMain: () {
           Get.back();
           Get.back();
         },
       );
-    }
+    });
   }
 
   @override
@@ -94,11 +123,13 @@ class _BasketScreenState extends State<BasketScreen> {
                 height: _designH * s,
                 child: Stack(
                   children: [
+                    // 인물 칸(예전 인물 그림 603x746 크기). 서버 그림 비율이 달라도 칸 안에 맞춤
                     Positioned(
                       left: 800 * s,
                       top: 140 * s,
                       width: 420 * s,
-                      child: Image.asset('$_path/inmul-07.png'),
+                      height: 520 * s,
+                      child: sourceImage(_problem.personImg, fit: BoxFit.contain),
                     ),
                     _buildBasket(s),
                     for (int i = 0; i < _items.length; i++)
@@ -153,8 +184,9 @@ class _BasketScreenState extends State<BasketScreen> {
 
   Widget _buildItem(int i, double s) {
     final (left, top, width, height) = _spots[_spotOf[i]];
-    final image = Image.asset('$_path/${_items[i].$1}', width: width * s, height: height * s);
+    final image = sourceImage(_items[i].img, width: width * s, height: height * s, fit: BoxFit.contain);
     return Positioned(
+      key: ValueKey(_items[i].img),
       left: left * s,
       top: top * s,
       child: Draggable<int>(

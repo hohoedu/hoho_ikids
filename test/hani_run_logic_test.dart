@@ -76,6 +76,20 @@ void main() {
       expect(run.onCorrect(), 20);
     });
 
+    test('500점(별 5개)을 채우면 하트가 남아 있어도 게임 끝', () {
+      final run = HanjaRun();
+      var answers = 0;
+      while (!run.isOver) {
+        run.onCorrect();
+        answers++;
+      }
+      expect(run.score, greaterThanOrEqualTo(500));
+      expect(run.hearts, HanjaRun.maxHearts);
+      expect(run.isCleared, isTrue);
+      expect(run.stars, 5);
+      expect(answers, inInclusiveRange(28, 31)); // 약 30문제
+    });
+
     test('점수 구간별 별 개수', () {
       final run = HanjaRun();
       expect(run.stars, 0);

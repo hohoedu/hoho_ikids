@@ -10,31 +10,32 @@ import 'package:logger/logger.dart';
 
 // 하니 유물찾기
 Future<void> haniRelicsService(id, keyCode, year) async {
-  // TODO: .env·env.dart 에 HANI_RELICS_URL 추가 후 build_runner (없으면 Env.get 이 예외)
   String url = Env.get('HANI_RELICS_URL');
-
+  String gamok = keyCode.toString().substring(0, 1);
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,
     'yy': year,
+    'gamok': gamok,
   };
 
   try {
     // HTTP POST 요청 (네트워크 오류도 아래 catch 로 받음)
     final response = await dio.post(url, data: jsonEncode(requestData));
-
+    Logger().d(response);
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
-      // TODO: 응답이 리스트인지 맵인지 스펙 확인
-      final List<dynamic> resultList = json.decode(response.data);
-      final resultValue = resultList[0]['result'];
+      // 응답 {"result": "0000", "gamok": "S", "count": 10, "list": [{gamok, ilno, seek_img, answer_img, wrong_img}, ...]}
+      final Map<String, dynamic> resultList = json.decode(response.data);
+      final resultValue = resultList['result'];
+      final List<dynamic> list = resultList['list'] ?? [];
 
       // 응답 결과가 있는 경우
-      if (resultValue == "0000") {
-        List<HaniRelicsData> haniRelicsDataList = resultList.map((item) => HaniRelicsData.fromJson(item)).toList();
+      if (resultValue == "0000" && list.isNotEmpty) {
+        List<HaniRelicsData> dataList = list.map((item) => HaniRelicsData.fromJson(item)).toList();
 
         final HaniRelicsDataController haniRelicsDataController = Get.put(HaniRelicsDataController());
-        haniRelicsDataController.setHaniRelicsDataList(haniRelicsDataList);
+        haniRelicsDataController.setHaniRelicsDataList(dataList);
 
         Get.to(() => const RelicsScreen());
       }

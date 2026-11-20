@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hani_booki/_data/booki/booki_proviso_data.dart';
 import 'package:hani_booki/utils/sound_manager.dart';
+import 'package:hani_booki/utils/text_format.dart';
 import 'package:hani_booki/widgets/appbar/main_appbar.dart';
 import 'package:hani_booki/widgets/dialog.dart';
 import 'package:hani_booki/widgets/sound_button.dart';
@@ -210,7 +211,7 @@ class _ProvisoScreenState extends State<ProvisoScreen> {
             Expanded(
               // 긴 단서(예: 손가락 한 마디가 짧은 손도장이 유명해요.)는 두 줄로
               child: Text(
-                clue.text,
+                keepWords(clue.text),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: _font(36 * s, _text),

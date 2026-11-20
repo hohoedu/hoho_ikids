@@ -10,13 +10,14 @@ import 'package:logger/logger.dart';
 
 // 부키 바구니
 Future<void> bookiBasketService(id, keyCode, year) async {
-  // TODO: .env·env.dart 에 BOOKI_BASKET_URL 추가 후 build_runner (없으면 Env.get 이 예외)
   String url = Env.get('BOOKI_BASKET_URL');
 
+  String gamok = keyCode.toString().substring(0, 1);
   final Map<String, dynamic> requestData = {
     'id': id,
     'keycode': keyCode,
     'yy': year,
+    'gamok': gamok,
   };
 
   try {
@@ -25,13 +26,14 @@ Future<void> bookiBasketService(id, keyCode, year) async {
 
     // 응답을 성공적으로 받았을 때
     if (response.statusCode == 200) {
-      // TODO: 응답이 리스트인지 맵인지 스펙 확인
-      final List<dynamic> resultList = json.decode(response.data);
-      final resultValue = resultList[0]['result'];
+      // 응답 {"result": "0000", "gamok": "K", "count": 10, "list": [{gamok, ilno, person_img, answer_img1~3, wrong_img1~3}, ...]}
+      final Map<String, dynamic> resultList = json.decode(response.data);
+      final resultValue = resultList['result'];
+      final List<dynamic> list = resultList['list'] ?? [];
 
       // 응답 결과가 있는 경우
-      if (resultValue == "0000") {
-        List<BookiBasketData> bookiBasketDataList = resultList.map((item) => BookiBasketData.fromJson(item)).toList();
+      if (resultValue == "0000" && list.isNotEmpty) {
+        List<BookiBasketData> bookiBasketDataList = list.map((item) => BookiBasketData.fromJson(item)).toList();
 
         final BookiBasketDataController bookiBasketDataController = Get.put(BookiBasketDataController());
         bookiBasketDataController.setBookiBasketDataList(bookiBasketDataList);
